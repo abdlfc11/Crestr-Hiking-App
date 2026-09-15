@@ -1239,7 +1239,7 @@ async function searchArea() {
       throw new Error("ERROR in searchArea() : Search Entry not found", {cause : ERROR_MESSAGES.SEARCH.GENERIC});
     };
 
-    const searchValue = searchEntry.value;
+    const searchValue = searchEntry.value.trim();
 
     if (!searchValue) throw new Error("ERROR in searchArea() : searchValue is empty", {cause : "Please enter a location. "})
 
