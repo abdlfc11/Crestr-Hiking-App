@@ -350,6 +350,13 @@ html.dark {
   background: var(--panel-glass-bg-hover);
 }
 
+#save-route-form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
 /* Generate Button positioning anchor */
 #generate-path-button {
   position: relative;
