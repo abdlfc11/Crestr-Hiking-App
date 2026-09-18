@@ -2,25 +2,17 @@ import {
   getCurrentPathData, 
   getLastKnownDistanceKm, 
   getLoadedRouteCoordinates, 
-  hasElevation, 
   manualRouteState,
-  extractElevation,
-  extractElevationProfile,
-  getElevationRange,
-  setCurrentPathData, 
   normaliseCoordLength
  } from "./routeState.js";
 
 import {
-  defaultCentre,
   homeButtonFunction,
   updateSaveRouteContainer,
   showLoginModal
 } from "../ui/ui.js";
 
 import { getMap } from "../map.js";
-
-import { initSavedRoutesDashboard } from "./savedRoutesDashboard.js";
 
 import {
   createRouteCard,
