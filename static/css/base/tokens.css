@@ -10,6 +10,10 @@
 */
 
 :root {
+
+  /* Spacing of left-sided elements to prevent being under the side-nav */
+  --side-nav-space: 70px;
+
   /* Brand blue (primary action color across the whole app) */
   --blue: #2563eb;
   --blue-dark: #1d4ed8;      /* report-issue.css hover shade */
@@ -32,6 +36,9 @@
   --glass-bg: rgba(249, 250, 251, 0.4);   /* the glassmorphism slide-panel background */
   --secondary-bg: #e2e8f0;
   --secondary-bg-hover: #cbd5e1;
+  --tooltip-bg: rgba(206, 203, 203, 0.85);
+  --list-item-bg: rgba(206, 203, 203, 0.85);
+  --list-item-bg-hover: rgba(121, 119, 119, 0.85);
 
   --panel-glass-bg: rgb(255 255 255 / 0.65); /* the glassmorphism routing panel background */
   --panel-glass-bg-hover: rgba(223, 221, 221, 0.65);
@@ -44,6 +51,7 @@
   --muted-strong: #475569;
   --muted-alt: #4b5563;
   --placeholder: #94a3b8;
+  --tooltip-ink: #FFFFFF;
 
   /* Borders */
   --border: #e2e8f0;
@@ -114,9 +122,11 @@ html.dark {
   --field-bg: #1c1c1e;
   --secondary-field-bg: #2c3038;
   --glass-bg: rgba(17, 24, 39, 0.85);
-
   --secondary-bg: rgb(69, 68, 68);
   --secondary-bg-hover: rgb(87, 87, 87);
+  --tooltip-bg: rgba(60, 60, 60, 0.85);
+  --list-item-bg: rgb(90, 88, 88);
+  --list-item-bg-hover: rgba(67, 66, 66, 0.85);
 
   --panel-glass-bg: rgb(31 41 55 / 0.75);
   --panel-glass-bg-hover: rgba(18, 25, 34, 0.75);

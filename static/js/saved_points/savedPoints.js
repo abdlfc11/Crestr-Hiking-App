@@ -1,16 +1,18 @@
 import { getSavedPointStyle } from "./style.js";
 import { getMap } from "../map.js";
-import { showLoginModal, showModal} from "../ui.js";
-import { showToast } from "../utils/ui-utils.js";
+import { showLoginModal} from "../ui/ui.js";
+import { showToast, showModal } from "../utils/ui-utils.js";
 import { logError } from "../utils/logError-utils.js";
 import { fromLonLat, toLonLat } from "ol/proj.js";
 import { Feature } from "ol";
 import { Point } from "ol/geom.js";
 import VectorLayer from "ol/layer/Vector.js";
 import VectorSource from "ol/source/Vector.js";
+import { ERROR_MESSAGES } from "../utils/error-contants.js";
 
 let savedPointsLayer = null;
 const deletePointModal = document.getElementById('delete-point-confirmation-dialog');
+const savePointModal = document.getElementById('save-point-dialog');
 
 export function getSavedPointsLayer() {
     return savedPointsLayer
@@ -90,9 +92,15 @@ export function loadAndDisplaySavedPoints() {
       })
 }
 
+/**
+ * 
+ * @param {number[]} coordinate In Web Mercator or Lon Lat
+ * @param {string} name 
+ * @returns {void}
+ */
 export async function saveNewPoint(coordinate, name) {
 
-  const isLoggedIn = window.appConfig.loggedIn
+  const isLoggedIn = window.appConfig.loggedIn;
   if (!isLoggedIn) {
     showLoginModal(true);
     return;
@@ -106,40 +114,32 @@ export async function saveNewPoint(coordinate, name) {
       ? [coordinate[0], coordinate[1]]
       : toLonLat([coordinate[0], coordinate[1]]);
 
-  try {
+  const response = await fetch(url, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        point_name: name,
+        lon: lonLat[0],
+        lat: lonLat[1],
+      }),
+    })
+    
+    const data = await response.json().catch(() => ({})); // .catch used to resolve errors safely, they are then caught later
 
-    const response = await fetch(url, {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          point_name: name,
-          lon: lonLat[0],
-          lat: lonLat[1],
-        }),
-      })
-      
-      const data = await response.json().catch(() => ({})); // .catch used to resolve errors safely, they are then caught later
-
-      if (response.status === 401) {
-        showLoginModal(true);
-        return;
-      }
-      else if (!response.ok) {
-        throw new Error(data.message || "There was an unexpected error whilst saving your point, try again later.")
-      }
-
-      if (data.success) {
-          return loadAndDisplaySavedPoints();
-        }
-      throw new Error(data.message)
+    if (response.status === 401) {
+      showLoginModal(true);
       return;
-  }
-  catch(error) {
-    showToast(error.message || "There was an unexpected error whilst saving your point, try again later.");
-    return false;
-  }
+    }
+    else if (!response.ok) {
+      throw new Error(`ERROR (saveNewPoint()) : ${data.message}`, {cause : ERROR_MESSAGES.ROUTING.GENERIC_SAVE_ROUTE})
+    }
+
+    if (data.success) {
+        return loadAndDisplaySavedPoints();
+      }
+    throw new Error(`ERROR (saveNewPoint()) : ${data.message}`, {cause : ERROR_MESSAGES.ROUTING.GENERIC_SAVE_ROUTE})
 }
 
 export async function deleteSavedPoint(selectedPoint) {
