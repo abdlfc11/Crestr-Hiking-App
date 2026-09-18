@@ -26,12 +26,11 @@ button[data-tooltip]::after {
   color: var(--ink-strong);
   font-size: 12px;
   line-height: 1.3;
-  white-space: normal;
 
-  /* Buffer on the sides so corners don't flatten */
-  width: fit-content;
-  box-sizing: border-box;
-  white-space: nowrap;
+  width: max-content;
+  max-width: 250px;
+  white-space: normal;
+  word-break: break-word;
 
   padding: 6px 10px;
   border-radius: 6px;

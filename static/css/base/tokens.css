@@ -36,7 +36,7 @@
   --glass-bg: rgba(249, 250, 251, 0.4);   /* the glassmorphism slide-panel background */
   --secondary-bg: #e2e8f0;
   --secondary-bg-hover: #cbd5e1;
-  --tooltip-bg: rgba(206, 203, 203, 0.85);
+  --tooltip-bg: rgba(206, 203, 203);
   --list-item-bg: rgba(206, 203, 203, 0.85);
   --list-item-bg-hover: rgba(121, 119, 119, 0.85);
 
