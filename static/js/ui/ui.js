@@ -1143,7 +1143,7 @@ async function handleLoadCachedRoute() {
     throw new Error(error.message)
   }
   finally {
-    // localforage.clear();
+    localforage.clear();
   }
 }
 
