@@ -1133,7 +1133,7 @@ async function handleLoadCachedRoute() {
   if (loadLastRouteModal) showModal(false, loadLastRouteModal); // hides modal 
 
   try {
-    handleLoadManualCachedRoute()
+    await handleLoadManualCachedRoute()
   }
   catch(error) {
     showToast("There was an error loading your last route", "error", null);
@@ -1340,8 +1340,10 @@ export async function updateManualRoute() {
         manualRouteFeature.getGeometry().setCoordinates(pathCoords);
       }
     } else {
-      manualRouteLayer.getSource().removeFeature(manualRouteFeature);
-      manualRouteFeature = null;
+      if (manualRouteFeature) {
+        manualRouteLayer.getSource().removeFeature(manualRouteFeature);
+        manualRouteFeature = null;
+      }
     }
 
     if (pathCoords.length === 1) {

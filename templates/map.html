@@ -81,7 +81,7 @@
         <div id="start-end">
             <div class="coords-header">
                 <span class="coords-title">Route Creation</span>
-                <button id="home-button" class="home-button"><i data-lucide="rotate-ccw"></i></button>
+                <button id="home-button" class="home-button" aria-label="Reset view and inputs"><i data-lucide="rotate-ccw"></i></button>
             </div>
             <div class="coords-content" id="manual-mode-content">
                     <div id="search-row" class="coord-row">
@@ -123,6 +123,7 @@
                             id="undo-manual-route"
                             class="generate-button routing-svg-button"
                             data-tooltip="Undo"
+                            aria-label="Undo the last point"
                         >
                             <i data-lucide="undo-2"></i>
                         </button>
@@ -132,6 +133,7 @@
                             id="redo-manual-route"
                             class="generate-button routing-svg-button"
                             data-tooltip="Redo"
+                            aria-label="Redo the last point"
                         >
                             <i data-lucide="redo-2"></i>
                         </button>
@@ -141,6 +143,7 @@
                             id="clear-route-button"
                             class="generate-button btn-secondary routing-svg-button"
                             data-tooltip="Clear Route"
+                            aria-label="Clear route"
                         >
                             <i data-lucide="eraser"></i>
                         </button>
@@ -178,11 +181,6 @@
 
             </div>
 
-        </div>
-
-
-        <div id="remove-point">
-            <button id="remove-point-button">remove</button>
         </div>
 
         <!-- ##### DONATE MODAL ##### -->

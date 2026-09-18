@@ -83,7 +83,7 @@ export function initMapContextMenu() {
     savePointModal.show();
   })
 
-  savePointModalSaveButton.addEventListener('click', () => {
+  savePointModalSaveButton.addEventListener('click', async () => {
     try {
       const pointName = savePointModalInput.value.trim();
 
@@ -93,7 +93,7 @@ export function initMapContextMenu() {
         throw new Error("ERROR (saveNewPoint()) : Invalid name given (generic)", {cause : "There was an unexpected error, enter a different name or try again leter."});
       }
 
-      saveNewPoint(coordinate, pointName);
+      await saveNewPoint(coordinate, pointName);
 
       savePointModal.close();
       savePointModalInput.value = "";
