@@ -7,6 +7,8 @@ export const ERROR_MESSAGES = {
         OUTSIDE_CUMBRIA:
             "Please click on a point within Cumbria.",
         GENERIC_ROUTE_ACTION: // e.g undo route, redo route, clear path
-            "Sorry, there was an unexpected error performing that action, please try again later"
+            "Sorry, there was an unexpected error performing that action, please try again later",
+        GENERIC_SAVE_ROUTE:
+            "There was an unexpected error whilst saving your point, try again later."
     },
 };
