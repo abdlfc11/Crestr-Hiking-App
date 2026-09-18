@@ -8,9 +8,11 @@ import { Feature } from "ol";
 import { Point } from "ol/geom.js";
 import VectorLayer from "ol/layer/Vector.js";
 import VectorSource from "ol/source/Vector.js";
+import { ERROR_MESSAGES } from "../utils/error-contants.js";
 
 let savedPointsLayer = null;
 const deletePointModal = document.getElementById('delete-point-confirmation-dialog');
+const savePointModal = document.getElementById('save-point-dialog');
 
 export function getSavedPointsLayer() {
     return savedPointsLayer
@@ -98,7 +100,7 @@ export function loadAndDisplaySavedPoints() {
  */
 export async function saveNewPoint(coordinate, name) {
 
-  const isLoggedIn = window.appConfig.loggedIn
+  const isLoggedIn = window.appConfig.loggedIn;
   if (!isLoggedIn) {
     showLoginModal(true);
     return;
@@ -112,39 +114,32 @@ export async function saveNewPoint(coordinate, name) {
       ? [coordinate[0], coordinate[1]]
       : toLonLat([coordinate[0], coordinate[1]]);
 
-  try {
+  const response = await fetch(url, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        point_name: name,
+        lon: lonLat[0],
+        lat: lonLat[1],
+      }),
+    })
+    
+    const data = await response.json().catch(() => ({})); // .catch used to resolve errors safely, they are then caught later
 
-    const response = await fetch(url, {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          point_name: name,
-          lon: lonLat[0],
-          lat: lonLat[1],
-        }),
-      })
-      
-      const data = await response.json().catch(() => ({})); // .catch used to resolve errors safely, they are then caught later
+    if (response.status === 401) {
+      showLoginModal(true);
+      return;
+    }
+    else if (!response.ok) {
+      throw new Error(`ERROR (saveNewPoint()) : ${data.message}`, {cause : ERROR_MESSAGES.ROUTING.GENERIC_SAVE_ROUTE})
+    }
 
-      if (response.status === 401) {
-        showLoginModal(true);
-        return;
+    if (data.success) {
+        return loadAndDisplaySavedPoints();
       }
-      else if (!response.ok) {
-        throw new Error(data.message || "There was an unexpected error whilst saving your point, try again later.")
-      }
-
-      if (data.success) {
-          return loadAndDisplaySavedPoints();
-        }
-      throw new Error(data.message)
-  }
-  catch(error) {
-    showToast(error.message || "There was an unexpected error whilst saving your point, try again later.");
-    return false;
-  }
+    throw new Error(`ERROR (saveNewPoint()) : ${data.message}`, {cause : ERROR_MESSAGES.ROUTING.GENERIC_SAVE_ROUTE})
 }
 
 export async function deleteSavedPoint(selectedPoint) {

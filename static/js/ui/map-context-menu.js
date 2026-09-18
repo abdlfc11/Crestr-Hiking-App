@@ -3,6 +3,7 @@ import { formatLatLon } from "../utils/routing-utils.js";
 import { getMap } from "../map.js";
 import { saveNewPoint } from "../saved_points/savedPoints.js";
 import { showToast } from "../utils/ui-utils.js";
+import { ERROR_MESSAGES } from "../utils/error-contants.js";
 
 const popup = document.getElementById('map-context-menu');
 
@@ -83,13 +84,25 @@ export function initMapContextMenu() {
   })
 
   savePointModalSaveButton.addEventListener('click', () => {
-    const pointName = savePointModalInput.value.trim();
-    saveNewPoint(coordinate, pointName);
+    try {
+      const pointName = savePointModalInput.value.trim();
 
-    savePointModal.close();
-    savePointModalInput.value = "";
-    
-    resetCoordinate();
+      if (pointName === "") {
+        throw new Error("ERROR (saveNewPoint()) : Invalid name given (empty)", {cause : "Please enter a name."});
+      } else if (!pointName) {
+        throw new Error("ERROR (saveNewPoint()) : Invalid name given (generic)", {cause : "There was an unexpected error, enter a different name or try again leter."});
+      }
+
+      saveNewPoint(coordinate, pointName);
+
+      savePointModal.close();
+      savePointModalInput.value = "";
+      
+      resetCoordinate();
+    } catch (error) {
+      console.error(error.message);
+      showToast(error.cause || ERROR_MESSAGES.ROUTING.GENERIC_SAVE_ROUTE)
+    }
   })
 
   copyCoordinateButton.addEventListener('click', () => {
