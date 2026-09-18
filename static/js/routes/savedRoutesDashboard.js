@@ -9,7 +9,7 @@ import { closeSavedRoutesDash } from "../ui/ui.js"
 
 import { displayLoadedRouteOnMap } from "./loadRoute.js";
 
-import { setLoadedRouteCoordinates, setCurrentPathData } from "./routeState.js";
+import { setLoadedRouteCoordinates, setCurrentPathData, clearManualRouteState } from "./routeState.js";
 
 import { createElevationProfile, initChartToggleListener } from "../elevationChart.js";
 
@@ -20,7 +20,6 @@ import {
 } from "../utils/ui-utils.js"
 
 import { formatDistance } from "../utils/format-utils.js";
-import { logError } from "../utils/logError-utils.js";
 
 const allRoutesContainer = document.getElementById("all-routes-container");
 
@@ -67,6 +66,7 @@ async function onLoadClick(event) {
     await createElevationProfile(data.coordinates)
 
     // both set calls could set coords whereby each coord is formed of 3 elements i.e (x, y and elevation)
+    clearManualRouteState();
     await setLoadedRouteCoordinates(data.coordinates);
     await setCurrentPathData(data.coordinates);
     await closeSavedRoutesDash();

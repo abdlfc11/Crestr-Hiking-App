@@ -86,6 +86,7 @@ function rebuildPathCoords(userClicks, segmentCache) {
 }
 
 async function persistManualSegmentCache() {
+  if (window.appConfig.loggedIn) return;
   await localforage.setItem("cachedSegmentCache", manualRouteState.segmentCache);
 }
 

@@ -1,5 +1,7 @@
 // Shared route path / mode state for save, load, and map display. 
 
+import localforage from "localforage";
+
 let currentPathData = null;
 let loadedRouteCoordinates = null;
 let currentMode = "manual";
@@ -82,13 +84,19 @@ export function clearPathState() {
   loadedRouteCoordinates = null;
 }
 
-export function clearManualRouteState() {
+export async function clearManualRouteState() {
   manualRouteState.userClicks = [];
   manualRouteState.pathCoords = [];
   manualRouteState.manualRoutePoints = [];
   manualRouteState.isSnapped = false;
   manualRouteState.segmentCache = {};
   manualRouteState.redoStack = [];
+
+  await Promise.all[
+    localforage.removeItem('cachedSegmentCache'),
+    localforage.removeItem('cachedPathCoords'),
+    localforage.removeItem('cachedUserClicks')
+  ]
 }
 
 export function hasActiveRouteStatsPanel() {
