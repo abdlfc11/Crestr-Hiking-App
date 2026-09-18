@@ -1123,6 +1123,7 @@ async function searchArea() {
       zoom: 14,
       duration: 1500,
     }); 
+    searchEntry.value = '';
   } catch (error) {
     showToast(error.cause || ERROR_MESSAGES.SEARCH.GENERIC);
   };
