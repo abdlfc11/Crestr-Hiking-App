@@ -1,8 +1,15 @@
 export const ERROR_MESSAGES = {
     ROUTING: {
-        PATH_CREATION_FAILED: "Sorry, there was an error whilst creating a path, please try again later.",
-        NO_PATH_FOUND: "Sorry, we could not find a path to that location.",
-        OUTSIDE_CUMBRIA: "Please click on a point within Cumbria.",
+        PATH_CREATION_FAILED:
+            "Sorry, there was an error whilst creating a path, please try again later.",
+        NO_PATH_FOUND:
+            "Sorry, we could not find a path to that location.",
+        OUTSIDE_CUMBRIA:
+            "Please click on a point within Cumbria.",
+        GENERIC_ROUTE_ACTION: // e.g undo route, redo route, clear path
+            "Sorry, there was an unexpected error performing that action, please try again later",
+        GENERIC_SAVE_ROUTE:
+            "There was an unexpected error whilst saving your point, try again later."
     },
     SEARCH : {
         GENERIC : "Sorry, there was an unexpected error finding that location, please try again later. "
