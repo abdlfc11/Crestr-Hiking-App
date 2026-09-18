@@ -129,7 +129,7 @@ export function createAutomaticRoutingTour(onTourEnd) {
             }
             },
             {
-            element: '#auto-home-button',
+            element: '#home-button',
             popover: {
                 title: 'Resetting the view',
                 description: 'Pressing this button will take you to the centre of the Lake District, and clear all inputs.'

@@ -6,7 +6,6 @@ import Style from "ol/style/Style.js";
 import Point from "ol/geom/Point.js"
 import Feature from "ol/Feature.js"
 import {
-  toLonLat,
   fromLonLat
 } from "ol/proj.js"
 
