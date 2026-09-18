@@ -11,4 +11,7 @@ export const ERROR_MESSAGES = {
         GENERIC_SAVE_ROUTE:
             "There was an unexpected error whilst saving your point, try again later."
     },
+    SEARCH : {
+        GENERIC : "Sorry, there was an unexpected error finding that location, please try again later. "
+    },
 };
