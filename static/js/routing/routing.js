@@ -172,6 +172,7 @@ export async function addManualPoint(x, y, type="normal", options = {}) {
 
   userClicks.push(finalClick);
   manualRouteState.isSnapped = finalClick === start;
+  await localforage.setItem("cachedRouteIsSnapped", manualRouteState.isSnapped)
 
   await updateManualRoute();
 

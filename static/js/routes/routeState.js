@@ -92,11 +92,11 @@ export async function clearManualRouteState() {
   manualRouteState.segmentCache = {};
   manualRouteState.redoStack = [];
 
-  await Promise.all[
+  await Promise.all([
     localforage.removeItem('cachedSegmentCache'),
     localforage.removeItem('cachedPathCoords'),
     localforage.removeItem('cachedUserClicks')
-  ]
+  ])
 }
 
 export function hasActiveRouteStatsPanel() {
