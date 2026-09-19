@@ -162,6 +162,7 @@
   padding: 0.55rem 1.1rem;
   font-size: 0.95rem;
   color: var(--ink-strong);
+  cursor: pointer;
   width: fit-content;
   max-width: 100%;
   box-sizing: border-box;

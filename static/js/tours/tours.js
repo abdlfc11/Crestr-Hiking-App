@@ -118,7 +118,7 @@ export function createAutomaticRoutingTour(onTourEnd) {
             {
             popover: {
                 title: 'Welcome to Crestr',
-                description: 'This tour will go through automatic routing.'
+                description: 'This tour will show you how to build a route and navigate Crestr.'
             }
             },
             {
@@ -129,38 +129,31 @@ export function createAutomaticRoutingTour(onTourEnd) {
             }
             },
             {
-            element: '#auto-home-button',
+            element: '#home-button',
             popover: {
                 title: 'Resetting the view',
                 description: 'Pressing this button will take you to the centre of the Lake District, and clear all inputs.'
             }
             },
             {
-            element: '#mode-toggle',
-            popover: {
-                title: 'Switching modes',
-                description: 'This is where you can switch between automatic routing and manual routing.'
-            }
-            },
-            {
             element: '#search-row',
             popover: {
-                title: 'Automatic Routing',
+                title: 'Find an area',
                 description: 'Here you can enter locations which move the map to those locations.'
             }
             },
             {
             element: '#coordinates-area',
             popover: {
-                title: 'Automatic Routing',
-                description: 'Here you can enter start and end coordinates to form a route.'
+                title: 'Route endpoints',
+                description: 'Enter start and end coordinates to generate a route, or use the Set buttons and click the map.'
             }
             },
             {
             element: '#generate-path-button',
             popover: {
-                title: 'Automatic Routing',
-                description: 'Pressing this button will generate the path using the coordinates you entered.'
+                title: 'Create the route',
+                description: 'Press this button to create a route. You can then click the map to add more waypoints.'
             }
             }
         ]
