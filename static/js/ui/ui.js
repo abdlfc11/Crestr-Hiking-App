@@ -1137,13 +1137,11 @@ async function handleLoadCachedRoute() {
 
   try {
     await handleLoadManualCachedRoute()
+    await localforage.clear();
   }
   catch(error) {
     showToast("There was an error loading your last route", "error", null);
     throw new Error(error.message)
-  }
-  finally {
-    localforage.clear();
   }
 }
 
@@ -1151,10 +1149,11 @@ async function handleLoadManualCachedRoute() {
 
   const map = getMap();
 
-  const [userClicks, pathCoords, segmentCache] = await Promise.all([
+  const [userClicks, pathCoords, segmentCache, isSnapped] = await Promise.all([
     localforage.getItem("cachedUserClicks"),
     localforage.getItem("cachedPathCoords"),
-    localforage.getItem("cachedSegmentCache")
+    localforage.getItem("cachedSegmentCache"),
+    localforage.getItem("cachedRouteIsSnapped")
   ]);
 
   if (!Array.isArray(userClicks) || !Array.isArray(pathCoords) || !segmentCache || typeof segmentCache !== "object") {
@@ -1164,6 +1163,7 @@ async function handleLoadManualCachedRoute() {
   manualRouteState.userClicks = userClicks;
   manualRouteState.pathCoords = pathCoords;
   manualRouteState.segmentCache = segmentCache;
+  manualRouteState.isSnapped = isSnapped;
   manualRouteState.redoStack = [];
   manualRouteFeature = null;
   removeManualRouteLayer();
