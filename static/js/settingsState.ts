@@ -107,12 +107,12 @@ export async function loadAppSettingsFromServer(): Promise<AppSettings> {
  * Persist the provided (or current) settings to the backend.
  * Fire-and-forget
  */
-export async function saveAppSettingsToServer(settingsDict?: Partial<AppSettings>): Promise<{ success: boolean, message?: string}> {
+export async function saveAppSettingsToServer(settingsDict?: Partial<AppSettings>): Promise<{ success: boolean, message?: string}> | null {
 
   // This is to ensure that no errors are thrown when a user is not logged in
   const isLoggedIn = window.appConfig.loggedIn
   if (!isLoggedIn) {
-    return;
+    return null;
   }
 
   const url = window.appConfig.apiSaveSettings;
