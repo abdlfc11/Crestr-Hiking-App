@@ -11,7 +11,20 @@ import {
 
 const allRoutesContainer = document.getElementById("all-routes-container");
 
-export async function processImportedRouteFile(file) {
+interface ImportedRouteResponse {
+    success: boolean;
+    coords?: number[][];
+    message?: string;
+    user_message?: string;
+    route_info?: {
+        route_name: string;
+        distance_km: number;
+        eta_seconds: number;
+        elevation_gain_metres: number;
+    };
+}
+
+export async function processImportedRouteFile(file: File): Promise<ImportedRouteResponse> {
 
     const form = new FormData();
     form.append("route_file", file);
@@ -31,12 +44,12 @@ export async function processImportedRouteFile(file) {
         return data;
     }
     else {
-        return data.message;
+        throw new Error(data.message || "Route import failed");
     }
 
 }
 
-export function displayImportedRouteCard(data) {
+export function displayImportedRouteCard(data: ImportedRouteResponse): void {
 
     const routeInfo = data.route_info;
     const today = new Date();
@@ -60,4 +73,3 @@ export function displayImportedRouteCard(data) {
 
     if (allRoutesContainer) allRoutesContainer.insertAdjacentHTML("beforeend", routeCard);            
 }
-

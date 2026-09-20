@@ -11,16 +11,27 @@ import {
 import { fromLonLat, toLonLat } from "ol/proj.js";
 import { getDistance } from "ol/sphere.js";
 import localforage from "localforage";
-import { ERROR_MESSAGES } from "../utils/error-contants.js";
+import { ERROR_MESSAGES } from "../utils/error-constants.js";
+
+type SegmentCache = Record<string, number[][]>;
+type ManualRouteResult = { success: boolean; message?: string } | undefined;
+
+type RoutingResult = {
+  success: boolean,
+  message?: string
+  pathGeoJson: Object,
+  map_centre: number[],
+  map_zoom: number,
+  route_stats: Object,
+  coordinates: number[][],
+  startCoord: number[],
+  endCoord: number[]
+}
 
 /**
  * Calculates and returns information associated with a path between two given points (specific to manual routing)
- * 
- * @param {Number} start Coordinate in the format [Lon, Lat]
- * @param {Number} end Coordinate in the format [Lon, Lat]
- * @returns {Object} Information of and information associated with the path that is calculated
  */
-export async function getPathSegment(start, end) {
+export async function getPathSegment(start: number[], end: number[]): Promise<RoutingResult> {
   const url = window.appConfig.apiCalculatePathUrl;
 
   const response = await fetch(url, {
@@ -45,15 +56,15 @@ export async function getPathSegment(start, end) {
   throw new Error( data.message || "ERROR : getPathSegment()", {cause : ERROR_MESSAGES.ROUTING.PATH_CREATION_FAILED});
 }
 
-function segmentKey(start, end) {
+function segmentKey(start: number[], end: number[]): string {
   return JSON.stringify([start, end]);
 }
 
-function coordinatesEqual(first, second) {
+function coordinatesEqual(first: number[] | undefined, second: number[] | undefined): boolean {
   return Boolean(first && second && first[0] === second[0] && first[1] === second[1]);
 }
 
-function toWebMercatorSegment(coordinates) {
+function toWebMercatorSegment(coordinates: number[][]): number[][] {
   return coordinates.map(coord =>
     coord.length >= 3
       ? [...fromLonLat([coord[0], coord[1]]), coord[2]]
@@ -61,7 +72,7 @@ function toWebMercatorSegment(coordinates) {
   );
 }
 
-async function resolveSegment(start, end, segmentCache) {
+async function resolveSegment(start: number[], end: number[], segmentCache: SegmentCache): Promise<number[][]> {
   const key = segmentKey(start, end);
   if (segmentCache[key]) return segmentCache[key];
 
@@ -69,7 +80,7 @@ async function resolveSegment(start, end, segmentCache) {
   return toWebMercatorSegment(data.coordinates);
 }
 
-function rebuildPathCoords(userClicks, segmentCache) {
+function rebuildPathCoords(userClicks: number[][], segmentCache: SegmentCache): number[][] {
   if (userClicks.length === 0) return [];
 
   const pathCoords = [userClicks[0]];
@@ -92,14 +103,8 @@ async function persistManualSegmentCache() {
 
 /**
  * Adds the entered point into the appropriate data structures and updates the UI
- * 
- * @param {Number} x X coordinate of clicked-on point in Web Mercator
- * @param {Number} y Y coordinate of clicked-on point in Web Mercator
- * @param {("normal"|"start"|"end")} [type="normal"] Type of point being added
- * @param {Object} 
- * @returns {Object} Holds success and (on failure) message values
  */
-export async function addManualPoint(x, y, type="normal", options = {}) {
+export async function addManualPoint(x: number, y: number, type: "normal" | "start" | "end" = "normal", options: { clearRedo?: boolean } = {},): Promise<ManualRouteResult> {
   const { userClicks, pathCoords, segmentCache } = manualRouteState;
   const currentClick = [x, y];
   const { clearRedo = true } = options;
@@ -181,11 +186,8 @@ export async function addManualPoint(x, y, type="normal", options = {}) {
 
 /**
  * Replaces the final manual waypoint without retaining its stale route segment.
- *
- * @param {number[]} currentClick
- * @returns
  */
-export async function replaceManualRouteEnd(currentClick) {
+export async function replaceManualRouteEnd(currentClick: number[]): Promise<ManualRouteResult> {
 
   try { 
     const { userClicks, segmentCache } = manualRouteState;
@@ -220,12 +222,8 @@ export async function replaceManualRouteEnd(currentClick) {
 
 /**
  * Replaces an intermediary waypoint of a present route
- *
- * @param {number} index Index attribute of the intermediary point that was moved
- * @param {number[]} newCoordinates Coordinates attribute of the intermediary point that was moved
- * @returns {void}
  */
-export async function replaceIntermediaryPoint(index, newCoordinates) {
+export async function replaceIntermediaryPoint(index: number, newCoordinates: number[]): Promise<ManualRouteResult> {
 
   try {
     const { userClicks, segmentCache } = manualRouteState;
@@ -278,11 +276,8 @@ export async function replaceIntermediaryPoint(index, newCoordinates) {
 
 /**
  * Replaces the current start point of a route with the inputted coordinates
- *
- * @param {number[]} currentClick
- * @returns {Object} Holds success
  */
-async function changeRouteStart(currentClick) {
+async function changeRouteStart(currentClick: number[]): Promise<ManualRouteResult> {
 
   try {
     const { userClicks, segmentCache } = manualRouteState;

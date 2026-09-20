@@ -5,7 +5,7 @@
     card patterns (#login_items / #register-items) and are now unified
     into shared classes so both pages share one stylesheet.
 
-    HTML ids are left untouched (auth.js relies on them for element
+    HTML ids are left untouched (auth.ts relies on them for element
     lookups); only classes were added/renamed to hook
     into the shared rules below.
 

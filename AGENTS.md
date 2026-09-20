@@ -2,7 +2,7 @@
 
 Compact guidance for agents working on Crestr (hiking route planner). Read [README.md](README.md) first for user setup.
 
-**Last Updated: 8th August 2026**
+**Last Updated: 19th September 2026**
 
 ## Run / Dev Commands
 - `docker-compose up --build` (primary; requires `example.env` and optional `.env` — see README for LOCATIONIQ_API_KEY + postgres vars)
@@ -12,7 +12,7 @@ Compact guidance for agents working on Crestr (hiking route planner). Read [READ
 - DB / migrations:
 	- Migrations run automatically in the container entrypoint (`docker-entrypoint.sh` runs `alembic upgrade heads`).
 	- To run manually: `docker-compose exec web-fastapi alembic upgrade heads` (or run `alembic upgrade heads` inside the container)
-- Frontend build: Dockerfile uses a multi-stage Node build to produce `static/dist` (frontend assets). In local dev the `static/dist` and `src` folders are mounted via volumes so a separate `npm run build` isn't required for development.
+- Frontend checks/build: `npm run typecheck` validates TypeScript and `npm run build` type-checks then produces `static/dist`. In local dev the `static/dist` and `src` folders are mounted via volumes, so a separate build is not required while iterating.
 - Graph handling: the container entrypoint will ensure a path graph exists at `/app/graph_generation/elevation_populated_igraph.pkl` (it will download a release asset if missing). If you prefer a tracked graph, `git lfs install && git lfs pull` may be required for older workflows.
 - No formal test harness (pytest/CI) configured — manual verification is expected.
 
@@ -20,7 +20,7 @@ Compact guidance for agents working on Crestr (hiking route planner). Read [READ
 - Entrypoint: `src/fastapi_app.py` (FastAPI app). The compose service is `web-fastapi` (see `docker-compose.yml`).
 - Pathfinding: `src/Pathfinding/` contains `Nodefinder.py` and `pathfinder.py` (A* / KDTree helpers). The runtime graph is in `graph_generation/elevation_populated_igraph.pkl` (igraph-format, large) and is loaded lazily by the `service.load_graph()` helper.
 - Data scripts: `graph_generation/` contains one-off scripts such as `path_downloader.py` and `elevation_upgrade.py` which require extra geospatial packages (pyrosm, rasterio, igraph, etc.) not bundled in `requirements.txt`.
-- Frontend: Jinja2 templates in `templates/` plus `static/` assets (vanilla JS + OpenLayers). Vite is used in the frontend build pipeline (see `package.json` / `vite.config.js`) and built assets are placed in `static/dist` by the Docker multi-stage build.
+- Frontend: Jinja2 templates in `templates/` plus typed modules in `static/js/` (vanilla TypeScript + OpenLayers). Vite is used in the frontend build pipeline (see `package.json` / `vite.config.ts`) and built assets are placed in `static/dist` by the Docker multi-stage build.
 - DB: Postgres (docker) + SQLModel/SQLAlchemy + Alembic migrations. The app expects the DB service name `db` (compose) and `POSTGRES_*` env vars set via `example.env` / `.env`.
 
 ## Docker / Build Gotchas
@@ -38,7 +38,7 @@ Compact guidance for agents working on Crestr (hiking route planner). Read [READ
 ## Tech Stack
 - Backend: Python (Docker: 3.11-slim), FastAPI, SQLModel/SQLAlchemy, Alembic, gunicorn/uvicorn
 - Pathfinding & Data: igraph / custom A* + KDTree helpers, OSM `.pbf`, SRTM tiles for elevation
-- Frontend: HTML/CSS/JS, OpenLayers, Vite (build), static Jinja templates
+- Frontend: HTML/CSS/TypeScript, OpenLayers, Vite (build), static Jinja templates
 - Infra: Docker, docker-compose, Postgres 16 (compose), Caddy (reverse proxy), pgAdmin, Umami (analytics)
 
 See [README.md](README.md) for user-facing docs, and reconcile drift against `docker-compose.yml`, `Dockerfile`, `docker-entrypoint.sh`, `graph_generation/`, and `requirements.txt`.

@@ -143,6 +143,6 @@
     </footer>
 
     <!-- Self-contained theme controller -->
-    <script src="{{ url_for('static', path='js/privacy-policy.js') }}"></script>
+    <script type="module" src="{{ url_for('static', path=vite_asset('static/js/privacy-policy.ts')) }}"></script>
 </body>
 </html>

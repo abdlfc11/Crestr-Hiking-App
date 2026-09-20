@@ -1,6 +1,6 @@
 /**
  * Saved-routes dashboard page UI ( /saved_routes ).
- * Event listeners are wired; implement the TODO handlers to call routeApi.js.
+ * Event listeners are wired through the typed route API helpers.
  */
 
 import { deleteRoute, downloadRoute, loadRoute } from "./routeApi.js";
@@ -27,7 +27,7 @@ const allRoutesContainer = document.getElementById("all-routes-container");
  * Function responsible for updating the distance values of saved route cards
  */
 export function updateSavedRouteCards() {
-  const statValues = document.querySelectorAll('[data-distance-km]');
+  const statValues = document.querySelectorAll<HTMLElement>('[data-distance-km]');
   statValues.forEach(value => {
     const rawKm = parseFloat(value.dataset.distanceKm);
     if (isNaN(rawKm)) return;
@@ -37,11 +37,9 @@ export function updateSavedRouteCards() {
 };
 
 /**
- * reads the route name and format from the closest route card
- * @param {Element} routeCardElement
- * @returns {{ routeName: string } | null}
+ * Reads the route name and format from the closest route card
  */
-export function getRouteFromCard(routeCardElement) {
+export function getRouteFromCard(routeCardElement: HTMLElement | null): {routeName : string} | null {
   if (!routeCardElement) return null;
 
   const routeName = routeCardElement.dataset.routeName;
@@ -51,11 +49,10 @@ export function getRouteFromCard(routeCardElement) {
 }
 
 /**
- * handler for controlling the sequence of events that occur following the clicking of the load route button 
- * @param {MouseEvent} event
+ * Handles the sequence of events that occur following the clicking of the load route button 
  */
-async function onLoadClick(event) {
-  const routeCard = event.target.closest('.route-card');
+async function onLoadClick(event: MouseEvent) {
+  const routeCard = (event.target as HTMLElement).closest<HTMLElement>('.route-card');
   const route = getRouteFromCard(routeCard);
   if (!route) return;
 
@@ -78,11 +75,10 @@ async function onLoadClick(event) {
 }
 
 /**
- * handler for controlling the sequence of events that occur following the clicking of the delete route button 
- * @param {MouseEvent} event
+ * Handles the sequence of events that occur following the clicking of the delete route button 
  */
-async function onDeleteClick(event) {
-  const routeCard = event.target.closest(".route-card")
+async function onDeleteClick(event: MouseEvent) {
+  const routeCard = (event.target as HTMLElement).closest<HTMLElement>(".route-card")
   const route = getRouteFromCard(routeCard);
   if (!route) return;
 
@@ -111,19 +107,20 @@ async function onDeleteClick(event) {
 }
 
 /**
- * handler for controlling the sequence of events that occur following the clicking of the download route button 
- * @param {MouseEvent} event
- * @param {"gpx" | "geojson"} format
- * @param {HTMLButtonElement} DOMElement
+ * Handles the sequence of events that occur following the clicking of the download route button 
  */
-async function onDownloadClick(event, format, DOMElement) {
+async function onDownloadClick(
+  event: MouseEvent,
+  format: "gpx" | "geojson",
+  DOMElement: HTMLButtonElement,
+) {
 
   DOMElement.classList.add('loading')
   DOMElement.disabled = true;
 
   event.preventDefault();
 
-  const routeCard = event.target.closest(".route-card")
+  const routeCard = (event.target as HTMLElement).closest<HTMLElement>(".route-card")
   const route = getRouteFromCard(routeCard);
   if (!route) {
     DOMElement.disabled = false;
@@ -135,11 +132,9 @@ async function onDownloadClick(event, format, DOMElement) {
 
     console.log('BEFORE DOWNLOAD ROUTE')
 
-    const response = await downloadRoute(route.routeName, format, DOMElement); 
+    const blob = await downloadRoute(route.routeName, format, DOMElement); 
 
     console.log('AFTER DOWNLOAD ROUTE')
-    
-    const blob = await response.blob(); // this gets binary file
 
     console.log(route.routeName)
     console.log(format)
@@ -174,35 +169,36 @@ async function onDownloadClick(event, format, DOMElement) {
 }
 
 /** 
-  * handles adding the event listeners for each button on the route card
+* Handles adding the event listeners for each button on the route card
 */
 function bindRouteCardButtons() {
   if (!allRoutesContainer) return;
 
   allRoutesContainer.addEventListener('click', (e) => {
 
-    const deleteButton = e.target.closest('.route-btn-delete');
-    const loadButton = e.target.closest('.route-btn-load');
-    const gpxButton = e.target.closest('.route-btn-download-gpx')
-    const geojsonButton = e.target.closest('.route-btn-download-geojson')
+    const target = e.target as HTMLElement;
+    const deleteButton = target.closest<HTMLButtonElement>('.route-btn-delete');
+    const loadButton = target.closest<HTMLButtonElement>('.route-btn-load');
+    const gpxButton = target.closest<HTMLButtonElement>('.route-btn-download-gpx')
+    const geojsonButton = target.closest<HTMLButtonElement>('.route-btn-download-geojson')
 
     if (deleteButton) {
-      onDeleteClick(e)
+      void onDeleteClick(e)
     }
     else if (loadButton) {
-      onLoadClick(e)
+      void onLoadClick(e)
     }
     else if (gpxButton) {
-      onDownloadClick(e, "gpx", gpxButton)
+      void onDownloadClick(e, "gpx", gpxButton)
     }
     else if (geojsonButton) {
-      onDownloadClick(e, "geojson", geojsonButton)
+      void onDownloadClick(e, "geojson", geojsonButton)
     }
   })
 }
 
 /**
- * responsible for adding event listener to the go back button
+ * Responsible for adding event listener to the go back button
  */
 function bindNavigation() {
   const goBackButton = document.getElementById("go-back-button");
@@ -212,8 +208,9 @@ function bindNavigation() {
     });
   }
 }
+
 /**
- * function responsbile for initialising the event listeners by calling both functions associated with adding event listeners 
+ * Responsible for initialising the event listeners by calling both functions associated with adding event listeners 
  */
 export function initSavedRoutesDashboard() {
   bindNavigation();

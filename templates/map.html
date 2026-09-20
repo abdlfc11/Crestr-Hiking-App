@@ -49,7 +49,7 @@
     <link rel="stylesheet" href="{{ url_for('static', path='css/vendor/tours.css') }}">
 
     <!-- Vite-extracted CSS (sidecars from JS-imported stylesheets, e.g. driver.js) -->
-    {% for css_path in vite_css('static/js/routes/savedRoutesDashboard.js') %}
+    {% for css_path in vite_css('static/js/routes/savedRoutesDashboard.ts') %}
     <link rel="stylesheet" href="{{ url_for('static', path=css_path) }}" />
     {% endfor %}
 
@@ -831,9 +831,7 @@
             },
 
             // auth API endpoints
-            apiLoginUrl: "/auth/login",
             apiLogoutUrl: "/auth/logout",
-            apiRegisterUrl: "/auth/register",
             apiDeleteAccountUrl: "/auth/delete-account",
 
             // routing API endpoints
@@ -866,9 +864,9 @@
 
     <!-- Vite builds (asset paths resolved from the Vite build manifest via vite_asset(),
          so entry filenames can be content-hashed to bust browser/CDN caches) -->
-    <script type="module" src="{{ url_for('static', path=vite_asset('static/js/map.js')) }}"></script>
-    <script type="module" src="{{ url_for('static', path=vite_asset('static/js/routes/savedRoutesDashboard.js')) }}"></script>
-    <script type="module" src="{{ url_for('static', path=vite_asset('static/js/importRoute.js')) }}"></script>
+    <script type="module" src="{{ url_for('static', path=vite_asset('static/js/init/init.ts')) }}"></script>
+    <script type="module" src="{{ url_for('static', path=vite_asset('static/js/routes/savedRoutesDashboard.ts')) }}"></script>
+    <script type="module" src="{{ url_for('static', path=vite_asset('static/js/importRoute.ts')) }}"></script>
 
 </body>
 </html>
