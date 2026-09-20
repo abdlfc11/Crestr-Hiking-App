@@ -26,7 +26,9 @@ import {
 import { getLastLoadedRouteStats, setLastKnownDistanceKm, setLastLoadedRouteStats } from "./routeState.js";
 
 import { getSavedPointStyle } from "../saved_points/style.js";
+
 import { MAP_VIEW_PADDING } from "../constants.js";
+import type { LoadRouteResponse } from "./route_types.js";
 
 
 export function displayLoadedRouteOnMap(data: LoadRouteResponse) {

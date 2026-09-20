@@ -16,15 +16,6 @@ interface RouteStats {
   elevation_gain_m?: number | string;
 }
 
-interface LoadRouteResponse {
-  success: boolean,
-  message: string,
-  pathGeoJSON: Object,
-  map_centre: number[],
-  coordinates: number[][],
-  route_stats: LoadedRouteStats
-}
-
 interface CrestrAppConfig {
   loggedIn: boolean;
   mapInitialCentre: [number, number];

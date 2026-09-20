@@ -3,28 +3,11 @@
  * Implement the TODO blocks when you wire up each button.
  */
 
+import type { LoadRouteResponse } from "./route_types"
+
 interface DeleteRouteResponse {
   success: boolean,
   message: string
-}
-
-interface LoadedRouteStats {
-  total_distance: number,
-  eta_seconds: number,
-  elevation_change: number
-}
-
-interface LoadRouteResponse {
-  success: boolean,
-  message: string,
-  pathGeoJSON: Object,
-  map_centre: number[],
-  coordinates: number[][],
-  route_stats: LoadedRouteStats
-}
-
-interface DownloadRouteResponse {
-
 }
 
 export async function deleteRoute(routeName: string): Promise<DeleteRouteResponse> {
