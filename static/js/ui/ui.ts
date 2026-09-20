@@ -327,22 +327,20 @@ function populateLastLoadedRouteModal(routeStats: RouteStats, routeName: string)
 async function handleInitialLoadCachedRoute() { 
   const hasPreviousSaveAttempt = await localforage.getItem('unauthenticated-save-route-attempt')
   const routeName = await localforage.getItem<string>('cachedRouteName'); 
-  const lastRoutingMode = await localforage.getItem<"auto" | "manual">('lastRoutingMode');
 
   if (!hasPreviousSaveAttempt || !window.appConfig.loggedIn) return;
 
-  if (lastRoutingMode === "auto") {
-    const routeStats = await localforage.getItem<RouteStats>('cachedAutoRouteStats');
+  const routeStats = await localforage.getItem<RouteStats>('cachedManualRouteStats'); 
+  if (!routeStats) {
+    throw new Error(
+      "ERROR (handleInitialLoadCachedRoute()) : Could not retrieve route stats",
+      {cause : "Sorry, there was an unexpected error loading the route."}
+    ); 
+  }; 
 
-    if (routeStats) populateLastLoadedRouteModal(routeStats, routeName ?? "");
-    showModal(true, loadLastRouteModal);
-  }
-  else {
-    const routeStats = await localforage.getItem<RouteStats>('cachedManualRouteStats');
+  populateLastLoadedRouteModal(routeStats, routeName ?? ""); 
+  showModal(true, loadLastRouteModal); 
 
-    if (routeStats) populateLastLoadedRouteModal(routeStats, routeName ?? "");
-    showModal(true, loadLastRouteModal);
-  }
 }
 
 //#endregion
