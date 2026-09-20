@@ -1,8 +1,8 @@
 // Local Imports 
-import { normaliseCoordLength, getCurrentPathData } from './routes/routeState.js';
-import { getManualRouteLayer, getRouteLayer } from './map.js';
+import { normaliseCoordLength } from './routes/routeState.js';
+import { getManualRouteLayer } from './init/map.js';
 import { getTheme, getDistanceUnit } from './settingsState.js';
-import { createElevationPointStyle, createManualPointStyle } from './utils/style-utils.js';
+import { createElevationPointStyle } from './utils/style-utils.js';
 
 // OpenLayers imports 
 import { fromLonLat, toLonLat } from 'ol/proj.js';
@@ -12,43 +12,32 @@ import { getDistance } from 'ol/sphere.js'
 
 // Chart.js imports 
 import Chart from 'chart.js/auto';
+import type { Chart as ChartInstance, Plugin } from 'chart.js';
 
 /**
  * Returns true if the coord is in EPSG:4326 projection and false otherwise
- * 
- * @param {Array} coord The coordinate array in format [X, Y] or [Lon, Lat]
- * @returns {bool} True if the coordinate is in EPSG:4326 projection and false otherwise 
  */
-function isLonLatCoord(coord) {
+function isLonLatCoord(coord: number[]): boolean {
   return Array.isArray(coord) && coord.length >= 2 &&
     Math.abs(coord[0]) <= 180 && Math.abs(coord[1]) <= 90;
 }
 
-let elevationChart = null;
-let currentCoordinates = null;
-const toggleElevationChartButton = document.getElementById('toggle-elevation-chart');
+let elevationChart: ChartInstance<"line", Array<{ x: number; y: number }>> | null = null;
+let currentCoordinates: number[][] | null = null;
 
 // Feature which is created on the map corresponding to the point being hovered over on the elevation chart
-let hoverPointFeature = null;
+let hoverPointFeature: Feature<Point> | null = null;
 
-/**
- * Used to set the value of the hoverPointFeature
- * 
- * @param {any} value 
- * @returns {void}
- */
-export function setHoverPointFeature(value) {
+
+export function setHoverPointFeature(value: Feature<Point> | null) {
     hoverPointFeature = value;
 }
 
 /**
  * Updates or creates a temporary marker feature on the route map layer at the specified position.
  * Strips out extra dimensions (like elevation data) to pass clean 2D coordinates to OpenLayers.
- * 
- * @param {Array<number>} coordinate  An array containing map location coordinates, formatted as `[x, y]` or `[x, y, elevation]`
- * @returns {void}
  */
-function updateMapHoverPoint(coordinate) {
+function updateMapHoverPoint(coordinate: number[]) {
   const routeLayer = getManualRouteLayer();
   if (!routeLayer) return;
   const source = routeLayer.getSource();
@@ -74,8 +63,6 @@ function updateMapHoverPoint(coordinate) {
 /**
  * Removes the temporary hover marker feature from the route map layer and clears its internal memory reference.
  * Operates safely if the layer source or the feature reference do not exist.
- * 
- * @returns {void}
  */
 function clearMapHoverPoint() {
   const routeLayer = getManualRouteLayer();
@@ -87,7 +74,7 @@ function clearMapHoverPoint() {
 };
 
 export function resetElevationChart() {
-    const ctx = document.getElementById('elevation-chart');
+    const ctx = document.getElementById('elevation-chart') as HTMLCanvasElement | null;
     
     // this destroys the chart via reference or via Chart.js canvas registry
     const existingChart = elevationChart || (ctx ? Chart.getChart(ctx) : null);
@@ -99,12 +86,12 @@ export function resetElevationChart() {
     currentCoordinates = null;
 }
 
-export function createElevationProfile(coordinates) {
+export function createElevationProfile(coordinates: number[][]) {
 
     coordinates = normaliseCoordLength(coordinates)
 
     const container = document.getElementById('elevation-chart-container');
-    const ctx = document.getElementById('elevation-chart');
+    const ctx = document.getElementById('elevation-chart') as HTMLCanvasElement | null;
 
     if (!ctx) {
         console.warn("Elevation chart canvas not found");
@@ -200,13 +187,15 @@ export function createElevationProfile(coordinates) {
 
 
     // Vertical Line plugin to allow a vertical line to be shown upon the hovering over of the elevation chart
-    const verticalLinePlugin = {
+    const verticalLinePlugin: Plugin<"line"> = {
         id: 'verticalLine',
         beforeDatasetsDraw: (chart) => {
             const { ctx, tooltip, chartArea } = chart;
-            if (!tooltip || !tooltip._active || tooltip._active.length === 0) return;
+            if (!tooltip) return;
+            const activeElements = tooltip.getActiveElements();
+            if (activeElements.length === 0) return;
 
-            const activePoint = tooltip._active[0];
+            const activePoint = activeElements[0];
             const x = activePoint.element.x;
 
             ctx.save();
@@ -239,12 +228,13 @@ export function createElevationProfile(coordinates) {
         elevationChart.options.scales.y.ticks.color = text;
         elevationChart.options.scales.y.grid.color = grid;
         
-        elevationChart.options.plugins.tooltip.callbacks.title = (ctx) => ctx[0].raw.x + distanceExtension;
+        elevationChart.options.plugins!.tooltip!.callbacks!.title = (ctx) =>
+            ((ctx[0].raw as { x: number }).x + distanceExtension);
 
         elevationChart.update();
     }
     else {
-        elevationChart = new Chart(ctx, {
+        elevationChart = new Chart<"line", Array<{ x: number; y: number }>>(ctx, {
             type: 'line',
             data: {
                 datasets: [{
@@ -280,12 +270,11 @@ export function createElevationProfile(coordinates) {
                     }
                 },
                 plugins: {
-                    verticalLine: {},
                     legend: { display: false },
                     tooltip: {
                         callbacks: {
-                            title: (ctx) => ctx[0].raw.x + distanceExtension,
-                            label: (ctx) => `${ctx.raw.y} m`
+                            title: (ctx) => (ctx[0].raw as { x: number }).x + distanceExtension,
+                            label: (ctx) => `${(ctx.raw as { y: number }).y} m`
                         }
                     }
                 },
@@ -302,7 +291,7 @@ export function createElevationProfile(coordinates) {
                             color: text,
                             font: { size: 12 },
                             callback: function(value) {
-                                return Math.round(value);
+                                return Math.round(Number(value));
                             },
                             stepSize: 1,
                             maxTicksLimit: 12
@@ -351,5 +340,3 @@ export function initChartToggleListener() {
         toggleButton.onclick = toggleElevationChart;
     }
 };
-
-

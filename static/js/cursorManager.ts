@@ -16,13 +16,19 @@
  * - Provides a single updateCursor() that decides based on current app state
  */
 
-let viewport = null;
-let getCurrentModeFn = null;
-let getClickModeFn = null;
-let desiredCursor = 'grab';
-let mapRef = null;          // keep a reference so we can call hasFeatureAtPixel
+import type Map from "ol/Map.js";
+import type { Pixel } from "ol/pixel.js";
 
-export function initCursorManager(map, getCurrentMode, getClickMode) {
+type ModeGetter = () => "manual" | "auto";
+type ClickModeGetter = () => string | null;
+
+let viewport: HTMLElement | null = null;
+let getCurrentModeFn: ModeGetter | null = null;
+let getClickModeFn: ClickModeGetter | null = null;
+let desiredCursor = 'grab';
+let mapRef: Map | null = null;          // keep a reference so we can call hasFeatureAtPixel
+
+export function initCursorManager(map: Map, getCurrentMode: ModeGetter, getClickMode: ClickModeGetter) {
   if (!map) {
     console.warn('[cursorManager] No map provided to initCursorManager');
     return;
@@ -61,7 +67,7 @@ export function updateCursor() {
 /**
  * Forces a specific cursor immediately.
  */
-export function setCursor(cursorValue) {
+export function setCursor(cursorValue: string) {
   desiredCursor = cursorValue;
   // apply immediately (no pixel available → no feature check)
   applyCursor(null);
@@ -78,10 +84,8 @@ export function forceApplyCursor() {
 /**
  * Internal helper that decides the final cursor value
  * and writes it to the viewport.
- *
- * @param {import('ol').Pixel | null} pixel current mouse pixel (null = no feature test)
  */
-function applyCursor(pixel) {
+function applyCursor(pixel: Pixel | null) {
   if (!viewport) return;
 
   let cursor = desiredCursor;

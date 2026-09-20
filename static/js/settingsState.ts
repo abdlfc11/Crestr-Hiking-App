@@ -1,5 +1,5 @@
 /**
- * settingsState.js
+ * settingsState.ts
  * Central in-memory + persisted (localStorage + server) store for user app preferences.
  * Supports `distanceUnit` ("km" | "miles"), Theme {dark, light and system}
  * Other modules import getAppSettings() for read-only access (e.g. formatDistance).
@@ -7,13 +7,7 @@
  * @module settingsState
  */
 
-/** 
- * @typedef {Object} AppSettings
- * @property {'km' | 'miles'} distanceUnit
- * @property {'light' | 'dark' | 'system'} theme
- */
-
-let appSettings = {
+let appSettings: AppSettings = {
   distanceUnit: "km",
   theme: "system"
 };
@@ -46,17 +40,15 @@ hydrateFromLocalStorage();
 
 /**
  * Return a clone of current settings. Safe for consumers.
- * @returns {AppSettings}
  */
-export function getAppSettings() {
+export function getAppSettings(): AppSettings {
   return { ...appSettings };
 }
 
 /**
  * Update in-memory state + localStorage. Does NOT touch the server.
- * @param {AppSettings} settings
  */
-export function saveAppSettings(settings) {
+export function saveAppSettings(settings: Partial<AppSettings>) {
 
   if(!settings) return;
 
@@ -67,18 +59,17 @@ export function saveAppSettings(settings) {
     if (settings.distanceUnit) {
       localStorage.setItem("distanceUnit", appSettings.distanceUnit);
     }
-  } catch (e) {
+  } catch (error) {
     // storage full / private mode etc.
+    console.error(error.message)
   }
 }
 
 /**
  * Asynchronously load preferences from the backend for the logged-in user
  * and merge into local state (server wins for this session).
- *
- * @returns {Promise<AppSettings>}
  */
-export async function loadAppSettingsFromServer() {
+export async function loadAppSettingsFromServer(): Promise<AppSettings> {
   const url = window.appConfig && window.appConfig.apiGetSettings;
   if (!url) {
     console.debug("[settingsState] no apiGetSettings configured");
@@ -105,8 +96,8 @@ export async function loadAppSettingsFromServer() {
         saveAppSettings({ theme: incoming.theme });
       }
     }
-  } catch (err) {
-    console.warn("[settingsState] failed to load settings from server:", err);
+  } catch (error) {
+    console.warn(`ERROR (loadAppSettingsFromServer()) failed to load settings from server: ${error}`);
     // keep whatever we have in memory/local
   }
   return getAppSettings();
@@ -114,20 +105,17 @@ export async function loadAppSettingsFromServer() {
 
 /**
  * Persist the provided (or current) settings to the backend.
- * Fire-and-forget friendly; throws on hard failure.
- *
- * @param {Object<string, string>} [settingsDict] - e.g. { distanceUnit: "miles" }
- * @returns {Promise<{ success: boolean, message?: string }>}
+ * Fire-and-forget
  */
-export async function saveAppSettingsToServer(settingsDict) {
+export async function saveAppSettingsToServer(settingsDict?: Partial<AppSettings>): Promise<{ success: boolean, message?: string}> | null {
 
   // This is to ensure that no errors are thrown when a user is not logged in
   const isLoggedIn = window.appConfig.loggedIn
   if (!isLoggedIn) {
-    return;
+    return null;
   }
 
-  const url = window.appConfig && window.appConfig.apiSaveSettings;
+  const url = window.appConfig.apiSaveSettings;
   if (!url) throw new Error("apiSaveSettings not present in window.appConfig");
 
   const payload = settingsDict || { ...appSettings };
@@ -141,30 +129,23 @@ export async function saveAppSettingsToServer(settingsDict) {
 
   if (!res.ok) {
     throw new Error(`Save settings HTTP ${res.status}`);
-  }
-  return res.json();
+  };
+
+  return await res.json();
 }
 
 // ##### SYSTEM THEME #####
 
 /**
  * returns the correct theme to apply at the time of calling
- * @returns {string}
  */
-export function getTheme() {
-  const currentTheme = appSettings.theme;
-
-  if (currentTheme === "system") {
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches; // var is a boolean value, True for dark and false for light
-    return prefersDark ? "dark" : "light" // if prefersDark is true, the return value is "dark" otherwise it is "light"
-  }
-  return currentTheme
+export function getTheme(): ThemePreference {
+  return appSettings.theme
 } 
 
 /**
  * Returns the current distance unit preference.
- * @returns {'km' | 'miles'}
  */
-export function getDistanceUnit() {
+export function getDistanceUnit(): DistanceUnit {
   return appSettings.distanceUnit;
 }

@@ -1,4 +1,4 @@
-import { getMap, getRouteLayer } from "../map.js";
+import { getMap, getRouteLayer } from "../init/map.js";
 
 import GeoJSON from "ol/format/GeoJSON.js";
 import Stroke from "ol/style/Stroke.js";
@@ -26,9 +26,12 @@ import {
 import { getLastLoadedRouteStats, setLastKnownDistanceKm, setLastLoadedRouteStats } from "./routeState.js";
 
 import { getSavedPointStyle } from "../saved_points/style.js";
-import { MAP_VIEW_PADDING } from "../constants.js";
 
-export function displayLoadedRouteOnMap(data) {
+import { MAP_VIEW_PADDING } from "../constants.js";
+import type { LoadRouteResponse } from "./route_types.js";
+
+
+export function displayLoadedRouteOnMap(data: LoadRouteResponse) {
 
   const map = getMap();
   const routeLayer = getRouteLayer();
@@ -90,7 +93,7 @@ export function displayLoadedRouteOnMap(data) {
       }, 
       
       // then zoom into the route
-      function(complete) {
+      function(complete: boolean) {
         if (complete) {
           setTimeout(() => {
             view.fit(vectorSource.getExtent(), {
@@ -118,10 +121,10 @@ export function displayLoadedRouteOnMap(data) {
   displayLoadedRouteStats(getLastLoadedRouteStats());
 }
 
-export function displayLoadedRouteStats(routeStats) {
+export function displayLoadedRouteStats(routeStats: RouteStats | null) {
   if (!routeStats) return;
 
-  setLastKnownDistanceKm(routeStats.total_distance);
+  setLastKnownDistanceKm(Number(routeStats.total_distance));
 
   let statsDiv = document.getElementById("route-stats");
 
@@ -133,5 +136,9 @@ export function displayLoadedRouteStats(routeStats) {
   statsDiv.id = "route-stats";
   document.body.appendChild(statsDiv);
 
-  statsDiv.innerHTML = createStatsPanel(formatDistance(parseFloat(routeStats.total_distance)), formatETA(routeStats.eta_seconds), formatElevation(routeStats.elevation_change))
+  statsDiv.innerHTML = createStatsPanel(
+    formatDistance(Number(routeStats.total_distance)),
+    formatETA(routeStats.eta_seconds),
+    formatElevation(routeStats.elevation_change ?? 0),
+  )
 }

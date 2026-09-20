@@ -1,5 +1,5 @@
 import { getSavedPointStyle } from "./style.js";
-import { getMap } from "../map.js";
+import { getMap } from "../init/map.js";
 import { showLoginModal} from "../ui/ui.js";
 import { showToast, showModal } from "../utils/ui-utils.js";
 import { logError } from "../utils/logError-utils.js";
@@ -8,11 +8,20 @@ import { Feature } from "ol";
 import { Point } from "ol/geom.js";
 import VectorLayer from "ol/layer/Vector.js";
 import VectorSource from "ol/source/Vector.js";
-import { ERROR_MESSAGES } from "../utils/error-contants.js";
+import { ERROR_MESSAGES } from "../utils/error-constants.js";
 
-let savedPointsLayer = null;
-const deletePointModal = document.getElementById('delete-point-confirmation-dialog');
-const savePointModal = document.getElementById('save-point-dialog');
+interface SavedPoint {
+  name: string;
+  coordinates: number[];
+}
+
+interface GetSavedPointsResponse {
+  success: string,
+  points: SavedPoint[]
+}
+
+let savedPointsLayer: VectorLayer<VectorSource> | null = null;
+const deletePointModal = document.getElementById('delete-point-confirmation-dialog') as HTMLDialogElement | null;
 
 export function getSavedPointsLayer() {
     return savedPointsLayer
@@ -27,8 +36,8 @@ function clearOldSavedPointsLayer() {
     } 
 }
 
-function convertPointsToFeatures(data) {
-    return data.points.map(point => {
+function convertPointsToFeatures(data: { points: SavedPoint[] }): Feature<Point>[] {
+    return data.points.map((point) => {
 
         // converts to Web Mercator (API sends coords in [Lon, Lat] format)
         const mercatorCoords = fromLonLat(point.coordinates);
@@ -39,7 +48,7 @@ function convertPointsToFeatures(data) {
     });
 };
 
-function createSavedPointsLayer(features) {
+function createSavedPointsLayer(features: Feature<Point>[]): VectorLayer<VectorSource> {
     return new VectorLayer({
         source: new VectorSource({ features }),
         style: f => getSavedPointStyle(f.get("name")),
@@ -47,7 +56,7 @@ function createSavedPointsLayer(features) {
     });
 };
 
-function addLayerToMap(layer) {
+function addLayerToMap(layer: VectorLayer<VectorSource>) {
 
     const map = getMap()
 
@@ -56,7 +65,7 @@ function addLayerToMap(layer) {
     return layer
 }
 
-async function getSavedPoints() {
+async function getSavedPoints(): Promise<GetSavedPointsResponse> {
     
     const url = window.appConfig.apiGetSavedPointsUrl;
 
@@ -64,7 +73,6 @@ async function getSavedPoints() {
 
     const data = await response.json();
     
-    // e.g when FastAPI returns HTTPException, such as if authorisation failed 
     if (!response.ok) {
       throw new Error(data.message || "Failed to fetch points");
     }
@@ -93,12 +101,9 @@ export function loadAndDisplaySavedPoints() {
 }
 
 /**
- * 
- * @param {number[]} coordinate In Web Mercator or Lon Lat
- * @param {string} name 
- * @returns {void}
+ * Responsible for saving a point for the given coordinate 
  */
-export async function saveNewPoint(coordinate, name) {
+export async function saveNewPoint(coordinate: number[], name: string): Promise<void> {
 
   const isLoggedIn = window.appConfig.loggedIn;
   if (!isLoggedIn) {
@@ -142,7 +147,7 @@ export async function saveNewPoint(coordinate, name) {
     throw new Error(`ERROR (saveNewPoint()) : ${data.message}`, {cause : ERROR_MESSAGES.ROUTING.GENERIC_SAVE_ROUTE})
 }
 
-export async function deleteSavedPoint(selectedPoint) {
+export async function deleteSavedPoint(selectedPoint: Feature | null): Promise<void> {
 
   try { 
     if (!selectedPoint) {

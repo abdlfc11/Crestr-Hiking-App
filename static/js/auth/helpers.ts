@@ -1,3 +1,5 @@
+
+// Constants
 const specialCharacters = ["@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+", "-", "=", "[", "]", "{", "}", "|", ";", ":", ",", ".", "<", ">", "?", "/"]
 const reqLength = document.getElementById("req-length");
 const reqNumber = document.getElementById("req-number");
@@ -6,7 +8,7 @@ const reqMatch = document.getElementById("req-match");
 
 //#region Registering Specific 
 
-function updateRequirement(element, condition) {
+function updateRequirement(element: HTMLElement | null, condition: boolean) {
     element.classList.remove("valid", "invalid");
 
     if (condition) {
@@ -16,7 +18,11 @@ function updateRequirement(element, condition) {
     }
 }
 
-export function clearRegisterEntries(username, password1, password2) {
+export function clearRegisterEntries(
+  username: HTMLInputElement,
+  password1: HTMLInputElement,
+  password2: HTMLInputElement,
+) {
   username.value = "";
   password1.value = "";
   password2.value = "";
@@ -26,7 +32,7 @@ export function clearRegisterEntries(username, password1, password2) {
 
 //#region Validation 
 
-export function validatePassword(p1, p2) {
+export function validatePassword(p1: string, p2: string): void {
 
     // these are the requirements 
     const lengthValid = p1.length >= 11;
@@ -51,7 +57,7 @@ export function validatePassword(p1, p2) {
  * @param {string} p2 
  * @returns 
  */
-export function validateRegisterInput(username, p1, p2) {
+export function validateRegisterInput(username: string, p1: string, p2: string): true | string {
   const thereIsSpecialCharacter = specialCharacters.some((word) =>
     p1.includes(word),
   );
@@ -73,7 +79,7 @@ export function validateRegisterInput(username, p1, p2) {
 //#endregion
 
 
-export function userFeedback(label, message, isSuccess) {
+export function userFeedback(label: HTMLElement, message: string, isSuccess: boolean) {
   label.textContent = message;
   label.style.color = isSuccess ? "#0f7a52" : "#ff4d4d";
   label.style.opacity = "1";
