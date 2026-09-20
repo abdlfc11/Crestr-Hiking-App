@@ -12,7 +12,7 @@ import {
   showLoginModal
 } from "../ui/ui.js";
 
-import { getMap } from "../map.js";
+import { getMap } from "../init/map.js";
 
 import {
   createRouteCard,

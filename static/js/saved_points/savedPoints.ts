@@ -1,5 +1,5 @@
 import { getSavedPointStyle } from "./style.js";
-import { getMap } from "../map.js";
+import { getMap } from "../init/map.js";
 import { showLoginModal} from "../ui/ui.js";
 import { showToast, showModal } from "../utils/ui-utils.js";
 import { logError } from "../utils/logError-utils.js";
@@ -13,6 +13,11 @@ import { ERROR_MESSAGES } from "../utils/error-constants.js";
 interface SavedPoint {
   name: string;
   coordinates: number[];
+}
+
+interface GetSavedPointsResponse {
+  success: string,
+  points: SavedPoint[]
 }
 
 let savedPointsLayer: VectorLayer<VectorSource> | null = null;
@@ -60,7 +65,7 @@ function addLayerToMap(layer: VectorLayer<VectorSource>) {
     return layer
 }
 
-async function getSavedPoints() {
+async function getSavedPoints(): Promise<GetSavedPointsResponse> {
     
     const url = window.appConfig.apiGetSavedPointsUrl;
 
@@ -68,7 +73,6 @@ async function getSavedPoints() {
 
     const data = await response.json();
     
-    // e.g when FastAPI returns HTTPException, such as if authorisation failed 
     if (!response.ok) {
       throw new Error(data.message || "Failed to fetch points");
     }

@@ -1,10 +1,5 @@
 //#region Imports
 
-import {
-  createIcons,
-  ChevronLeft
-} from "lucide"
-
 import { showToast } from "../utils/ui-utils.js";
 
 import { 
@@ -251,55 +246,51 @@ function initDarkMode() {
 //#endregion
 
 //#region INIT
+export function initAuth() {
 
-initDarkMode();
+  initDarkMode();
 
-createIcons({
-  icons: {
-    ChevronLeft
-  }
-})
+  addClickListener(logoutButton, logout, "click");
+  addClickListener(loginButton, login, "click");
+  addClickListener(registerButton, register, "click");
+  addClickListener(switchToRegisterButton, switchToRegister, "click");
+  addClickListener(switchToLoginButton, switchToLogin, "click");
+  addClickListener(deleteAccountButton, () => void deleteAccount(), "click");
+  addClickListener(registerPasswordEntry1, () => validatePassword(registerPasswordEntry1.value, registerPasswordEntry2.value), "input");
+  addClickListener(registerPasswordEntry2, () => validatePassword(registerPasswordEntry1.value, registerPasswordEntry2.value), "input");
 
-// Add event listeners to all password visibility toggle icons
-icons.forEach((icon) => {
-  icon.addEventListener("click", (event) => {
-    const target = event.currentTarget as HTMLElement;
-    const parent = target.parentElement;
-    const passwordInput = parent.querySelector<HTMLInputElement>(
-      'input[type="password"], input[type="text"]',
-    );
+  if (window.location.pathname === "/login-page" || window.location.pathname === "/register") {
+    if (window.location.pathname === "/login-page") {
+      document.addEventListener("keypress", (event) => {
+        if (event.key === 'Enter') {
+          login()
+        }
+      });
+    }
+    else {
+      document.addEventListener("keypress", (event) => {
+        if (event.key === 'Enter') {
+          register()
+        }
+      });
+    }
+  };
 
-    const isPassword = passwordInput.type === "password";
-    passwordInput.type = isPassword ? "text" : "password";
+  // Add event listeners to all password visibility toggle icons
+  icons.forEach((icon) => {
+    icon.addEventListener("click", (event) => {
+      const target = event.currentTarget as HTMLElement;
+      const parent = target.parentElement;
+      const passwordInput = parent.querySelector<HTMLInputElement>(
+        'input[type="password"], input[type="text"]',
+      );
 
-    target.classList.toggle("auth-icon-active", isPassword);
+      const isPassword = passwordInput.type === "password";
+      passwordInput.type = isPassword ? "text" : "password";
+
+      target.classList.toggle("auth-icon-active", isPassword);
+    });
   });
-});
-
-addClickListener(logoutButton, logout, "click");
-addClickListener(loginButton, login, "click");
-addClickListener(registerButton, register, "click");
-addClickListener(switchToRegisterButton, switchToRegister, "click");
-addClickListener(switchToLoginButton, switchToLogin, "click");
-addClickListener(deleteAccountButton, () => void deleteAccount(), "click");
-addClickListener(registerPasswordEntry1, () => validatePassword(registerPasswordEntry1.value, registerPasswordEntry2.value), "input");
-addClickListener(registerPasswordEntry2, () => validatePassword(registerPasswordEntry1.value, registerPasswordEntry2.value), "input");
-
-if (window.location.pathname === "/login-page" || window.location.pathname === "/register") {
-  if (window.location.pathname === "/login-page") {
-    document.addEventListener("keypress", (event) => {
-      if (event.key === 'Enter') {
-        login()
-      }
-    });
-  }
-  else {
-    document.addEventListener("keypress", (event) => {
-      if (event.key === 'Enter') {
-        register()
-      }
-    });
-  }
-};
+}
 
 //#endregion

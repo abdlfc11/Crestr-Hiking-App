@@ -1,6 +1,8 @@
+// IMPORTS 
+
 import "ol/ol.css?inline"
 
-import { getRouteStrokeStyle } from "./utils/style-utils.js";
+import { getRouteStrokeStyle } from "../utils/style-utils.js";
 
 // OpenLayers Core & Views
 import Map from "ol/Map.js";
@@ -20,53 +22,11 @@ import VectorSource from "ol/source/Vector.js";
 import Style from "ol/style/Style.js";
 import Stroke from "ol/style/Stroke.js";
 
-// Lucide Icons
-import {
-  createIcons,
-  RotateCcw,
-  ChevronDown,
-  Waypoints,
-  Import,
-  Settings,
-  Bug,
-  Heart,
-  LogIn,
-  LogOut,
-  Coffee,
-  MoveRight,
-  Keyboard,
-  Eraser,
-  Redo2,
-  Undo2
-} from 'lucide';
 
 export let map: Map | null = null;
 export let tileLayer: Tile<XYZ> | null = null;
 export let routeLayer: VectorLayer<VectorSource> | null = null;
 export let manualRouteLayer: VectorLayer<VectorSource> | null = null;
-
-// Icon initialisation
-createIcons({
-  icons: {
-    RotateCcw,
-    ChevronDown,
-    Waypoints,
-    Import,
-    Settings,
-    Bug,
-    Heart,
-    LogIn,
-    LogOut,
-    Coffee,
-    MoveRight,
-    Keyboard,
-    Eraser,
-    Redo2,
-    Undo2
-  }
-});
-
-let mapInitialised = false;
 
 export function getMap() {
   return map;
@@ -114,15 +74,7 @@ export function setTileLayer(layer: Tile<XYZ> | null) {
   tileLayer = layer;
 }
 
-export function initMap() {
-  if (mapInitialised) return;
-  mapInitialised = true;
-  createTileLayer();
-  createMap();
-  createRouteLayer();
-}
-
-function createMap() {
+export function createMap() {
   const initialCentreLatLon = Array.isArray(window.appConfig?.mapInitialCentre)
     ? window.appConfig.mapInitialCentre
     : [-3.198308, 54.465458];
@@ -187,7 +139,7 @@ export function createRouteLayer() {
 
   const map = getMap();
   if (map) map.addLayer(routeLayer);
-  else console.error("Could not add routeLayer to the map");
+  else console.error("ERROR (createRouteLayer()) : Could not add routeLayer to the map");
 }
 
 export function createManualRouteLayer() {
@@ -201,22 +153,21 @@ export function createManualRouteLayer() {
 
   const map = getMap();
   if (map) map.addLayer(manualRouteLayer);
-  else console.error("Could not add manualRouteLayer to the map");
+  else console.error("ERROR (createManualRouteLayer()) : Could not add manualRouteLayer to the map");
 };
 
 export function getPathColour() {
   return "#2563eb";
 }
 
-async function initApp() {
-  initMap();
-  await import("./auth/auth.js");
-  const { initSettings } = await import("./settings.js");
-  initSettings();
-  const { initUi } = await import("./ui/ui.js");
-  initUi();
-  const { initMapContextMenu } = await import('./ui/map-context-menu.js')
-  initMapContextMenu();
-}
+// Init
 
-document.addEventListener("DOMContentLoaded", initApp);
+let mapInitialised = false;
+
+export function initMap() {
+    if (mapInitialised) return;
+    mapInitialised = true;
+    createTileLayer();
+    createMap();
+    createRouteLayer();
+}

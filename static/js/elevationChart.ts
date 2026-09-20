@@ -1,6 +1,6 @@
 // Local Imports 
 import { normaliseCoordLength } from './routes/routeState.js';
-import { getManualRouteLayer } from './map.js';
+import { getManualRouteLayer } from './init/map.js';
 import { getTheme, getDistanceUnit } from './settingsState.js';
 import { createElevationPointStyle } from './utils/style-utils.js';
 

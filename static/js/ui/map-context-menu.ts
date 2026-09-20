@@ -1,6 +1,6 @@
 import { toLonLat } from "ol/proj.js";
 import { formatLatLon } from "../utils/routing-utils.js";
-import { getMap } from "../map.js";
+import { getMap } from "../init/map.js";
 import { saveNewPoint } from "../saved_points/savedPoints.js";
 import { showToast } from "../utils/ui-utils.js";
 import { ERROR_MESSAGES } from "../utils/error-constants.js";

@@ -52,12 +52,11 @@ import {
   getRouteLayer,
   getManualRouteLayer,
   removeManualRouteLayer
-} from "../map.js";
+} from "../init/map.js";
 
 import {
   loadAndDisplaySavedPoints,
   getSavedPointsLayer,
-  saveNewPoint,
   deleteSavedPoint
 } from "../saved_points/index.js";
 
@@ -1973,7 +1972,7 @@ export function initUi() {
   initPointDeleteHandlers();
 
   initInteractivePointLayer(map);
-
+  loadAndDisplaySavedPoints();
 
   // initial tour (automatic routing and saving the first route)
   handleInitialTour();
@@ -1985,7 +1984,6 @@ export function initUi() {
   setOnDistanceUnitChange(() => handleDistanceUnitToggle());
 
   window.addEventListener("load", checkIfMobile);
-  window.addEventListener('DOMContentLoaded', loadAndDisplaySavedPoints);
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
     applyTheme(getTheme());
   });
@@ -2034,8 +2032,8 @@ export function initUi() {
   addClickListener(undoManualRouteButton, undoManualRoutePoint, "click");
   addClickListener(redoManualRouteButton, redoManualRoutePoint, "click");
   addClickListener(noRouteCreateButton, closeSavedRoutesDash, "click");
-
-  generatePathButton.addEventListener("click", () => handleManualRouteGeneration());
+  
+  addClickListener(generatePathButton, () => handleManualRouteGeneration, "click");
 
   // These event listeners are for route saving.
   addClickListener(saveRouteToggleButton, toggleSaveRouteContainer, "click");

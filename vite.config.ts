@@ -14,10 +14,11 @@ export default defineConfig({
 
     rolldownOptions: {
       input: {
-        map: source("./static/js/map.ts"),
+        map: source("./static/js/init/init.ts"),
         savedRoutes: source("./static/js/routes/savedRoutesDashboard.ts"),
         importRoute: source("./static/js/importRoute.ts"),
         auth: source("./static/js/auth/auth.ts"),
+        authPage: source("./static/js/auth/auth-page.ts"),
         privacyPolicy: source("./static/js/privacy-policy.ts"),
       },
       output: {

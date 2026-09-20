@@ -1,4 +1,4 @@
-import { getMap, getRouteLayer } from "../map.js";
+import { getMap, getRouteLayer } from "../init/map.js";
 
 import GeoJSON from "ol/format/GeoJSON.js";
 import Stroke from "ol/style/Stroke.js";
