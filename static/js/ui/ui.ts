@@ -2035,7 +2035,7 @@ export function initUi() {
   addClickListener(redoManualRouteButton, redoManualRoutePoint, "click");
   addClickListener(noRouteCreateButton, closeSavedRoutesDash, "click");
   
-  addClickListener(generatePathButton, () => handleManualRouteGeneration, "click");
+  addClickListener(generatePathButton, () => void handleManualRouteGeneration(), "click");
 
   // These event listeners are for route saving.
   addClickListener(saveRouteToggleButton, toggleSaveRouteContainer, "click");
