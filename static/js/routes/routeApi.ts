@@ -3,15 +3,31 @@
  * Implement the TODO blocks when you wire up each button.
  */
 
-/** @typedef {{ name: string, type: string }} RouteRef */
+interface DeleteRouteResponse {
+  success: boolean,
+  message: string
+}
 
+interface LoadedRouteStats {
+  total_distance: number,
+  eta_seconds: number,
+  elevation_change: number
+}
 
-/**
- * @param {string} routeName
- * @param {string} fileType - e.g. "geojson" | "gpx"
- * @returns {Promise<{ success: boolean, message?: string, [key: string]: unknown }>}
- */
-export async function deleteRoute(routeName) {
+interface LoadRouteResponse {
+  success: boolean,
+  message: string,
+  pathGeoJSON: Object,
+  map_centre: number[],
+  coordinates: number[][],
+  route_stats: LoadedRouteStats
+}
+
+interface DownloadRouteResponse {
+
+}
+
+export async function deleteRoute(routeName: string): Promise<DeleteRouteResponse> {
 
   const url = window.appConfig.apiDeleteRouteUrl
 
@@ -32,11 +48,7 @@ export async function deleteRoute(routeName) {
   return data
 }
 
-/**
- * @param {string} routeName
- * @returns {Promise<{ success: boolean, path_geojson?: object, coordinates?: Array<Array<number>>, route_stats?: object, message?: string }>}
- */
-export async function loadRoute(routeName) {
+export async function loadRoute(routeName: string): Promise<LoadRouteResponse> {
   const url = window.appConfig.apiLoadRouteUrl;
 
   const response = await fetch(url, {
@@ -56,13 +68,8 @@ export async function loadRoute(routeName) {
   return data;
 }
 
-/**
- * @param {string} routeName
- * @param {"gpx" | "geojson"} format
- * @param {HTMLButtonElement} DOMElement
- * @returns {Promise<Blob>}
- */
-export async function downloadRoute(routeName, format, DOMElement) {
+
+export async function downloadRoute(routeName: string, format: "gpx" | "geojson", DOMElement: HTMLButtonElement,): Promise<Blob> {
 
   const url = window.appConfig.apiDownloadRouteFileUrl
   DOMElement.classList.add('loading');
@@ -82,6 +89,5 @@ export async function downloadRoute(routeName, format, DOMElement) {
   }
 
   DOMElement.classList.remove('loading')
-  return response
+  return await response.blob()
 }
-

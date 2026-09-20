@@ -13,7 +13,6 @@ import Tile from "ol/layer/Tile.js";
 import VectorLayer from "ol/layer/Vector.js";
 
 // OpenLayers Sources
-import OSM from "ol/source/OSM.js";
 import XYZ from "ol/source/XYZ.js";
 import VectorSource from "ol/source/Vector.js";
 
@@ -41,10 +40,10 @@ import {
   Undo2
 } from 'lucide';
 
-export let map = null;
-export let tileLayer = null;
-export let routeLayer = null;
-export let manualRouteLayer = null;
+export let map: Map | null = null;
+export let tileLayer: Tile<XYZ> | null = null;
+export let routeLayer: VectorLayer<VectorSource> | null = null;
+export let manualRouteLayer: VectorLayer<VectorSource> | null = null;
 
 // Icon initialisation
 createIcons({
@@ -73,7 +72,7 @@ export function getMap() {
   return map;
 }
 
-export function setRouteLayer(layer) {
+export function setRouteLayer(layer: VectorLayer<VectorSource> | null) {
   routeLayer = layer;
 }
 
@@ -81,7 +80,7 @@ export function getRouteLayer() {
   return routeLayer;
 }
 
-export function setManualRoutelayer(layer) {
+export function setManualRoutelayer(layer: VectorLayer<VectorSource> | null) {
   manualRouteLayer = layer;
 };
 
@@ -111,7 +110,7 @@ export function getTileLayer() {
   return tileLayer;
 }
 
-export function setTileLayer(layer) {
+export function setTileLayer(layer: Tile<XYZ> | null) {
   tileLayer = layer;
 }
 
@@ -148,12 +147,12 @@ function createMap() {
   });
 }
 
-export function onMapClick(handler) {
+export function onMapClick(handler: (...args: any[]) => void) {
   const m = getMap();
   if (m) m.on("click", handler);
 }
 
-export function onMapRenderComplete(handler) {
+export function onMapRenderComplete(handler: (...args: any[]) => void) {
   const m = getMap();
   if (m && typeof handler === "function") {
     m.once("rendercomplete", handler);

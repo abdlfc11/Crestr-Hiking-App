@@ -1,43 +1,10 @@
-import { driver } from "driver.js";
+import { driver, type Driver } from "driver.js";
 import "driver.js/dist/driver.css";
 
 /**
- * This function is responsible for creating and returning the tour for the manual routing mode 
- * @returns {object} The initialised driver instance 
+ * Creates and returns the tour for the import route panel
  */
-export function createManualRoutingTour() {
-    return driver({
-        popoverClass: 'app-tour-theme',
-        steps: [
-            {
-            popover: {
-                title: 'Manual Routing',
-                description: 'Click on the map to plot points, with statistics being dynamically generated with each point'
-            }
-            },
-            {
-            element: '#manual-routing-actions',
-            popover: {
-                title: 'Routing',
-                description: 'Here you can Undo or Redo a point, as well as clear your route.'
-            }
-            },
-            {
-            element: '#manual-routing-header',
-            popover: {
-                title: 'Actions',
-                description: 'Here you can open the menu, or reset the view of the map.'
-            }
-            }
-        ]
-    })
-}
-
-/**
- * This function is responsible for creating and returning the tour for the import route panel
- * @returns {object} The initialised driver instance 
- */
-export function createImportRoutePanelTour() {
+export function createImportRoutePanelTour(): Driver {
     return driver({
         popoverClass: 'app-tour-theme',
         steps: [
@@ -79,7 +46,10 @@ export function createImportRoutePanelTour() {
     })
 }
 
-export function createSavedRouteDashboardTour() {
+/**
+ * Creates and returns the tour for the saved routes dashboard 
+ */
+export function createSavedRouteDashboardTour(): Driver {
     return driver({
         popoverClass: 'app-tour-theme',
         steps: [
@@ -93,12 +63,15 @@ export function createSavedRouteDashboardTour() {
     })
 }
 
-export function createAutomaticRoutingTour(onTourEnd) {
+/**
+ * Creates and returns the tour for routing
+ */
+export function createAutomaticRoutingTour(onTourEnd?: () => void | Promise<void>): Driver {
     return driver({
         popoverClass: 'app-tour-theme',
 
         // injects active class to body upon starting the tour
-        onInit: () => {
+        onHighlightStarted: () => {
             document.body.classList.add("tour-active");
         },
         
@@ -160,7 +133,10 @@ export function createAutomaticRoutingTour(onTourEnd) {
     });
 }
 
-export function createSavingRoutesTour(onTourEnd) {
+/**
+ * Creates and returns the tour for saving a route 
+ */
+export function createSavingRoutesTour(onTourEnd?: () => void | Promise<void>): Driver {
     return driver({
         popoverClass: 'app-tour-theme',
         onDestroyed: () => {
@@ -192,7 +168,10 @@ export function createSavingRoutesTour(onTourEnd) {
     });
 }
 
-export function createSettingsTour() {
+/**
+ * Creates and returns the tour for the settings panel
+ */
+export function createSettingsTour(): Driver {
     return driver({
         popoverClass: 'app-tour-theme',
         steps: [

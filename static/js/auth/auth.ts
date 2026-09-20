@@ -1,22 +1,30 @@
-//#region IMPORTS
+//#region Imports
+
+import {
+  createIcons,
+  ChevronLeft
+} from "lucide"
 
 import { showToast } from "../utils/ui-utils.js";
+
 import { 
   validatePassword,
   validateRegisterInput,
-  clearRegisterEntries,
-  userFeedback
+  clearRegisterEntries
 } from "./helpers.js";
+
+import {
+  addClickListener
+} from "../utils/ui-utils.js"
 
 //#endregion
 
-//#region VAR / CONST DECLARATIONS
+//#region Variables / Constants
 
 // Login elements
 const loginValidationLabel = document.getElementById("login_validation_label");
-const loginScreen = document.getElementById("login-screen");
-const loginUsernameEntry = document.getElementById("login_username_entry");
-const loginPasswordEntry = document.getElementById("login_password_entry");
+const loginUsernameEntry = document.getElementById("login_username_entry") as HTMLInputElement | null;
+const loginPasswordEntry = document.getElementById("login_password_entry") as HTMLInputElement | null;
 const loginButton = document.getElementById("login_button");
 const logoutButton = document.getElementById("logout-button");
 const switchToRegisterButton = document.getElementById("switch_to_register_button");
@@ -24,34 +32,32 @@ const switchToRegisterButton = document.getElementById("switch_to_register_butto
 // Registering elements
 const switchToLoginButton = document.getElementById("register-switch-to-login-button")
 const registerButton = document.getElementById("register-button");
-const registerValidationLabel = document.getElementById("register-validation-label");
-const registerScreen = document.getElementById("register-screen");
-const registerPasswordEntry1 = document.getElementById("register-password-entry1");
-const registerPasswordEntry2 = document.getElementById("register-password-entry2");
-const registerUsernameEntry = document.getElementById("register-username-entry");
-const registerPreferredNameEntry = document.getElementById("register-preferred-name-entry");
+const registerPasswordEntry1 = document.getElementById("register-password-entry1") as HTMLInputElement | null;
+const registerPasswordEntry2 = document.getElementById("register-password-entry2") as HTMLInputElement | null;
+const registerUsernameEntry = document.getElementById("register-username-entry") as HTMLInputElement | null;
+const registerPreferredNameEntry = document.getElementById("register-preferred-name-entry") as HTMLInputElement | null;
 
 // icon elements
-const icons = document.querySelectorAll(".fa-eye");
+const icons = document.querySelectorAll<HTMLElement>(".fa-eye");
 
 // deleting elements
 const deleteAccountButton = document.getElementById("delete-user-button");
 
 //#endregion
 
-// ###########
-// REGISTERING
-// ###########
+//#region NAVIGATION
 
-
-function switchToLoginFromRegister() {
+function switchToLogin() {
   window.location.href = '/login-page';
 }
 
-export function switchToRegistering() {
+export function switchToRegister() {
   window.location.href = "/register-page";
 }
 
+//#endregion
+
+//#region REGISTERING
 
 async function register() {
   const username = registerUsernameEntry.value;
@@ -103,11 +109,13 @@ async function register() {
 
 };
 
-// ###########
-// LOGIN AND LOGOUT
-// ###########
+//#endregion
 
-// Function to handle user login
+//#region LOGIN/LOGOUT
+
+/**
+ * Handles user login using entry values 
+ */
 export async function login() {
 
   const username = loginUsernameEntry.value;
@@ -146,7 +154,9 @@ export async function login() {
 
 }
 
-// Function to handle user logging out
+/**
+ * Handles user logout 
+ */
 export function logout() {
 
   const url = window.appConfig.apiLogoutUrl
@@ -159,25 +169,26 @@ export function logout() {
     .then((data) => {
       if (data.success) {
         window.location.href = "https://crestr.co.uk";
-        settingsModal.classList.remove("active");
       }
     });
 }
 
-// ###########
-// DELETING ACCOUNT
-// ###########
+//#endregion
 
+//#region ACCOUNT DELETION
+
+/**
+ * 
+ * @param skipConfirm 
+ * @returns 
+ */
 export async function deleteAccount(skipConfirm = false) {
 
-  const userConfirmation = skipConfirm || confirm("Are you sure you want to delete your account ? ") // ensures the user is sure they want to delete 
+  const userConfirmation = skipConfirm || confirm("Are you sure you want to delete your account ? ") // (confirm acts as fallback)
 
-  // if the user has not confirmed (clicked no)
   if (!userConfirmation) {
     return;
   }
-
-  // else, carry on with the deletion process
 
   const url = window.appConfig.apiDeleteAccountUrl
 
@@ -192,132 +203,87 @@ export async function deleteAccount(skipConfirm = false) {
 
     const data = await response.json();
 
-    if (!response.ok) {
-      showToast("There was an unexpected error whilst deleting your account.")
-      return;
+    if (!response.ok || !data.success) {
+      throw new Error(`ERROR (deleteAccount()) : ${data.message || response.status}`, {cause : "There was an unexpected error whilst deleting your account."});
     };
 
-    if (!data.success) {
-      showToast("There was an unexpected error whilst deleting your account.")
-      return;
-    };
+    window.location.href = 'https://crestr.co.uk'; 
 
-    // redirect back to landing page if deletion successfull
-    window.location.href = 'https://crestr.co.uk'
   } catch(error) {
-    console.log(`ERROR : ${error.message}`)
-    showToast("There was an unexpected error whilst deleting your account.")
-    return;
+    console.error(`ERROR : ${error.message}`); 
+    showToast(error.cause); 
   };
 }
 
-// ###########
-// DARK MODE
-// ###########
+//#endregion
+
+//#region THEME
+
+function getStoredThemePreference(): ThemePreference {
+  const savedSettings: AppSettings = JSON.parse(localStorage.getItem("appSettings"));
+  if (!savedSettings) return "system";
+  else return savedSettings.theme
+}
 
 // Helper to apply the '.dark' class to the document
-function setDarkMode(isDark){
+function setTheme(isDark: boolean) {
     if (isDark) {
         document.documentElement.classList.add("dark");
     } else {
         document.documentElement.classList.remove("dark");
     }
-};
-
-function onThemeToggleClick() {
-    const isCurrentlyDark = document.documentElement.classList.contains("dark");
-    const newThemeState = !isCurrentlyDark;
-    
-    setDarkMode(newThemeState);
-    
-    localStorage.setItem("user-theme", newThemeState ? "dark" : "light");
 }
 
 function initDarkMode() {
-    const themeToggle = document.getElementById("theme-toggle");
     const darkModeQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const theme = getStoredThemePreference();
 
-    // This determines the initial state 
-    const savedTheme = localStorage.getItem("user-theme");
-    
-    if (savedTheme) {
-        // This ensure that if a user has explicitly chosen a setting before, use it
-        setDarkMode(savedTheme === "dark");
-    } else {
-        // Otherwise, it'll fall back to the OS system preference
-        setDarkMode(darkModeQuery.matches);
-    }
 
-    if (themeToggle) {
-        themeToggle.addEventListener("click", onThemeToggleClick);
-    }
+    setTheme(theme === "system" ? darkModeQuery.matches : theme === "dark");
 
-    // This runs if the user hasn't overridden preferences
     darkModeQuery.addEventListener("change", (e) => {
-        if (!localStorage.getItem("user-theme")) {
-            setDarkMode(e.matches);
-        }
+      if (getStoredThemePreference() === "system") {
+          setTheme(e.matches);
+      }
     });
 }
 
-// ###########
-// INIT
-// ###########
+//#endregion
+
+//#region INIT
 
 initDarkMode();
+
+createIcons({
+  icons: {
+    ChevronLeft
+  }
+})
 
 // Add event listeners to all password visibility toggle icons
 icons.forEach((icon) => {
   icon.addEventListener("click", (event) => {
-    const parent = event.currentTarget.parentElement;
-    const passwordInput = parent.querySelector(
+    const target = event.currentTarget as HTMLElement;
+    const parent = target.parentElement;
+    const passwordInput = parent.querySelector<HTMLInputElement>(
       'input[type="password"], input[type="text"]',
     );
 
     const isPassword = passwordInput.type === "password";
     passwordInput.type = isPassword ? "text" : "password";
 
-    event.currentTarget.classList.toggle("auth-icon-active", isPassword);
+    target.classList.toggle("auth-icon-active", isPassword);
   });
 });
 
-// ###########
-// ADDING EVENT LISTENERS 
-// ###########
-
-// NOTE: conditional checks are necessary to prevent errors on pages where these buttons don't exist
-
-if (logoutButton) {
-  logoutButton.addEventListener("click", logout);
-}
-
-if (loginButton) {
-  loginButton.addEventListener("click", login);
-}
-
-if (switchToRegisterButton) {
-  switchToRegisterButton.addEventListener("click", switchToRegistering);
-}
-
-if (switchToLoginButton) {
-  switchToLoginButton.addEventListener('click', switchToLoginFromRegister)
-}
-
-if (registerButton) {
-  registerButton.addEventListener('click', register)
-}
-
-if (deleteAccountButton) {
-  deleteAccountButton.addEventListener('click', (e) => {deleteAccount(e)})
-}
-
-if (registerPasswordEntry1) {
-  registerPasswordEntry1.addEventListener("input", () => validatePassword(registerPasswordEntry1.value, registerPasswordEntry2.value));
-}
-
-if (registerPasswordEntry2) {
-  registerPasswordEntry2.addEventListener("input", () => validatePassword(registerPasswordEntry1.value, registerPasswordEntry2.value));
-}
+addClickListener(logoutButton, logout, "click");
+addClickListener(loginButton, login, "click");
+addClickListener(registerButton, register, "click");
+addClickListener(switchToRegisterButton, switchToRegister, "click");
+addClickListener(switchToLoginButton, switchToLogin, "click");
+addClickListener(deleteAccountButton, () => void deleteAccount(), "click");
+addClickListener(registerPasswordEntry1, () => validatePassword(registerPasswordEntry1.value, registerPasswordEntry2.value), "input");
+addClickListener(registerPasswordEntry2, () => validatePassword(registerPasswordEntry1.value, registerPasswordEntry2.value), "input");
 
 if (window.location.pathname === "/login-page" || window.location.pathname === "/register") {
   if (window.location.pathname === "/login-page") {
@@ -335,3 +301,5 @@ if (window.location.pathname === "/login-page" || window.location.pathname === "
     });
   }
 };
+
+//#endregion

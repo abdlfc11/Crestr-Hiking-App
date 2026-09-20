@@ -4,7 +4,7 @@ export {
   loadRoute,
   downloadRoute,
 } from "./routeApi.js";
-// Dashboard exports live in savedRoutesDashboard.js — import from there on /saved_routes only.
+// Dashboard exports live in savedRoutesDashboard.ts — import from there on the map page only.
 export {
   getCurrentMode,
   setCurrentMode,

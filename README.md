@@ -14,3 +14,15 @@
 > **Disclaimer:** This is a desktop planning tool only. Always carry an OS map and compass, check weather conditions, and never rely solely on the app for navigation in the field. Only use routes within your skill level.
 
 **Full documentation, setup guides, and technical details:** [crestr.co.uk/docs](https://crestr.co.uk/docs)
+
+## Frontend development
+
+The browser application is written in TypeScript under `static/js/` and bundled by Vite using the entry points in `vite.config.ts`.
+
+```bash
+npm install
+npm run typecheck
+npm run build
+```
+
+The production build writes hashed JavaScript and CSS assets plus the Vite manifest to `static/dist/`. Local source imports retain `.js` runtime specifiers so the bundled ESM output remains standards-compliant; TypeScript resolves those specifiers to the corresponding `.ts` source files.

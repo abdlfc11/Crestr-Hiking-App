@@ -7,6 +7,9 @@ import VectorSource from "ol/source/Vector.js";
 import VectorLayer from "ol/layer/Vector.js";
 import Feature from "ol/Feature.js";
 import { Translate } from "ol/interaction.js"
+import type Map from "ol/Map.js";
+import type MapBrowserEvent from "ol/MapBrowserEvent.js";
+import type Style from "ol/style/Style.js";
 
 // constants
 import { MAP_VIEW_PADDING } from "../constants.js";
@@ -109,7 +112,7 @@ import {
 
 import { logout } from "../auth/auth.js";
 import { logError } from "../utils/logError-utils.js";
-import { ERROR_MESSAGES } from "../utils/error-contants.js";
+import { ERROR_MESSAGES } from "../utils/error-constants.js";
 
 //#endregion
 
@@ -122,19 +125,19 @@ export const defaultCentre = Array.isArray(window.appConfig?.mapInitialCentre)
 const setStartCoordButton = document.getElementById("set-start-coord-button");
 const setEndCoordButton = document.getElementById("set-end-coord-button");
 
-const startCoordEntry = document.getElementById("start-point-entry");
-const endCoordEntry = document.getElementById("end-point-entry");
+const startCoordEntry = document.getElementById("start-point-entry") as HTMLInputElement | null;
+const endCoordEntry = document.getElementById("end-point-entry") as HTMLInputElement | null;
 
 const homeButton = document.getElementById("home-button");
 
-const generatePathButton = document.getElementById("generate-path-button");
+const generatePathButton = document.getElementById("generate-path-button") as HTMLButtonElement | null;
 
 const clearRouteButton = document.getElementById('clear-route-button');
 
 const undoManualRouteButton = document.getElementById("undo-manual-route");
 const redoManualRouteButton = document.getElementById("redo-manual-route");
 
-const searchEntry = document.getElementById("search-entry");
+const searchEntry = document.getElementById("search-entry") as HTMLInputElement | null;
 const searchForAreaButton = document.getElementById("search-for-area-button");
 
 const mapElement = document.getElementById("map");
@@ -142,7 +145,7 @@ const mapElement = document.getElementById("map");
 
 // saved route div 
 const saveRouteDiv = document.getElementById("save-route");
-const routeNameEntry = document.getElementById("route-name");
+const routeNameEntry = document.getElementById("route-name") as HTMLInputElement | null;
 const saveContainer = document.getElementById('save-route-container');
 const saveRouteToggleButton = document.getElementById("save-route-toggle-button");
 const saveRouteContainer = document.getElementById('save-route-container');
@@ -155,40 +158,40 @@ const loginNavBarButton = document.getElementById('sidenav-login-button');
 const logoutNavBarButton = document.getElementById('sidenav-logout-button');
 
 // delete point modal
-const deletePointModal = document.getElementById("delete-point-confirmation-dialog");
+const deletePointModal = document.getElementById("delete-point-confirmation-dialog") as HTMLDialogElement | null;
 const deletePointModalNameDisplay = document.getElementById("point-name-display");
 const deletePointModalDeleteButton = document.getElementById("point-delete-delete-button");
 const deletePointModalExitButton = document.getElementById("point-delete-exit-button");
 const deletePointModalContent = deletePointModal.querySelector('.modal-content');
 
 // save point modal
-const savePointModal = document.getElementById('save-point-dialog');
+const savePointModal = document.getElementById('save-point-dialog') as HTMLDialogElement | null;
 const savePointModalContent = savePointModal.querySelector('.modal-content');
-const savePointModalInput = document.getElementById('save-point-dialog-name-input');
+const savePointModalInput = document.getElementById('save-point-dialog-name-input') as HTMLInputElement | null;
 const savePointModalCloseButton = document.getElementById('save-point-dialog-close');
 const savePointModalSaveButton = document.getElementById('save-point-dialog-save');
 
 // login modal
-const loginModal = document.getElementById('login-dialog');
+const loginModal = document.getElementById('login-dialog') as HTMLDialogElement | null;
 const loginModalLoginButton = document.getElementById('login-dialog-login');
 const loginModalExitButton = document.getElementById('login-dialog-exit');
 const loginModalContent = loginModal.querySelector('.modal-content');
 
 // report issue modal
-const reportIssueModal = document.getElementById('report-issue-dialog');
-const reportIssueModalSubmit = document.getElementById('report-issue-dialog-submit');
+const reportIssueModal = document.getElementById('report-issue-dialog') as HTMLDialogElement | null;
+const reportIssueModalSubmit = document.getElementById('report-issue-dialog-submit') as HTMLButtonElement | null;
 const reportIssueModalExit = document.getElementById('report-issue-dialog-exit');
-const reportIssueTitleInput = document.getElementById("report-issue-title");
-const reportIssueTextAreaInput = document.getElementById("report-issue-description");
+const reportIssueTitleInput = document.getElementById("report-issue-title") as HTMLInputElement | null;
+const reportIssueTextAreaInput = document.getElementById("report-issue-description") as HTMLTextAreaElement | null;
 
 // donate modal
-const donateModal = document.getElementById('donate-modal');
+const donateModal = document.getElementById('donate-modal') as HTMLDialogElement | null;
 const donateModalContent = document.getElementById('donate-modal-content');
 const donateModalCloseButton = document.getElementById('donate-modal-close-button');
 const donateModalMaybeLaterButton = document.getElementById('donate-modal-maybe-later-button')
 
 // load last route modal
-const loadLastRouteModal = document.getElementById('load-last-route-dialog');
+const loadLastRouteModal = document.getElementById('load-last-route-dialog') as HTMLDialogElement | null;
 const loadLastRouteModalContent = loadLastRouteModal.querySelector('.modal-content');
 const loadLastRouteModalLoadButton = document.getElementById('load-last-route-dialog-load-button');
 const loadLastRouteModalDismissButton = document.getElementById('load-last-route-dialog-dismiss-button');
@@ -197,7 +200,7 @@ const loadLastRouteModalRouteDistance = document.getElementById('load-last-route
 const loadLastRouteModalRouteElevationGain = document.getElementById('load-last-route-modal-route-elevation-gain');
 
 // Keyboard Shortcuts Modal
-const shortcutsModal = document.getElementById('shortcuts-dialog');
+const shortcutsModal = document.getElementById('shortcuts-dialog') as HTMLDialogElement | null;
 const shortcutsModalContent = shortcutsModal.querySelector('.modal-content');
 const shortcutsModalCloseButton = document.getElementById('shortcuts-dialog-close-button');
 
@@ -217,14 +220,14 @@ const settingPanel = document.getElementById("settings-panel");
 const importRouteOpenButton = document.getElementById("import-route-open-button");
 const importRouteCloseButton = document.getElementById("import-route-close-button");
 const importRoutePanel = document.getElementById("import-route-panel");
-const importRouteFileInput = document.getElementById('import-route-file-input');
-const importRouteURLInput = document.getElementById('import-route-url-input');
+const importRouteFileInput = document.getElementById('import-route-file-input') as HTMLInputElement | null;
+const importRouteURLInput = document.getElementById('import-route-url-input') as HTMLInputElement | null;
 const importRouteCancelButton = document.getElementById('import-route-cancel-button');
-const importRouteNameEntry = document.getElementById('import-route-name-input');
+const importRouteNameEntry = document.getElementById('import-route-name-input') as HTMLInputElement | null;
 const importRouteSubmitButton = document.getElementById('import-route-submit-button');
-const routeInputTypes = document.querySelectorAll('input[name="import-route-method"]');
-const fileInputType = document.getElementById('file-route-input-type');
-const URLInputType = document.getElementById('url-route-input-type')
+const routeInputTypes = document.querySelectorAll<HTMLInputElement>('input[name="import-route-method"]');
+const fileInputType = document.getElementById('file-route-input-type') as HTMLInputElement | null;
+const URLInputType = document.getElementById('url-route-input-type') as HTMLInputElement | null;
 
 // driver.js tours
 let automaticRoutingTourDriver;
@@ -234,14 +237,17 @@ let savingRoutesTourDriver;
 // grouped elements
 const allowedFileTypes = ['.gpx', '.kml', '.geojson', '.fit'];
 
-let clickMode = null;
-let selectedPoint = null;
-let manualRouteFeature = null;
+type ClickMode = "setStart" | "setEnd" | null;
+type PointType = "start" | "end" | "start-end" | "route-waypoint";
+
+let clickMode: ClickMode = null;
+let selectedPoint: Feature<Point> | null = null;
+let manualRouteFeature: Feature<LineString> | null = null;
 
 // Start and End points 
 
-let interactivePointLayerInteraction = null; // holds the OpenLayer interaction for the start and end points 
-let interactivePointLayer = null; // stores the vector layer which holds the point features 
+let interactivePointLayerInteraction: Translate | null = null; // holds the OpenLayer interaction for the start and end points 
+let interactivePointLayer: VectorLayer<VectorSource> | null = null; // stores the vector layer which holds the point features 
 
 //#endregion
 
@@ -249,9 +255,6 @@ let interactivePointLayer = null; // stores the vector layer which holds the poi
 
 /**
  * Checks if user is on mobile device and advices to use Crestr on desktop / laptop instead 
- * 
- * @param {void}
- * @returns {void}
  */
 function checkIfMobile() {
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 1024;   
@@ -282,11 +285,8 @@ function checkIfMobile() {
 
 /**
  * Toggles the login modal display and sets the action context
- * @param {boolean} show true if you want to show the modal, false if you want to hide the modal
- * @param {string} [actionName='perform this action'] the specific action that is being performed when showing the modal e.g save routes 
- * @returns {void}
  */
-export function showLoginModal(show, actionName = 'perform this action') {
+export function showLoginModal(show: boolean, actionName = 'perform this action') {
   const messageElement = loginModal.querySelector('.modal-body p');
 
   if (show) {
@@ -302,7 +302,6 @@ export function showLoginModal(show, actionName = 'perform this action') {
 
 /**
  * Function used to transition to the login page from the login modal
- * @returns {void}
  */
 function loginModalLogin() {
   showLoginModal(false);
@@ -319,30 +318,30 @@ function discardLastLoadedRoute() {
   localforage.clear();
 }
 
-function populateLastLoadedRouteModal(routeStats, routeName) {
+function populateLastLoadedRouteModal(routeStats: RouteStats, routeName: string) {
   loadLastRouteModalRouteName.textContent = routeName || 'Untitled route';
-  loadLastRouteModalRouteDistance.textContent = formatDistance(routeStats.total_distance)
+  loadLastRouteModalRouteDistance.textContent = formatDistance(Number(routeStats.total_distance))
   loadLastRouteModalRouteElevationGain.textContent = `${routeStats.elevation_gain} m`
 }
 
 
 async function handleInitialLoadCachedRoute() { 
   const hasPreviousSaveAttempt = await localforage.getItem('unauthenticated-save-route-attempt')
-  const routeName = await localforage.getItem('cachedRouteName'); 
-  const lastRoutingMode = await localforage.getItem('lastRoutingMode');
+  const routeName = await localforage.getItem<string>('cachedRouteName'); 
+  const lastRoutingMode = await localforage.getItem<"auto" | "manual">('lastRoutingMode');
 
   if (!hasPreviousSaveAttempt || !window.appConfig.loggedIn) return;
 
   if (lastRoutingMode === "auto") {
-    const routeStats = await localforage.getItem('cachedAutoRouteStats');
+    const routeStats = await localforage.getItem<RouteStats>('cachedAutoRouteStats');
 
-    populateLastLoadedRouteModal(routeStats, routeName);
+    if (routeStats) populateLastLoadedRouteModal(routeStats, routeName ?? "");
     showModal(true, loadLastRouteModal);
   }
   else {
-    const routeStats = await localforage.getItem('cachedManualRouteStats');
+    const routeStats = await localforage.getItem<RouteStats>('cachedManualRouteStats');
 
-    populateLastLoadedRouteModal(routeStats, routeName);
+    if (routeStats) populateLastLoadedRouteModal(routeStats, routeName ?? "");
     showModal(true, loadLastRouteModal);
   }
 }
@@ -351,10 +350,7 @@ async function handleInitialLoadCachedRoute() {
 
 //#region REPORT ISSUE MODAL
 
-/**
- * @param {Boolean} show True to show the modal, false to hide the modal
- */
-function showReportIssueModal(show) {
+function showReportIssueModal(show: boolean) {
   if (!reportIssueModal) return;
   if (show) {
     reportIssueModal.showModal();
@@ -366,12 +362,9 @@ function showReportIssueModal(show) {
 }
 
 /**
- * This function validates the input fields for the report issue form.
- * @param {string} title 
- * @param {string} description 
- * @returns {boolean} Returns true if the input is valid, false otherwise.
+ * Validates the input fields for the report issue form.
  */
-function validateReportIssueInput(title, description) {
+function validateReportIssueInput(title: string, description: string): boolean {
     if (!title || !description) {
         showToast("Please fill in both the title and description fields.", "error", reportIssueModal);
         return false;
@@ -391,15 +384,10 @@ function validateReportIssueInput(title, description) {
 }
 
 /**
- * 
  * Handles the submission of the report issue form.
  * It validates the input fields and sends a POST request to the server with the title and description of the issue. 
- * 
- * @param {string} title
- * @param {string} description
- * @returns {void}
  */
-export async function handleReportIssueSubmission(title, description) {
+export async function handleReportIssueSubmission(title: string, description: string) {
 
     if (!validateReportIssueInput(title, description)) {
         return;
@@ -451,12 +439,7 @@ export async function handleReportIssueSubmission(title, description) {
 
 //#region COORDINATE INPUT FUNCTIONS
 
-/**
- * @param {string} startPoint
- * @param {string} endPoint
- * @returns {boolean} True if the parameters are empty and false if otherwise
- */
-function isCoordInputEmpty(startPoint, endPoint) {
+function isCoordInputEmpty(startPoint: string, endPoint: string): boolean {
   
   if (endPoint === "" && startPoint === "") {
     showCoordInputError(startCoordEntry, "Please enter coordinates");
@@ -477,13 +460,7 @@ function isCoordInputEmpty(startPoint, endPoint) {
   return false;
 };
 
-/**
- * 
- * @param {string} startPoint 
- * @param {string} endPoint 
- * @returns {boolean} True if the coordinates are correctly formatted and false if otherwise
- */
-function validateInputCoords(startPoint, endPoint) {
+function validateInputCoords(startPoint: string, endPoint: string): boolean {
 
   if (isCoordInputEmpty(startPoint, endPoint)) {
     return false;
@@ -526,7 +503,7 @@ function validateInputCoords(startPoint, endPoint) {
   return true;
 };
 
-function showCoordInputError(entry, message) {
+function showCoordInputError(entry: HTMLInputElement, message: string) {
   entry.placeholder = message;
   entry.classList.add("input-error");
   entry.addEventListener(
@@ -539,7 +516,7 @@ function showCoordInputError(entry, message) {
   );
 }
 
-function setCoordInputActiveState(entry, isActive) {
+function setCoordInputActiveState(entry: HTMLInputElement, isActive: boolean) {
   entry.classList.toggle("is-active", isActive);
 }
 
@@ -564,7 +541,7 @@ function setEndCoord() {
  * @param {HTMLInputElement} entry 
  * @param {number[]} coordinate In Web Mercator projection
  */
-function setCoordEntry(entry, coordinate) {
+function setCoordEntry(entry: HTMLInputElement, coordinate: number[]) {
   const lonLat = toLonLat(coordinate);
 
   entry.value = formatLatLon(lonLat, 6);
@@ -592,14 +569,8 @@ function syncCoordinateInputs() {
 
 //#region OPEN/CLOSE PANEL FUNCTIONS
 
-// this is for the 'create route' button on the panel shown on the saved routes dashboard when the user has no saved routes
-function noRouteCreateFunction() {
-  closeSavedRoutesDash()
-}
-
 /**
  * Closes all panels accessible from the navigation raile
- * @returns {void}
  */
 function closePanels() {
   const panels = [savedRoutesDashContent, importRoutePanel, settingPanel];
@@ -791,10 +762,9 @@ async function handleRouteImport() {
 }
 
 /**
- * Function responsible for validating the import route input.
- * @returns {boolean} - True if the input is valid, false otherwise.
+ * Validates the import route input.
  */
-function validateFileInput(file) {
+function validateFileInput(file: File | undefined): boolean {
 
   try {
 
@@ -829,9 +799,8 @@ function validateFileInput(file) {
 
 /**
  * Returns the currently selected input type for route import.
- * @returns {string|null} - The selected input type or null if none is selected.
  */
-function whichInputTypeSelected() {
+function whichInputTypeSelected(): string | null {
     const selectedInputType = document.querySelector('input[name="import-route-method"]:checked');
 
     if (selectedInputType === fileInputType) {
@@ -891,7 +860,7 @@ function handleRouteImportType() {
 
 //#region MAP CLICK HANDLERS
 
-async function manualRouteClickHandler(event) {
+async function manualRouteClickHandler(event: MapBrowserEvent<PointerEvent>) {
 
   if (handleSelectSavedPoint(event)) return;
 
@@ -1081,8 +1050,6 @@ export function homeButtonFunction() {
 
 /**
  * Responsible for moving to a given location
- * 
- * @returns {void}
  */
 async function searchArea() {
 
@@ -1128,6 +1095,7 @@ async function searchArea() {
     showToast(error.cause || ERROR_MESSAGES.SEARCH.GENERIC);
   };
 };
+
 //#endregion
 
 //#region CACHED ROUTES
@@ -1162,8 +1130,8 @@ async function handleLoadManualCachedRoute() {
 
   manualRouteState.userClicks = userClicks;
   manualRouteState.pathCoords = pathCoords;
-  manualRouteState.segmentCache = segmentCache;
-  manualRouteState.isSnapped = isSnapped;
+  manualRouteState.segmentCache = segmentCache as Record<string, number[][]>;
+  manualRouteState.isSnapped = Boolean(isSnapped);
   manualRouteState.redoStack = [];
   manualRouteFeature = null;
   removeManualRouteLayer();
@@ -1189,12 +1157,8 @@ async function handleLoadManualCachedRoute() {
 
 /**
  * Creates a manual route with a given start and end point 
- * 
- * @param {number} [start] 
- * @param {number} [end] 
- * @returns {void}
  */
-async function handleManualRouteGeneration(start = null, end = null) {
+async function handleManualRouteGeneration(start: string | null = null, end: string | null = null) {
 
   const startPoint = start || startCoordEntry?.value || "";
   const endPoint = end || endCoordEntry?.value || "";
@@ -1232,8 +1196,6 @@ async function handleManualRouteGeneration(start = null, end = null) {
 
 /**
  * Handles the clearing of route stats and save button if there are no current coordinates
- *
- * @returns {void}
  */
 function cleanRouteUI() {
   document.getElementById("route-stats")?.remove();
@@ -1246,11 +1208,8 @@ function cleanRouteUI() {
 
 /**
  * Updates key point features, such as start, end and intermediary points 
- * 
- * @param {number[][]} userClicks 
- * @returns {void}
  */
-function syncManualEndpointMarkers(userClicks) {
+function syncManualEndpointMarkers(userClicks: number[][]) {
   if (!interactivePointLayer) return;
   const source = interactivePointLayer.getSource();
 
@@ -1422,7 +1381,12 @@ export async function updateManualRoute() {
   }
 };
 
-function updateManualRouteStats(isOnePoint, distanceDisplay, etaDisplay, elevationGainDisplay) {
+function updateManualRouteStats(
+  isOnePoint: boolean,
+  distanceDisplay: string,
+  etaDisplay: string,
+  elevationGainDisplay: string,
+) {
   let statsDiv = document.getElementById("route-stats");
   let firstRender = !statsDiv
 
@@ -1442,7 +1406,7 @@ function updateManualRouteStats(isOnePoint, distanceDisplay, etaDisplay, elevati
     document.getElementById("route-elevation-gain-display").textContent = elevationGainDisplay;
   }
 
-  const toggleChartButton = document.getElementById('toggle-elevation-chart');
+  const toggleChartButton = document.getElementById('toggle-elevation-chart') as HTMLButtonElement | null;
 
   if (toggleChartButton) {
     toggleChartButton.classList.toggle('one-point-only', isOnePoint);
@@ -1524,12 +1488,6 @@ async function redoManualRoutePoint() {
 
 //#region SAVE ROUTE PANEL
 
-if (!window.appConfig.initialCurrentPath) {
-    if (saveContainer) {
-        saveContainer.style.display = 'none';
-    }
-}
-
 export function updateSaveRouteContainer() {
   collapseSaveRouteContainer();
   return true;
@@ -1570,13 +1528,9 @@ export function handleInitialTour() {
 //#region POINT INTERACTION
 
 /**
- * Converts a human-entered [latitude, longitude] pair into Web Mercator (EPSG: 3857)
- * coordinates for OpenLayers.
- *
- * @param {[number, number]} latLon - An array containing latitude and longitude as [lat, lon].
- * @returns {ol.coordinate.Coordinate | null} The converted Web Mercator coordinate [x, y], or null if invalid.
+ * Converts a human-entered [latitude, longitude] pair into Web Mercator (EPSG: 3857) coords for OpenLayers
  */
-function toWebMercator(latLon) {
+function toWebMercator(latLon: number[] | null): number[] | null {
   if (!latLon || latLon.length < 2) return null;
 
   // OpenLayers expects [longitude, latitude]
@@ -1585,11 +1539,8 @@ function toWebMercator(latLon) {
 
 /**
  * Handles a change on either the start or end coordinate input.
- *
- * @param {HTMLInputElement} entry
- * @param {"start" | "end"} type
  */
-async function handleCoordEntryChange(entry, type) {
+async function handleCoordEntryChange(entry: HTMLInputElement, type: "start" | "end") {
   const raw = entry?.value?.trim() ?? "";
   const parsed = parseCoordString(raw);
 
@@ -1626,13 +1577,8 @@ async function handleCoordEntryChange(entry, type) {
 
 /**
  * Adds a start/end point feature to a vector layer, removing any existing feature of the same type first
- *
- * @param {ol.Feature} pointFeature The point feature to add
- * @param {ol.layer.Vector} vectorLayer The vector layer that will contain the feature
- * @param {"start"|"end"|"route-waypoint"} type Feature type identifier (e.g. `"start"` or `"end"`)
- * @returns {void}
  */
-function addStartEndPoint(pointFeature, vectorLayer, type) {
+function addStartEndPoint(pointFeature: Feature<Point>, vectorLayer: VectorLayer<VectorSource>, type: PointType,) {
   const vectorLayerSource = vectorLayer.getSource();
 
   // this removes any existing features which are of the same type (for start and end points)
@@ -1647,39 +1593,26 @@ function addStartEndPoint(pointFeature, vectorLayer, type) {
 
 /**
  * Creates an OpenLayers point feature.
- *
- * @param {Array<number>} coordinates Coordinates in EPSG:3857.
- * @param {ol.style.Style} style Style to apply to the feature.
- * @param {"start"|"end"|"start-end"|"route-waypoint"} type Logical point type (e.g. "start", "end", "waypoint").
- * @param {"Start"|"End"|"Start/End"|undefined} [label] Display label for the point.
- * @param {number} [index] For intermediary points
- * @returns {ol.Feature}
  */
-export function createPoint(coordinates, style, type, label, index) {
+export function createPoint(coordinates: number[], style: Style, type: PointType, label: "Start" | "End" | "Start/End" | undefined = undefined, index: number | undefined = undefined): Feature<Point> {
+  const point = new Feature({
+      geometry: new Point(coordinates)
+  });
 
-    const point = new Feature({
-        geometry: new Point(coordinates)
-    });
+  point.set("type", type);
+  point.set("label", label);
+  if (type === "route-waypoint") point.set("index", index);
+  point.setStyle(style);
 
-    point.set("type", type);
-    point.set("label", label);
-    if (type === "route-waypoint") point.set("index", index);
-    point.setStyle(style);
-
-    return point;
+  return point;
 }
 
 /**
  * Adds a translate interaction to start / end OpenLayers points
- * 
- * @param {Array} layers The layers that the interaction is to be applied upon 
- * @returns {void}
  */
-export function setUpPointInteraction(layers) {
+export function setUpPointInteraction(layers: Array<VectorLayer<VectorSource>>) {
   const map = getMap();
   if (!map || !layers) return;
-
-  const interactivePointLayerSource = interactivePointLayer.getSource();
 
   // this removes any previous interaction
   if (interactivePointLayerInteraction) {
@@ -1698,7 +1631,9 @@ export function setUpPointInteraction(layers) {
     const movedFeature = event.features.item(0);
     if (!movedFeature) return;
 
-    const newCoordinates = movedFeature.getGeometry().getCoordinates();
+    const geometry = movedFeature.getGeometry();
+    if (!(geometry instanceof Point)) return;
+    const newCoordinates = geometry.getCoordinates();
     const pointType = movedFeature.get("type");
     try {
       if (!isPointInPolygon(toLonLat(newCoordinates))) {
@@ -1725,7 +1660,7 @@ export function setUpPointInteraction(layers) {
 
 //#region DELETING POINTS
 
-function deselectSelectedPoint() {
+function deselectSelectedPoint(): null | undefined {
   if (selectedPoint) {
     selectedPoint.setStyle(getSavedPointStyle(selectedPoint.get("name")));
 
@@ -1736,11 +1671,8 @@ function deselectSelectedPoint() {
 
 /**
  * Handles user clicks on saved points 
- * 
- * @param {Event} event 
- * @returns {boolean} True if a point has been clicked and false if not
  */
-function handleSelectSavedPoint(event) {
+function handleSelectSavedPoint(event: MapBrowserEvent<PointerEvent>): boolean {
   const map = getMap();
 
   if (selectedPoint) {
@@ -1749,12 +1681,12 @@ function handleSelectSavedPoint(event) {
   }
 
   let featureClicked = false;
-  let newSelection = null;
+  let newSelection: Feature<Point> | null = null;
   const savedPointsLayer = getSavedPointsLayer();
 
   map.forEachFeatureAtPixel(event.pixel, (feature, layer) => {
     if ( layer === savedPointsLayer && feature.getGeometry() instanceof Point ) {
-      newSelection = feature;
+      newSelection = feature as Feature<Point>;
       featureClicked = true;
       return;
     }
@@ -1777,7 +1709,7 @@ function handleSelectSavedPoint(event) {
 //#region SETTINGS
 
 // ##### LIGHT / DARK THEME #####
-export function applyTheme(theme) {
+export function applyTheme(theme: ThemePreference) {
   const effective = theme === "system" ? getTheme() : theme;
   document.documentElement.classList.toggle("dark", effective === "dark");
 
@@ -1800,7 +1732,7 @@ function handleDistanceUnitToggle() {
     updateManualRoute();
   }
   else if (getLastAutoRouteStats()) {
-    displayAutoRouteStats(getLastAutoRouteStats());
+    displayLoadedRouteStats(getLastAutoRouteStats());
     toggleElevationChart();
   }
   else if (getLastLoadedRouteStats()) {
@@ -1823,11 +1755,8 @@ function handleDistanceUnitToggle() {
 
 /**
  * Orchestrates keyboard shortcuts process and order of events  
- * 
- * @param {Event} e 
- * @returns {void}
  */
-function handleKeyboardShortcuts(e) {
+function handleKeyboardShortcuts(e: KeyboardEvent) {
 
   // this returns if the user is typing 
   if (document.activeElement.tagName === "INPUT" || 
@@ -1853,12 +1782,8 @@ function handleKeyboardShortcuts(e) {
 
 /**
  * Handles general shortcuts
- * 
- * @param {Event} e 
- * @param {String} key 
- * @returns 
  */
-function appShortcuts(e, key) {
+function appShortcuts(e: KeyboardEvent, key: string) {
 
   const isModifier = e.metaKey || e.ctrlKey;
 
@@ -1880,12 +1805,8 @@ function appShortcuts(e, key) {
 
 /**
  * Handles shortcuts for manual routing 
- * 
- * @param {Event} e 
- * @param {String} key 
- * @returns {void}
  */
-function manualRouteShortcuts(e, key) {
+function manualRouteShortcuts(e: KeyboardEvent, key: string) {
   // this un-does the last point if ctrl/cmd + z is clicked
   if (key === "z") {
     e.preventDefault();
@@ -1904,12 +1825,8 @@ function manualRouteShortcuts(e, key) {
 
 /**
  * Handles shortcuts for opening/closing panels and modals 
- * 
- * @param {Event} e 
- * @param {String} key 
- * @returns {void}
  */
-function navigationShortcuts(e, key) {
+function navigationShortcuts(e: KeyboardEvent, key: string) {
   
   // saved routes dash
   if (key === '1') {
@@ -1972,14 +1889,7 @@ function navigationShortcuts(e, key) {
   };
 }
 
-/**
- * @param {Event} e
- * @param {HTMLDivElement} panel 
- * @param {Function} open 
- * @param {Function} close 
- * @returns {void}
- */
-function handlePanelShortcut(e, panel, open, close) {
+function handlePanelShortcut(e: KeyboardEvent, panel: HTMLElement, open: () => void, close: () => void) {
   e.preventDefault();
 
   if (loginModal.open) {
@@ -1999,12 +1909,8 @@ function handlePanelShortcut(e, panel, open, close) {
 
 /**
  * Helper to open/close modals
- * 
- * @param {Event} e 
- * @param {HTMLDialogElement} modal 
- * @returns {void}
  */
-function handleModalShortcut(e, modal) {
+function handleModalShortcut(e: KeyboardEvent, modal: HTMLDialogElement) {
   e.preventDefault();
 
   closePanels();
@@ -2021,7 +1927,7 @@ function handleModalShortcut(e, modal) {
 
 //#region EVENT LISTENERS / INIT
 
-function initInteractivePointLayer(map) {
+function initInteractivePointLayer(map: Map) {
   interactivePointLayer = new VectorLayer({
     source: new VectorSource(),
     zIndex: 1100 // above the route layer + saved points layer 
@@ -2050,8 +1956,15 @@ function initPointDeleteHandlers() {
 
 export function initUi() {
   const map = getMap();
+
   if (map) {
     initCursorManager(map, getCurrentMode, getClickMode);
+  }
+
+  if (!window.appConfig.initialCurrentPath) {
+    if (saveContainer) {
+        saveContainer.style.display = 'none';
+    }
   }
 
   applyTheme(getTheme());
@@ -2096,7 +2009,7 @@ export function initUi() {
 
   // These event listeners are for route import.
   importRouteFileInput.addEventListener("change", (e) => {
-    const file = e.target.files[0];
+    const file = (e.target as HTMLInputElement).files?.[0];
     validateFileInput(file);
   });
 
@@ -2120,7 +2033,7 @@ export function initUi() {
 
   addClickListener(undoManualRouteButton, undoManualRoutePoint, "click");
   addClickListener(redoManualRouteButton, redoManualRoutePoint, "click");
-  addClickListener(noRouteCreateButton, noRouteCreateFunction, "click");
+  addClickListener(noRouteCreateButton, closeSavedRoutesDash, "click");
 
   generatePathButton.addEventListener("click", () => handleManualRouteGeneration());
 

@@ -20,13 +20,11 @@
 //#region GENERAL 
 
 /**
- * Parses a coordinate string in the form "X, Y" (or "X,Y").
- * Returns [x, y] as numbers or null if the format is invalid.
- * Never throws.
- * @param {String} value
- * @returns {number[] | null}
+ * Parses a coordinate string in the form "X, Y" (or "X,Y")
+ * Returns [x, y] as numbers or null if the format is invalid
+ * Never throws
  */
-export function parseCoordString(value) {
+export function parseCoordString(value: string): number[] | null {
   if (typeof value !== "string") return null;
 
   const trimmed = value.trim();
@@ -44,15 +42,11 @@ export function parseCoordString(value) {
   return [x, y];
 }
 
+type ToastType = "error" | "success" | "warning" | "info";
 /**
  * Shows a toast notification 
- *
- * @param {string} message The message to be shown in the toast body
- * @param {("error"|"success"|"warning"|"info")} [type="error"] The toast type, controls the status icon and accent colour
- * @param {HTMLDialogElement|boolean|null} [modal=null] If a dialog element is passed, the toast is rendered inside it, otherwise, if `null`/`false`, the main app toast container is used.
- * @returns {void}
  */
-export function showToast(message, type = "error", modal = null) {
+export function showToast( message: string, type: ToastType = "error", modal: HTMLDialogElement | boolean | null = null) {
 
     // this defines the status icons
     const icons = {
@@ -78,7 +72,7 @@ export function showToast(message, type = "error", modal = null) {
     }
 
     // this determines the container i.e within a modal or the main app
-    let container;
+    let container: HTMLElement | null;
 
     if (modalElement) {
         // this finds or creates the container 
@@ -121,7 +115,7 @@ export function showToast(message, type = "error", modal = null) {
 
     const messageElement = document.createElement("span");
     messageElement.className = "toast-message";
-    messageElement.textContent = message;
+    messageElement.textContent = String(message);
 
     content.appendChild(titleElement);
     content.appendChild(messageElement);
@@ -175,25 +169,17 @@ export function showToast(message, type = "error", modal = null) {
 //#region DOM RELATED
 
 /**
- * 
  * Used to quickly add an event listener to skip the if statement 
- * 
- * @param {DOMElement} element 
- * @param {function} func 
- * @param {string} type 
  */
-export function addClickListener(element, func, type) {
+export function addClickListener(element: EventTarget | null, func: EventListenerOrEventListenerObject, type: string) {
   if (element) element.addEventListener(type, func);
 }
 
 /**
  * Removes the passed in DOM element
  * Used in any feature which adds a route card to the saved routes dashboard as it is used to remove the <div>...</div> content which tells the user that they have not saved any routes
- * 
- * @param {HTMLElement}  
- * @returns {boolean} true: element has been removed, false: element has not been removed (is already not there)
  */
-export function removeDOMElement(element) {
+export function removeDOMElement(element: HTMLElement | null): boolean {
   if (element) {
     element.remove()
     return true;
@@ -204,37 +190,20 @@ export function removeDOMElement(element) {
 }
 
 
-// ROUTE CARDS 
-
 /**
  * Replaces any character within passed in string that interfere with HTML and returns the edited string
- * 
- * @param {string} value The string to be checked to ensure it does not interfere with HTML
- * @returns {string} The safe string which can be placed into 
  */
-function escapeHtml(value) {
-  return String(value).replace(/[&<>"']/g, (c) => ({
+function escapeHtml(value: string): string {
+  const replacements: Record<string, string> = {
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&`#39`;"
-  })[c]);
+  };
+  return String(value).replace(/[&<>"']/g, (character) => replacements[character]);
 }
 
 /**
  * Generates the HTML string for a saved route card displayed in the UI.
- *
- * This function builds a self-contained route card element with header,
- * key statistics, and action buttons. The returned string is intended to
- * be inserted into the DOM (e.g., via `innerHTML` or a DOM builder).
- *
- * @param {string} routeName: The display name of the route.
- * @param {string} formattedDate: Human-readable date string (e.g. "Saved on 15 June 2026").
- * @param {number} distanceInKm: Route length in kilometers. Used both for the data attribute and for formatting.
- * @param {string} formattedDistance: String showing formatted distance 
- * @param {string} ETA: Formatted estimated time to complete the route.
- * @param {string} elevDisplayValue: Pre-formatted elevation change string for display.
- * @returns {string} HTML string for the complete route card.
  */
-export function createRouteCard(routeName, formattedDate, distanceInKm, formattedDistance, ETA, elevDisplayValue) {
-
+export function createRouteCard(routeName: string, formattedDate: string, distanceInKm: number, formattedDistance: string, ETA: string, elevDisplayValue: string): string {
     const safeRouteName = escapeHtml(routeName)
 
     return `<div class="route-card" data-route-name="${safeRouteName}">
@@ -267,11 +236,9 @@ export function createRouteCard(routeName, formattedDate, distanceInKm, formatte
     }
 
 /**
- * This returns a card showing users that there are no saved routes for both a clean UI and a UX
- * 
- * @returns {string} HTML string for the route card showing that there are no routes 
+ * Returns a card showing users that there are no saved routes 
  */
-export function createNoRouteCard() {
+export function createNoRouteCard(): string {
   return `<div id="no-routes-wrapper" class="no-routes-wrapper">
               <div class="no-routes-card">
                   <h2 class="no-routes-title">No routes saved yet</h2>
@@ -286,14 +253,9 @@ export function createNoRouteCard() {
 }
 
 /**
- * This returns a stats panel showing key details of the currently-displayed route 
- * 
- * @param {String} distanceDisplay
- * @param {String} etaDisplay
- * @param {String} elevationGain
- * @returns {string} HTML string for the stats panel showing key route details 
+ * Returns a stats panel showing key details of the currently-displayed route 
  */
-export function createStatsPanel(distanceDisplay, etaDisplay, elevationGain) {
+export function createStatsPanel(distanceDisplay: string, etaDisplay: string, elevationGain: string): string {
 
     const elevationGainDisplay = elevationGain == "+0 m" ? "No Data" : elevationGain
 
@@ -333,25 +295,17 @@ export function createStatsPanel(distanceDisplay, etaDisplay, elevationGain) {
 
 /**
  * Catches clicks outside of a modal in order to close the modal upon these clicks. 
- * 
- * @param {Event} e 
- * @param {HTMLDivElement} modalContent 
- * @param {HTMLDialogElement} modal 
- * @returns {void}
  */
-export function closeModalUponOutsideClick(e, modalContent, modal) {
-  if (modalContent && !modalContent.contains(e.target)) {
+export function closeModalUponOutsideClick(e: Event, modalContent: Element | null, modal: HTMLDialogElement) {
+  if (modalContent && !modalContent.contains(e.target as Node)) {
       modal.close()
     }
 };
 
 /**
  * Toggles the provided modal
- * @param {boolean} show true if you want to show the modal, false if you want to hide the modal
- * @param {HTMLDialogElement} modal The modal you want to open/close
- * @returns {void} 
  */
-export function showModal(show, modal) {
+export function showModal(show: boolean, modal: HTMLDialogElement) {
   if (show) {
     modal.showModal();
   }
@@ -362,19 +316,17 @@ export function showModal(show, modal) {
 
 /**
  * Closes all modals within the application
- * 
- * @returns {void}
  */
 export function closeModals() {
 
     const modals = [
-        document.getElementById('save-point-dialog'),
-        document.getElementById('shortcuts-dialog'),
-        document.getElementById('load-last-route-dialog'),
-        document.getElementById('donate-modal'),
-        document.getElementById('report-issue-dialog'),
-        document.getElementById('login-dialog'),
-        document.getElementById("delete-point-confirmation-dialog")
+        document.getElementById('save-point-dialog') as HTMLDialogElement,
+        document.getElementById('shortcuts-dialog') as HTMLDialogElement,
+        document.getElementById('load-last-route-dialog') as HTMLDialogElement,
+        document.getElementById('donate-modal') as HTMLDialogElement,
+        document.getElementById('report-issue-dialog') as HTMLDialogElement,
+        document.getElementById('login-dialog') as HTMLDialogElement,
+        document.getElementById("delete-point-confirmation-dialog") as HTMLDialogElement
     ]
 
     modals.forEach(modal => {

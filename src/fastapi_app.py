@@ -49,7 +49,7 @@ app.mount(
 )
 
 # Vite Helpers:
-# These helpers resolve a Vite source path (the keys used in vite.config.js build.input) to the actual
+# These helpers resolve a Vite source path (the keys used in vite.config.ts build.input) to the actual
 # hashed output file. The manifest is read with an mtime-based cache so that a rebuilt manifest
 # (e.g. after `npm run build` on a bind-mounted static dir) is picked up without restarting the app.
 VITE_MANIFEST_PATH = STATIC_DIR / "dist" / ".vite" / "manifest.json"

@@ -20,12 +20,9 @@ const TEXT_FILL = '#000000'
 //#endregion
 
 /**
- * helper to generate SVG Data URIs with custom fill and stroke colors
- * @param {string} fillColor Hex or RGB color code for the pin interior
- * @param {string} [strokeColor="#FFFFFF"] Hex or RGB color code for the pin border
- * @returns {string} Data URI suitable for OpenLayers ol.style.Icon
+ * Helper to generate SVG Data URIs with custom fill and stroke colors
  */
-function createPinSvg(fillColor, strokeColor = "#FFFFFF") {
+function createPinSvg(fillColor: string, strokeColor: string = "#FFFFFF"): string {
   const svg = `
     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none">
       <ellipse cx="12" cy="22" rx="4" ry="1.5" fill="black" fill-opacity="0.25"/>
@@ -44,12 +41,9 @@ function createPinSvg(fillColor, strokeColor = "#FFFFFF") {
 }
 
 /**
- * returns the default OpenLayers style for a saved map point
- * @param {string} name the label text to display above the pin
- * @param {string} [fill=null] The Fill colour of the point to be added, defaults to null 
- * @returns {ol.style.Style} OpenLayers Style object for standard points
+ * Returns the OpenLayers style for a saved map point
  */
-export function getSavedPointStyle(name, fill) {
+export function getSavedPointStyle(name: string, fill: string | null = null): Style {
   return new Style({
 
     // icon
@@ -85,11 +79,9 @@ export function getSavedPointStyle(name, fill) {
 }
 
 /**
- * returns the OpenLayers style for a selected/highlighted map point
- * @param {string} name the label text to display above the pin
- * @returns {ol.style.Style} OpenLayers Style object for selected points
+ * Returns the OpenLayers style for a selected/highlighted map point
  */
-export function getSelectedPointStyle(name) {
+export function getSelectedPointStyle(name: string): Style {
   return new Style({
 
     // icon

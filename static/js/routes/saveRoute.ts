@@ -31,9 +31,9 @@ import { toLonLat } from "ol/proj.js";
 import localforage from "localforage";
 import { logError } from "../utils/logError-utils.js";
 
-let saveRouteForm = null;
+let saveRouteForm: HTMLFormElement | null = null;
 const allRoutesContainer = document.getElementById("all-routes-container");
-const routeNameEntry = document.getElementById("route-name");
+const routeNameEntry = document.getElementById("route-name") as HTMLInputElement | null;
 const routeETADisplay = document.getElementById("route-eta-display");
 const routeElevationDisplay = document.getElementById("route-elevation-change-display");
 const noRouteCreateDiv = document.getElementById('no-routes-wrapper');
@@ -41,13 +41,13 @@ const noRouteCreateDiv = document.getElementById('no-routes-wrapper');
 
 
 export function initSaveRoute() {
-  saveRouteForm = document.getElementById("save-route-form");
+  saveRouteForm = document.getElementById("save-route-form") as HTMLFormElement | null;
   if (saveRouteForm) {
     saveRouteForm.addEventListener("submit", handleSaveRoute);
   }
 }
 
-async function handleSaveRoute(e) {
+async function handleSaveRoute(e: SubmitEvent) {
   e.preventDefault();
 
   let elevDisplayValue; 
@@ -142,10 +142,8 @@ async function handleSaveRoute(e) {
 
 /**
  * Retrieves and formats coordinates of a present path
- * 
- * @returns {Array<Array<number>>}
  */
-function getPathCoordinates() {
+function getPathCoordinates(): number[][] {
   let pathCoordinates = [];
   
   if (manualRouteState.pathCoords.length > 0) {
@@ -162,12 +160,7 @@ function getPathCoordinates() {
   return normaliseCoordLength(pathCoordinates);
 }
 
-/**
- * 
- * 
- * @returns {Boolean}
- */
-async function handleUnauthenticatedUser(routeName) {
+async function handleUnauthenticatedUser(routeName: string): Promise<boolean> {
   if (!window.appConfig.loggedIn) {
     showLoginModal(true, 'save routes');
     await localforage.setItem("unauthenticated-save-route-attempt", true);
