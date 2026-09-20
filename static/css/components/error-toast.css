@@ -16,7 +16,7 @@
   max-width: 360px;
 }
 
-/* modal-scoped toast container (created dynamically by showToast() in utils/ui-utils.js ) */
+/* modal-scoped toast container (created dynamically by showToast() in utils/ui-utils.ts) */
 .toast-container--modal {
   position: absolute;
   bottom: 20px;

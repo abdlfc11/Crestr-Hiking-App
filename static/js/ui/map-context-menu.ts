@@ -1,22 +1,22 @@
 import { toLonLat } from "ol/proj.js";
 import { formatLatLon } from "../utils/routing-utils.js";
-import { getMap } from "../map.js";
+import { getMap } from "../init/map.js";
 import { saveNewPoint } from "../saved_points/savedPoints.js";
 import { showToast } from "../utils/ui-utils.js";
-import { ERROR_MESSAGES } from "../utils/error-contants.js";
+import { ERROR_MESSAGES } from "../utils/error-constants.js";
 
 const popup = document.getElementById('map-context-menu');
 
 const saveButton = document.getElementById('map-context-save-point');
-const savePointModal = document.getElementById('save-point-dialog');
-const savePointModalInput = document.getElementById('save-point-dialog-name-input');
+const savePointModal = document.getElementById('save-point-dialog') as HTMLDialogElement | null;
+const savePointModalInput = document.getElementById('save-point-dialog-name-input') as HTMLInputElement | null;
 const savePointModalSaveButton = document.getElementById('save-point-dialog-save');
 
 const copyCoordinateButton = document.getElementById('map-context-copy-coordinate');
 
 // Menu item functions
 
-function handleCoordinateCopy(coordinate) {
+function handleCoordinateCopy(coordinate: number[] | null) {
   if (!coordinate) {
     console.error("ERROR (handleCoordinateCopy()) : Invalid / no coordinate passed in. ");
     return;
@@ -45,7 +45,7 @@ export function initMapContextMenu() {
   const viewport = map.getViewport();
   if (!viewport || !popup || !saveButton || !copyCoordinateButton) return;
 
-  let coordinate = null;
+  let coordinate: number[] | null = null;
 
   // Helper functions
 
@@ -57,7 +57,7 @@ export function initMapContextMenu() {
     coordinate = null;
   }
 
-  const positionPopup = (event) => {
+  const positionPopup = (event: MouseEvent) => {
     const popupRect = popup.getBoundingClientRect();
     const gap = 8;
     const maxLeft = Math.max(gap, window.innerWidth - popupRect.width - gap);
@@ -112,7 +112,7 @@ export function initMapContextMenu() {
   })
 
   document.addEventListener("pointerdown", (event) => {
-    if (!popup.hidden && !popup.contains(event.target)) {
+    if (!popup.hidden && !popup.contains(event.target as Node)) {
       closePopup();
       resetCoordinate();
     };

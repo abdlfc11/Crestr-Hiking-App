@@ -14,7 +14,7 @@
     const STORAGE_KEY = "privacy-policy-theme";
 
     /** Valid theme values */
-    const VALID_THEMES = ["system", "light", "dark"];
+    const VALID_THEMES: ThemePreference[] = ["system", "light", "dark"];
 
     /**
      * Reads the stored theme from localStorage.
@@ -22,11 +22,11 @@
      *
      * @returns {string} "system" or "light" or "dark"
      */
-    function getStoredTheme() {
+    function getStoredTheme(): ThemePreference {
         try {
         const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored && VALID_THEMES.indexOf(stored) !== -1) {
-            return stored;
+        if (stored && VALID_THEMES.includes(stored as ThemePreference)) {
+            return stored as ThemePreference;
         }
         } catch (e) {
         /* this ensures that those in private mode / storage disabled falls through to default value (system) */
@@ -39,7 +39,7 @@
      *
      * @param {string} theme "system" | "light" | "dark"
      */
-    function setStoredTheme(theme) {
+    function setStoredTheme(theme: ThemePreference) {
         try {
         localStorage.setItem(STORAGE_KEY, theme);
         } catch (e) {
@@ -53,7 +53,7 @@
      * @param {string} preference "system" or "light" or "dark"
      * @returns {string} "light" or "dark"
      */
-    function resolveEffective(preference) {
+    function resolveEffective(preference: ThemePreference): Exclude<ThemePreference, "system"> {
         if (preference === "system") {
         return window.matchMedia("(prefers-color-scheme: dark)").matches
             ? "dark"
@@ -67,7 +67,7 @@
      *
      * @param {string} preference "system" | "light" | "dark"
      */
-    function applyTheme(preference) {
+    function applyTheme(preference: ThemePreference) {
         const effective = resolveEffective(preference);
         document.documentElement.setAttribute("data-theme", effective);
     }
@@ -77,7 +77,7 @@
      *
      * @param {string} preference "system" | "light" | "dark"
      */
-    function updateToggleLabel(preference) {
+    function updateToggleLabel(preference: ThemePreference) {
         if (!label) return;
 
         if (preference === "dark") {
@@ -94,7 +94,7 @@
      */
     function cycleTheme() {
         let current = getStoredTheme();
-        let next;
+        let next: ThemePreference;
 
         if (current === "system") {
         next = "light";

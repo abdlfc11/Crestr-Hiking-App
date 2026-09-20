@@ -15,12 +15,8 @@ import { getDistance } from "ol/sphere.js"
 
 /**
  * Rounds coordinates to a specific decimal point 
- * 
- * @param {Array} coordArray One coordinate in the form of [x, y]
- * @param {number} decimals Integer which dictates how many decimal points the number returned is rounded to 
- * @returns {Array} The rounded coordinates in the form [x, y]
  */
-export function roundCoords (coordArray, decimals) {
+export function roundCoords(coordArray: number[], decimals: number): number[] {
 
     const [x, y] = coordArray;
 
@@ -39,16 +35,8 @@ export function roundCoords (coordArray, decimals) {
 
 /**
  * Validates whether the input is a valid WGS84 (lat / lon) coordinate 
- * 
- * @param {LatLonObject | [number, number] | null | undefined} coord The coordinate data to validate NOTE it is in lon lat format 
- * @returns {boolean} True if the input represents a valid latitude and longitude, false otherwise.
- * 
- * @example
- * isValidCoordinate({ lon: -0.1, lat: 51.5 }); // returns true
- * isValidCoordinate([-0.1, 51.5]);             // returns true
- * isValidCoordinate({ lon: -0.1, lat: 95 });   // returns false (latitude out of bounds)
  */
-export function isLonLat(coordinate) {
+export function isLonLat(coordinate: number[] | Object): boolean {
 
   // local variables to store extracted coordinate values
   let lat;
@@ -59,8 +47,9 @@ export function isLonLat(coordinate) {
 
   // this ensures it handles dictionaries (objects)
   if (coordinate && typeof coordinate === 'object' && !isCoordinateArray) {
-    lat = coordinate.lat ?? coordinate.latitude 
-    lon = coordinate.lon ?? coordinate.lng ?? coordinate.longitude
+    const candidate = coordinate as Record<string, unknown>;
+    lat = candidate.lat ?? candidate.latitude;
+    lon = candidate.lon ?? candidate.lng ?? candidate.longitude;
   }
 
   // this ensures it handles arrays 
@@ -91,36 +80,26 @@ export function isLonLat(coordinate) {
 /**
  * Detects whether a coordinate is in Web Mercator (EPSG:3857) based on magnitude
  * Lat/lon values are always within [-180, 180] / [-90, 90]
- * 
- * @param {Array<number>} coordinate A coordinate as [x, y]
- * @returns {boolean} True if the coordinate is Web Mercator
  */
-export function isMercatorCoord(coordinate) {
+export function isMercatorCoord(coordinate: number[]): boolean {
   if (!Array.isArray(coordinate) || coordinate.length < 2) return false;
   return Math.abs(coordinate[0]) > 181 || Math.abs(coordinate[1]) > 181;
 }
 
 /**
  * Formats a [lon, lat] coordinate into a user-friendly "lat, lon" string
- * 
- * @param {Array<number>} lonLat Coordinate as [longitude, latitude]
- * @param {number} decimals Number of decimal places (default 6)
- * @returns {string} Formatted "lat, lon" string
  */
-export function formatLatLon(lonLat, decimals = 6) {
+export function formatLatLon(lonLat: number[], decimals: number = 6): string {
   if (!Array.isArray(lonLat) || lonLat.length < 2) return "";
   const [lon, lat] = lonLat;
-  const round = (value) => Number(value).toFixed(decimals);
+  const round = (value: number) => Number(value).toFixed(decimals);
   return `${round(lat)}, ${round(lon)}`;
 }
 
 /**
  * Returns the total distance of the route in KM 
- * 
- * @param {Array} points The array of all the points in the route 
- * @returns {number} The total distance of the route in KM
  */
-export function calculateTotalDistance(points) {
+export function calculateTotalDistance(points: number[][]): number {
   let totalDistance = 0;
   for (let i = 1; i < points.length; i++) {
     const previous = toLonLat(points[i - 1]);
@@ -131,11 +110,8 @@ export function calculateTotalDistance(points) {
 }
 /**
  * Generates a user-facing string displaying the total time estimated to complete the route 
- * 
- * @param {number} distanceKm The length of the route in KM
- * @returns {string} The string of the total time estimated to complete the route 
  */
-export function calculateEta(distanceKm) {
+export function calculateEta(distanceKm: number): string {
   const averageHikingSpeed = 4.0;
   const etaHours = distanceKm / averageHikingSpeed;
   const etaMinutes = Math.floor(etaHours * 60);

@@ -6,20 +6,12 @@
  */
 
 import { fromLonLat } from "ol/proj";
+import type Map from "ol/Map.js";
 
 /**
  * Function to move the map to a specific coordinate or the centre of the map via an animation
- * 
- * Position is expected in EPSG:4326 ( [Lon, Lat] )
- * It is converted to Web Mercator before animating the map movement (OpenLayers map is in a Web Mercator projection)
- * 
- * @param {ol.Map} map OL map instance 
- * @param {Array} position The specific coordinate to move the map to in [Lon, Lat] format, if not entered it defaults to the map centre  
- * @param {number} duration How long the animation to move the map takes
- * @param {number} zoom Zoom level used by open layers 
- * @returns {void}
  */
-export function moveMapToPosition(map, position = null, duration = 1200, zoom = 10.5) {
+export function moveMapToPosition(map: Map | null, position: number[] | null = null, duration: number = 1200, zoom: number = 10.5) {
   if (!map) {
     console.warn("No map, returning");
     return;

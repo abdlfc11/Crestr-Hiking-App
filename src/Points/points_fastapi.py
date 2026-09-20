@@ -47,7 +47,7 @@ def get_saved_points(user: User | None = Depends(get_current_user)):
         try:
             coord_x, coord_y = json.loads(point.coordinates)
 
-            # converts coordinates to Lon/Lat if it detects web mercator coordinates (via not Lon/Lat condition)
+            # converts coordinates to Lon/Lat if it detects web mercator coordinates
             if abs(coord_x) > 181 or abs(coord_y) > 181:
                 coord_x, coord_y = service.convert_web_mercator_to_wgs84(coord_x, coord_y)
 

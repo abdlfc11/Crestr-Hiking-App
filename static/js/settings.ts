@@ -1,10 +1,10 @@
 /**
- * settings.js
+ * settings.ts
  * Handles settings panel UI wiring for the map view (distance unit toggle + theme radio pills).
- * Open/close of the panel itself is managed by ui.js (style.width).
+ * Open/close of the panel itself is managed by ui.ts (style.width).
  * Persists choice to both localStorage (via settingsState) and the Flask backend.
  *
- * Uses vanilla JS + JSDoc. No framework.
+ * Uses vanilla TypeScript. No framework.
  *
  * @module settings
  */
@@ -28,27 +28,23 @@ import { hasActiveRouteStatsPanel } from "./routes/routeState.js";
 import { updateSavedRouteCards } from "./routes/savedRoutesDashboard.js";
 
 /** @type {(() => void) | null} */
-let onDistanceUnitChange = null;
-
-const routeStatPanel = document.getElementById('route-stats');
+let onDistanceUnitChange: (() => void) | null = null;
 
 /**
  * Register callback invoked after distance unit is toggled.
- * Used by ui.js to refresh manual route stats, etc.
- *
- * @param {() => void} handler
+ * Used by ui.ts to refresh manual route stats, etc.
  */
-export function setOnDistanceUnitChange(handler) {
+export function setOnDistanceUnitChange(handler: () => void) {
   onDistanceUnitChange = handler;
 }
 
 /**
- * Entry point called from map.js after DOM ready.
+ * Entry point called from map.ts after DOM ready.
  * Loads server prefs (async) then wires the checkbox using the real DOM id from map.html.
- * Does NOT touch open/close buttons (handled in ui.js to avoid duplicate listeners / scope issues).
  */
 export function initSettings() {
-  // 1. Immediate UI from local/default
+  
+  // Immediately updates the UI with localStorage values / default values
   syncCheckboxWithCurrentSettings();
   syncThemeRadiosWithCurrentSettings();
   applyTheme(getTheme());
@@ -59,7 +55,7 @@ export function initSettings() {
     return;
   }
  
-  // 2. Background sync with server (user is authenticated on /map)
+  // Syncs with the server in the background 
   loadAppSettingsFromServer()
     .then(() => {
       syncCheckboxWithCurrentSettings();
@@ -70,9 +66,6 @@ export function initSettings() {
       console.warn("[settings] server load failed, using local", err);
     });
  
-  // NOTE: we intentionally do NOT attach open/close here.
-  // ui.js does: addClickListener(settingOpenButton, openSettings...) and closeSettings()
- 
   initAccountManagementButtons();
 }
 
@@ -80,7 +73,7 @@ export function initSettings() {
  * Read current settings and set checkbox state + (re)attach change handler once.
  */
 function syncCheckboxWithCurrentSettings() {
-  const checkbox = document.getElementById("distance-unit-checkbox");
+  const checkbox = document.getElementById("distance-unit-checkbox") as HTMLInputElement | null;
   if (!checkbox) return;
 
   const settings = getAppSettings();
@@ -95,11 +88,10 @@ function syncCheckboxWithCurrentSettings() {
 
 /**
  * Toggle handler – updates state, persists locally + server, refreshes consumers.
- * @this {HTMLInputElement}
  */
-function handleDistanceUnitChange() {
+function handleDistanceUnitChange(this: HTMLInputElement) {
   const isMiles = this.checked;
-  const newSettings = { distanceUnit: isMiles ? "miles" : "km" };
+  const newSettings: { distanceUnit: DistanceUnit } = { distanceUnit: isMiles ? "miles" : "km" };
 
   const previous = getAppSettings();
   if (previous.distanceUnit === newSettings.distanceUnit) return;
@@ -128,10 +120,9 @@ function handleDistanceUnitChange() {
 
 /**
  * Read current settings and check the correct theme radio.
- * Uses the same once-only listener guard pattern as the distance checkbox.
  */
 function syncThemeRadiosWithCurrentSettings() {
-  const radios = document.querySelectorAll('input[name="theme"]');
+  const radios = document.querySelectorAll<HTMLInputElement>('input[name="theme"]');
   if (!radios.length) return;
 
   const settings = getAppSettings();
@@ -150,11 +141,10 @@ function syncThemeRadiosWithCurrentSettings() {
 }
 
 /**
- * Radio change handler – updates state, persists locally + server, applies visual theme.
- * @this {HTMLInputElement}
+ * Radio change handler - updates state, persists locally + server, applies visual theme.
  */
-function handleThemeChange() {
-  const value = this.value; // "light" | "dark" | "system"
+function handleThemeChange(this: HTMLInputElement) {
+  const value = this.value as ThemePreference;
   const newSettings = { theme: value };
 
   const previous = getAppSettings();
@@ -189,8 +179,8 @@ function initAccountManagementButtons() {
   const container = document.getElementById("delete-account-container");
   if (!container) return;
 
-  const normalState = container.querySelector(".delete-normal-state");
-  const confirmState = container.querySelector(".delete-confirm-state");
+  const normalState = container.querySelector<HTMLElement>(".delete-normal-state");
+  const confirmState = container.querySelector<HTMLElement>(".delete-confirm-state");
   const deleteBtn = document.getElementById("settings-delete-account-button");
   const cancelBtn = document.getElementById("delete-cancel-button");
   const confirmBtn = document.getElementById("delete-confirm-button");

@@ -11,13 +11,13 @@ import Fill from "ol/style/Fill"
 import Stroke from "ol/style/Stroke"
 import Circle from "ol/style/Circle"
 import Style from "ol/style/Style"
+import type { Options as StrokeOptions } from "ol/style/Stroke.js"
 
 
 /**
  * Returns the styling to be applied to intermediary points on a route
- * @returns {ol.style.Style}
  */
-export function createManualPointStyle() {
+export function createManualPointStyle(): Style {
   return new Style({
     image: new Circle({
       radius: 6.5,
@@ -35,9 +35,8 @@ export function createManualPointStyle() {
 
 /**
  * Returns the styling to be applied to dynamic points created on a route by the elevation chart 
- * @returns {ol.style.Style} 
  */
-export function createElevationPointStyle() {
+export function createElevationPointStyle(): Style {
   return new Style({
     image: new Circle({
       radius: 7.5,
@@ -54,11 +53,9 @@ export function createElevationPointStyle() {
 }
 
 /**
- * Function used to get the styling of route LineStrings displayed on the map 
- * 
- * @returns {Object} The styling to be applied to the LineString via OL
+ * Returns the styling of route LineStrings displayed on the map 
  */
-export function getRouteStrokeStyle() {
+export function getRouteStrokeStyle(): StrokeOptions {
   return {
     color: "#2563eb",
     width: 8,
