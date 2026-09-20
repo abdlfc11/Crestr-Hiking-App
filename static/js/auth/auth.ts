@@ -215,9 +215,23 @@ export async function deleteAccount(skipConfirm = false) {
 //#region THEME
 
 function getStoredThemePreference(): ThemePreference {
-  const savedSettings: AppSettings = JSON.parse(localStorage.getItem("appSettings"));
-  if (!savedSettings) return "system";
-  else return savedSettings.theme
+
+  try {
+    const settings = localStorage.getItem('appSettings'); 
+    if (!settings) return "system"; 
+
+    const parsedSettings: unknown = JSON.parse(settings); 
+    if (
+      typeof parsedSettings === "object" &&
+      parsedSettings !== null &&
+      ["light", "dark", "system"].includes((parsedSettings as AppSettings).theme)
+    ) {
+      return (parsedSettings as AppSettings).theme
+    }
+  } catch (error) {
+    console.warn(`ERROR getStoredThemePreference() : ${error}`); 
+  }
+  return "system"
 }
 
 // Helper to apply the '.dark' class to the document
