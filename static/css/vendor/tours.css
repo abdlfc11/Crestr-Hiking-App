@@ -3,7 +3,7 @@
 /* Popover wrapper */
 .driver-popover.app-tour-theme {
   background: var(--bg);
-  color: var(--tour-ink);
+  color: var(--ink);
   border-radius: var(--radius-md);
   border: 1px solid var(--border);
   box-shadow: var(--shadow-surface);
