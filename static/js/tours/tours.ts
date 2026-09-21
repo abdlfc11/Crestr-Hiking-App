@@ -70,16 +70,6 @@ export function createAutomaticRoutingTour(onTourEnd?: () => void | Promise<void
     return driver({
         popoverClass: 'app-tour-theme',
 
-        // injects active class to body upon starting the tour
-        onHighlightStarted: () => {
-            document.body.classList.add("tour-active");
-        },
-        
-        // this removes active class from body when the tour ends 
-        onDestroyStarted: () => {
-            document.body.classList.remove("tour-active");
-        },
-
         onDoneClick: async (element, step, options) => {
             options.driver.destroy();
 
