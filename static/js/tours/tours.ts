@@ -7,6 +7,7 @@ import "driver.js/dist/driver.css";
 export function createImportRoutePanelTour(): Driver {
     return driver({
         popoverClass: 'app-tour-theme',
+        showProgress: true,
         steps: [
           {
             popover: {
@@ -52,6 +53,7 @@ export function createImportRoutePanelTour(): Driver {
 export function createSavedRouteDashboardTour(): Driver {
     return driver({
         popoverClass: 'app-tour-theme',
+        showProgress: true,
         steps: [
           {
             popover: {
@@ -69,16 +71,7 @@ export function createSavedRouteDashboardTour(): Driver {
 export function createAutomaticRoutingTour(onTourEnd?: () => void | Promise<void>): Driver {
     return driver({
         popoverClass: 'app-tour-theme',
-
-        // injects active class to body upon starting the tour
-        onHighlightStarted: () => {
-            document.body.classList.add("tour-active");
-        },
-        
-        // this removes active class from body when the tour ends 
-        onDestroyStarted: () => {
-            document.body.classList.remove("tour-active");
-        },
+        showProgress: true,
 
         onDoneClick: async (element, step, options) => {
             options.driver.destroy();
@@ -139,6 +132,7 @@ export function createAutomaticRoutingTour(onTourEnd?: () => void | Promise<void
 export function createSavingRoutesTour(onTourEnd?: () => void | Promise<void>): Driver {
     return driver({
         popoverClass: 'app-tour-theme',
+        showProgress: true,
         onDestroyed: () => {
             if (typeof onTourEnd === 'function') onTourEnd();
         },
@@ -174,6 +168,7 @@ export function createSavingRoutesTour(onTourEnd?: () => void | Promise<void>): 
 export function createSettingsTour(): Driver {
     return driver({
         popoverClass: 'app-tour-theme',
+        showProgress: true,
         steps: [
             {
                 popover: {
