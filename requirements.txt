@@ -1,5 +1,4 @@
 # Core Framework
-flask==3.0.3
 werkzeug==3.0.3
 
 
@@ -18,15 +17,9 @@ fastapi==0.115.0
 uvicorn[standard]==0.30.6
 python-multipart==0.0.32
 
-# Auth / Rate Limiting
-PyJWT==2.13.0
-fastapi-limiter==0.2.0
-pyrate-limiter==4.4.0
-
 # Utils
 python-dotenv==1.0.1
 requests==2.32.3
-flask-limiter==3.8.0
 gunicorn==23.0.0
 
 # Geospatial file processing support
