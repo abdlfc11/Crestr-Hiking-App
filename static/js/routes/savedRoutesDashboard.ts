@@ -96,6 +96,8 @@ async function onDeleteClick(event: MouseEvent) {
 
       if (remainingCards.length === 0) {
         allRoutesContainer.insertAdjacentHTML('beforeend', createNoRouteCard());
+        const createRouteButton = document.getElementById('no-route-create-button'); 
+        addClickListener(createRouteButton, closeSavedRoutesDash, "click")
       }
 
     }
