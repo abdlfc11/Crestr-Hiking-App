@@ -139,8 +139,16 @@ export async function saveAppSettingsToServer(settingsDict?: Partial<AppSettings
 /**
  * returns the correct theme to apply at the time of calling
  */
-export function getTheme(): ThemePreference {
-  return appSettings.theme
+export function getTheme(): "dark" | "light" {
+  if (appSettings.theme !== "system") {
+    return appSettings.theme
+  } else {
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      return "dark"; 
+    } else {
+      return "light"
+    }
+  }
 } 
 
 /**
