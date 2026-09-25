@@ -1707,12 +1707,7 @@ function handleSelectSavedPoint(event: MapBrowserEvent<PointerEvent>): boolean {
 
 // ##### LIGHT / DARK THEME #####
 export function applyTheme(theme: ThemePreference) {
-  const effective: Exclude<ThemePreference, "system"> = 
-    theme === "system" ? 
-    (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light") : 
-    theme
-
-  document.documentElement.classList.toggle("dark", effective === "dark");
+  document.documentElement.classList.toggle("dark", theme === "dark");
 
   const currentCoordinates =  getCurrentMode() === "auto" ? getCurrentPathData() : manualRouteState.pathCoords
 
