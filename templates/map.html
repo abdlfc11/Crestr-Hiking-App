@@ -546,44 +546,64 @@
                 </header>
 
                 <div id="all-routes-container">
+                    <div class="route-list-header" aria-hidden="true">
+                        <span>Route</span>
+                        <span>Saved</span>
+                        <span>Distance</span>
+                        <span>ETA</span>
+                        <span>Elevation gain</span>
+                        <span class="route-list-options-heading">Options</span>
+                    </div>
                     {% if available_routes %}
                         {% for route in available_routes %}
                         <div class="route-card" data-route-name="{{ route.name }}">
-                            <div class="route-card-header">
+                            <div class="route-card-cell route-card-primary">
                                 <h3 class="route-card-name">{{ route.name }}</h3>
-                                <span class="route-card-date">Saved on {{ route.created_at | strftime("%d/%m/%Y") }}</span>
                             </div>
-                            <div class="route-card-stats">
-                                <div class="stat-item">
-                                    <span class="stat-label">Distance:</span>
-                                    <span class="stat-value" data-distance-km="{{ route.distance_km }}">{{ route.distance_km | format_distance }}</span>
-                                </div>
-                                <div class="stat-item">
-                                    <span class="stat-label">ETA:</span>
-                                    <span class="stat-value">{{ route.eta_seconds | format_eta }}</span>
-                                </div>
-                                <div class="stat-item">
-                                    <span class="stat-label">Elevation Gain:</span>
-                                    <span class="stat-value">{{ route.elevation_change | format_elevation }}</span>
-                                </div>
+                            <div class="route-card-cell">
+                                <span class="route-card-mobile-label">Saved</span>
+                                <span class="route-card-date">{{ route.created_at | strftime("%d/%m/%Y") }}</span>
+                            </div>
+                            <div class="route-card-cell">
+                                <span class="route-card-mobile-label">Distance</span>
+                                <span class="route-card-value" data-distance-km="{{ route.distance_km }}">{{ route.distance_km | format_distance }}</span>
+                            </div>
+                            <div class="route-card-cell">
+                                <span class="route-card-mobile-label">ETA</span>
+                                <span class="route-card-value">{{ route.eta_seconds | format_eta }}</span>
+                            </div>
+                            <div class="route-card-cell">
+                                <span class="route-card-mobile-label">Elevation gain</span>
+                                <span class="route-card-value">{{ route.elevation_change | format_elevation }}</span>
                             </div>
                             <div class="route-card-actions">
-                                <button type="button" class="route-btn route-btn-delete">Delete</button>
-                                <button type="button" class="route-btn route-btn-download-gpx">
-                                    <span class="route-btn-text">GPX</span>
-                                    <span class="loader"></span>
+                                <button
+                                    type="button"
+                                    class="route-options-button"
+                                    aria-label="Options for {{ route.name }}"
+                                    aria-haspopup="menu"
+                                    aria-expanded="false"
+                                >
+                                    <span aria-hidden="true">&#8230;</span> 
                                 </button>
-                                <button type="button" class="route-btn route-btn-download-geojson">
-                                    <span class="route-btn-text">GeoJSON</span>
-                                    <span class="loader"></span>
-                                </button>
-                                <button type="button" class="route-btn route-btn-load">Load</button>
+                                <div class="route-actions-menu" role="menu" hidden>
+                                    <button type="button" role="menuitem" class="route-btn route-btn-load">Load route</button>
+                                    <button type="button" role="menuitem" class="route-btn route-btn-download-gpx">
+                                        <span class="route-btn-text">Download GPX</span>
+                                        <span class="loader" aria-hidden="true"></span>
+                                    </button>
+                                    <button type="button" role="menuitem" class="route-btn route-btn-download-geojson">
+                                        <span class="route-btn-text">Download GeoJSON</span>
+                                        <span class="loader" aria-hidden="true"></span>
+                                    </button>
+                                    <button type="button" role="menuitem" class="route-btn route-btn-delete">Delete route</button>
+                                </div>
                             </div>
                         </div>
                         {% endfor %}
                     
                     {% else %}
-                        <div id="no-routes-wrapper" class="no-routes-wrapper">
+                        <div id="no-routes-wrapper-container" class="no-routes-wrapper">
                             <div class="no-routes-card">
                                 <h2 class="no-routes-title">No routes saved yet</h2>
                                 <p class="no-routes-description">
