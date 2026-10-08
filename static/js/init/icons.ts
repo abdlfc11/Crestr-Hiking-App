@@ -15,7 +15,8 @@ import {
   Keyboard,
   Eraser,
   Redo2,
-  Undo2
+  Undo2,
+  ArrowUpRight
 } from 'lucide';
 
 export function initIcons() {
@@ -36,7 +37,8 @@ export function initIcons() {
             Keyboard,
             Eraser,
             Redo2,
-            Undo2
+            Undo2,
+            ArrowUpRight
         }
     })
 }

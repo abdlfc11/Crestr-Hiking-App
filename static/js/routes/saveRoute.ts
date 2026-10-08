@@ -28,6 +28,7 @@ import { toLonLat } from "ol/proj.js";
 
 import localforage from "localforage";
 import { logError } from "../utils/logError-utils.js";
+import { initIcons } from "../init/icons.js";
 
 let saveRouteForm: HTMLFormElement | null = null;
 const allRoutesContainer = document.getElementById("all-routes-container");
@@ -126,7 +127,10 @@ async function handleSaveRoute(e: SubmitEvent) {
     // Creating + Adding route row
     const routeCard = createRouteRow(routeName, formattedToday, rawDistanceKm, formattedDistance, eta, elevDisplayValue);
 
-    if (allRoutesContainer) allRoutesContainer.insertAdjacentHTML("beforeend", routeCard);
+    if (allRoutesContainer) {
+      allRoutesContainer.insertAdjacentHTML("beforeend", routeCard);
+      initIcons();
+    }
 
     // Resetting UI state
     homeButtonFunction();
