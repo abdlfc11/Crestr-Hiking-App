@@ -202,7 +202,7 @@ function bindRouteCardButtons() {
     const target = e.target as HTMLElement;
     const optionsButton = target.closest<HTMLButtonElement>('.route-options-button');
     const deleteButton = target.closest<HTMLButtonElement>('.route-btn-delete');
-    const loadButton = target.closest<HTMLButtonElement>('.route-btn-load');
+    const loadButton = target.closest<HTMLButtonElement>('.route-card-actions-load-route-button');
     const gpxButton = target.closest<HTMLButtonElement>('.route-btn-download-gpx')
     const geojsonButton = target.closest<HTMLButtonElement>('.route-btn-download-geojson')
 

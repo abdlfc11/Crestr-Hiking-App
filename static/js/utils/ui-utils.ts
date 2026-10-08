@@ -226,11 +226,24 @@ export function createRouteRow(routeName: string, formattedDate: string, distanc
                                     <span class="route-card-value">${elevDisplayValue}</span>
                                 </div>
                                 <div class="route-card-actions">
-                                    <button type="button" class="route-options-button" aria-label="Options for ${safeRouteName}" aria-expanded="false">
-                                        <span aria-hidden="true">&#8230;</span>
+                                    <button
+                                        type="button"
+                                        class="route-card-actions-buttons route-card-actions-load-route-button"
+                                        aria-label="Load Route"
+                                        data-tooltip="Load Route"
+                                    >
+                                        <i data-lucide="arrow-up-right"></i>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="route-options-button route-card-actions-buttons"
+                                        aria-label="Options for ${safeRouteName}"
+                                        aria-haspopup="menu"
+                                        aria-expanded="false"
+                                    >
+                                        <span aria-hidden="true">&#8230;</span> 
                                     </button>
                                     <div class="route-actions-menu" hidden>
-                                        <button type="button" class="route-btn route-btn-load">Load route</button>
                                         <button type="button" class="route-btn route-btn-download-gpx">
                                             <span class="route-btn-text">Download GPX</span>
                                             <span class="loader" aria-hidden="true"></span>
