@@ -207,8 +207,8 @@ const shortcutsModalCloseButton = document.getElementById('shortcuts-dialog-clos
 const openSavedRoutesDashButton = document.getElementById('saved-routes-dash-open-button');
 const closeSavedRoutesDashButton = document.getElementById('saved-routes-dash-go-back-button');
 const savedRoutesDashContent = document.getElementById('saved-routes-dashboard');
-const noRouteCreateButton = document.getElementById("no-route-create-button");
-const noRouteCreateDiv = document.getElementById('no-routes-wrapper');
+const noRouteCardButton = document.getElementById("no-route-create-button");
+const noRouteCardDiv = document.getElementById('no-routes-wrapper-container');
 
 // setting panel
 const settingOpenButton = document.getElementById("settings-open-button");
@@ -737,7 +737,7 @@ async function handleRouteImport() {
       }
 
       displayImportedRouteCard(result);
-      removeDOMElement(noRouteCreateDiv);
+      removeDOMElement(noRouteCardDiv);
       cancelRouteImport();
       return true;
 
@@ -2028,7 +2028,7 @@ export function initUi() {
 
   addClickListener(undoManualRouteButton, undoManualRoutePoint, "click");
   addClickListener(redoManualRouteButton, redoManualRoutePoint, "click");
-  addClickListener(noRouteCreateButton, closeSavedRoutesDash, "click");
+  addClickListener(noRouteCardButton, closeSavedRoutesDash, "click");
   
   addClickListener(generatePathButton, () => void handleManualRouteGeneration(), "click");
 
