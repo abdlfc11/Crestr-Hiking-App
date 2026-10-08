@@ -1,6 +1,6 @@
 
 import {
-    createRouteCard
+    createRouteRow
 } from "./utils/ui-utils.js";
 
 import {
@@ -69,7 +69,7 @@ export function displayImportedRouteCard(data: ImportedRouteResponse): void {
 
     
 
-    const routeCard = createRouteCard(routeName, formattedToday, distanceKm, formattedDistanceKm, formattedETA, formattedElevation);
+    const routeCard = createRouteRow(routeName, formattedToday, distanceKm, formattedDistanceKm, formattedETA, formattedElevation);
 
     if (allRoutesContainer) allRoutesContainer.insertAdjacentHTML("beforeend", routeCard);            
 }

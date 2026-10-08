@@ -23,6 +23,27 @@ import { formatDistance } from "../utils/format-utils.js";
 
 const allRoutesContainer = document.getElementById("all-routes-container");
 
+function closeRouteMenus(exceptMenu?: HTMLElement) {
+  document.querySelectorAll<HTMLElement>('.route-actions-menu:not([hidden])').forEach(menu => {
+    if (menu === exceptMenu) return;
+
+    menu.hidden = true;
+    menu.closest('.route-card-actions')
+      ?.querySelector<HTMLButtonElement>('.route-options-button')
+      ?.setAttribute('aria-expanded', 'false');
+  });
+}
+
+function toggleRouteMenu(button: HTMLButtonElement) {
+  const menu = button.parentElement?.querySelector<HTMLElement>('.route-actions-menu');
+  if (!menu) return;
+
+  const shouldOpen = menu.hidden;
+  closeRouteMenus(menu);
+  menu.hidden = !shouldOpen;
+  button.setAttribute('aria-expanded', String(shouldOpen));
+}
+
 /**
  * Function responsible for updating the distance values of saved route cards
  */
@@ -179,24 +200,50 @@ function bindRouteCardButtons() {
   allRoutesContainer.addEventListener('click', (e) => {
 
     const target = e.target as HTMLElement;
+    const optionsButton = target.closest<HTMLButtonElement>('.route-options-button');
     const deleteButton = target.closest<HTMLButtonElement>('.route-btn-delete');
     const loadButton = target.closest<HTMLButtonElement>('.route-btn-load');
     const gpxButton = target.closest<HTMLButtonElement>('.route-btn-download-gpx')
     const geojsonButton = target.closest<HTMLButtonElement>('.route-btn-download-geojson')
 
-    if (deleteButton) {
+    if (optionsButton) {
+      e.preventDefault();
+      toggleRouteMenu(optionsButton);
+    }
+    else if (deleteButton) {
+      closeRouteMenus();
       void onDeleteClick(e)
     }
     else if (loadButton) {
+      closeRouteMenus();
       void onLoadClick(e)
     }
     else if (gpxButton) {
+      closeRouteMenus();
       void onDownloadClick(e, "gpx", gpxButton)
     }
     else if (geojsonButton) {
+      closeRouteMenus();
       void onDownloadClick(e, "geojson", geojsonButton)
     }
   })
+
+  document.addEventListener('click', (event) => {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.route-card-actions')) closeRouteMenus();
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape') return;
+
+    const openMenu = document.querySelector<HTMLElement>('.route-actions-menu:not([hidden])');
+    if (!openMenu) return;
+
+    const optionsButton = openMenu.closest('.route-card-actions')
+      ?.querySelector<HTMLButtonElement>('.route-options-button');
+    closeRouteMenus();
+    optionsButton?.focus();
+  });
 }
 
 /**

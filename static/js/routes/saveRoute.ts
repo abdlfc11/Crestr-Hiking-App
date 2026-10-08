@@ -12,10 +12,8 @@ import {
   showLoginModal
 } from "../ui/ui.js";
 
-import { getMap } from "../init/map.js";
-
 import {
-  createRouteCard,
+  createRouteRow,
   removeDOMElement,
   showToast
 } from "../utils/ui-utils.js"
@@ -36,7 +34,6 @@ const allRoutesContainer = document.getElementById("all-routes-container");
 const routeNameEntry = document.getElementById("route-name") as HTMLInputElement | null;
 const routeETADisplay = document.getElementById("route-eta-display");
 const routeElevationDisplay = document.getElementById("route-elevation-change-display");
-const noRouteCreateDiv = document.getElementById('no-routes-wrapper');
 
 
 
@@ -58,7 +55,6 @@ async function handleSaveRoute(e: SubmitEvent) {
   let rawDistanceKm;
 
   try {
-    const map = getMap();
     routeName = routeNameEntry.value;
     eta = routeETADisplay?.textContent;
     elevationChange = routeElevationDisplay?.textContent
@@ -110,27 +106,29 @@ async function handleSaveRoute(e: SubmitEvent) {
 
     if (routeNameEntry) routeNameEntry.value = "";
 
-    const routeInfo = data.route_info;
+    // Removing noRouteCard if present 
+    const noRouteCard = document.getElementById('no-routes-wrapper-container');
+    if (noRouteCard) removeDOMElement(noRouteCard);
 
+    // constructing / formatting data to be used in route card 
     const today = new Date();
-
     const formattedToday = new Intl.DateTimeFormat('en-GB', {
       "day": "2-digit",
       "month": "2-digit",
       "year": "numeric"
     }).format(today);
-    
-    elevDisplayValue = routeInfo.elevation_gain_metres === 0 ? "No Data" : formatElevation(routeInfo.elevation_gain_metres);
 
+    const routeInfo = data.route_info;
+    elevDisplayValue = routeInfo.elevation_gain_metres === 0 ? "No Data" : formatElevation(routeInfo.elevation_gain_metres);
     eta = formatETA(routeInfo.eta_seconds);
-    
-    if (noRouteCreateDiv) removeDOMElement(noRouteCreateDiv);   
-    
     const formattedDistance = formatDistance(rawDistanceKm)
 
-    const routeCard = createRouteCard(routeName, formattedToday, rawDistanceKm, formattedDistance, eta, elevDisplayValue);
+    // Creating + Adding route row
+    const routeCard = createRouteRow(routeName, formattedToday, rawDistanceKm, formattedDistance, eta, elevDisplayValue);
 
     if (allRoutesContainer) allRoutesContainer.insertAdjacentHTML("beforeend", routeCard);
+
+    // Resetting UI state
     homeButtonFunction();
     updateSaveRouteContainer();
 

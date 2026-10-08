@@ -38,7 +38,7 @@
   --secondary-bg-hover: #cbd5e1;
   --tooltip-bg: rgba(206, 203, 203);
   --list-item-bg: rgba(206, 203, 203, 0.85);
-  --list-item-bg-hover: rgba(121, 119, 119, 0.85);
+  --list-item-bg-hover: rgba(169, 166, 166, 0.85);
 
   --panel-glass-bg: rgb(255 255 255 / 0.65); /* the glassmorphism routing panel background */
   --panel-glass-bg-hover: rgba(223, 221, 221, 0.65);
@@ -62,6 +62,7 @@
   --btn-bg-hover: #454545;
   --secondary-btn-bg: #595959;
   --secondary-btn-bg-hover: #4b4a4a;
+  --danger-btn-bg-transparent: rgba(227, 49, 49, 0.2); 
   --btn-disabled-bg: #93b4f2;
   --btn-disabled-text: #ffffff;
 
@@ -125,8 +126,8 @@ html.dark {
   --secondary-bg: rgb(69, 68, 68);
   --secondary-bg-hover: rgb(87, 87, 87);
   --tooltip-bg: rgba(60, 60, 60, 0.85);
-  --list-item-bg: rgb(90, 88, 88);
-  --list-item-bg-hover: rgba(67, 66, 66, 0.85);
+  --list-item-bg: rgb(101, 100, 100);
+  --list-item-bg-hover: rgba(79, 77, 77, 0.85);
 
   --panel-glass-bg: rgb(31 41 55 / 0.75);
   --panel-glass-bg-hover: rgba(18, 25, 34, 0.75);
@@ -150,6 +151,7 @@ html.dark {
 
   --btn-bg: #374151;
   --btn-bg-hover: #4b5563;
+  --danger-btn-bg-transparent: rgba(158, 43, 43, 0.3); 
   --secondary-btn-bg: #3d3c3c;
   --secondary-btn-bg-hover: #313131;
   --btn-disabled-bg: #1e293b;
