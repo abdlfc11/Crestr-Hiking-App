@@ -9,6 +9,8 @@ import {
     formatElevation
 } from "./utils/format-utils.js";
 
+import { initIcons } from "./init/icons.js";
+
 const allRoutesContainer = document.getElementById("all-routes-container");
 
 interface ImportedRouteResponse {
@@ -71,5 +73,8 @@ export function displayImportedRouteCard(data: ImportedRouteResponse): void {
 
     const routeCard = createRouteRow(routeName, formattedToday, distanceKm, formattedDistanceKm, formattedETA, formattedElevation);
 
-    if (allRoutesContainer) allRoutesContainer.insertAdjacentHTML("beforeend", routeCard);            
+    if (allRoutesContainer) {
+        allRoutesContainer.insertAdjacentHTML("beforeend", routeCard);
+        initIcons();
+    }
 }
