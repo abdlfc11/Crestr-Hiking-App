@@ -5,7 +5,7 @@
  *      - showToast(message, type = "error", modal = null)
  *      - addClickListener(element, func, type)
  *      - removeDOMElement(element)
- *      - createRouteCard(routeName, formattedDate, distanceInKm, ETA, elevDisplayValue)
+ *      - createRouteRow(routeName, formattedDate, distanceInKm, ETA, elevDisplayValue)
  *      - createNoRouteCard()
  *      - createStatsPanel(distanceDisplay, etaDisplay, elevationGain)
  *      - parseCoordString(value)
@@ -177,7 +177,6 @@ export function addClickListener(element: EventTarget | null, func: EventListene
 
 /**
  * Removes the passed in DOM element
- * Used in any feature which adds a route card to the saved routes dashboard as it is used to remove the <div>...</div> content which tells the user that they have not saved any routes
  */
 export function removeDOMElement(element: HTMLElement | null): boolean {
   if (element) {
@@ -195,7 +194,7 @@ export function removeDOMElement(element: HTMLElement | null): boolean {
  */
 function escapeHtml(value: string): string {
   const replacements: Record<string, string> = {
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&`#39`;"
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
   };
   return String(value).replace(/[&<>"']/g, (character) => replacements[character]);
 }
@@ -203,33 +202,45 @@ function escapeHtml(value: string): string {
 /**
  * Generates the HTML string for a saved route card displayed in the UI.
  */
-export function createRouteCard(routeName: string, formattedDate: string, distanceInKm: number, formattedDistance: string, ETA: string, elevDisplayValue: string): string {
+export function createRouteRow(routeName: string, formattedDate: string, distanceInKm: number, formattedDistance: string, ETA: string, elevDisplayValue: string): string {
     const safeRouteName = escapeHtml(routeName)
 
     return `<div class="route-card" data-route-name="${safeRouteName}">
-                                <div class="route-card-header">
+                                <div class="route-card-cell route-card-primary">
                                     <h3 class="route-card-name">${safeRouteName}</h3>
-                                    <span class="route-card-date">Saved on ${formattedDate}</span>
                                 </div>
-                                <div class="route-card-stats">
-                                    <div class="stat-item">
-                                        <span class="stat-label">Distance:</span>
-                                        <span class="stat-value" data-distance-km="${distanceInKm}">${formattedDistance}</span>
-                                    </div>
-                                    <div class="stat-item">
-                                        <span class="stat-label">ETA:</span>
-                                        <span class="stat-value">${ETA}</span>
-                                    </div>
-                                    <div class="stat-item">
-                                        <span class="stat-label">Elevation Gain:</span>
-                                        <span class="stat-value">${elevDisplayValue}</span>
-                                    </div>
+                                <div class="route-card-cell">
+                                    <span class="route-card-mobile-label">Saved</span>
+                                    <span class="route-card-date">${formattedDate}</span>
+                                </div>
+                                <div class="route-card-cell">
+                                    <span class="route-card-mobile-label">Distance</span>
+                                    <span class="route-card-value" data-distance-km="${distanceInKm}">${formattedDistance}</span>
+                                </div>
+                                <div class="route-card-cell">
+                                    <span class="route-card-mobile-label">ETA</span>
+                                    <span class="route-card-value">${ETA}</span>
+                                </div>
+                                <div class="route-card-cell">
+                                    <span class="route-card-mobile-label">Elevation gain</span>
+                                    <span class="route-card-value">${elevDisplayValue}</span>
                                 </div>
                                 <div class="route-card-actions">
-                                    <button type="button" class="route-btn route-btn-delete">Delete</button>
-                                    <button type="button" class="route-btn route-btn-download-gpx">GPX</button>
-                                    <button type="button" class="route-btn route-btn-download-geojson">GeoJSON</button>
-                                    <button type="button" class="route-btn route-btn-load">Load</button>
+                                    <button type="button" class="route-options-button" aria-label="Options for ${safeRouteName}" aria-expanded="false">
+                                        <span aria-hidden="true">&#8230;</span>
+                                    </button>
+                                    <div class="route-actions-menu" hidden>
+                                        <button type="button" class="route-btn route-btn-load">Load route</button>
+                                        <button type="button" class="route-btn route-btn-download-gpx">
+                                            <span class="route-btn-text">Download GPX</span>
+                                            <span class="loader" aria-hidden="true"></span>
+                                        </button>
+                                        <button type="button" class="route-btn route-btn-download-geojson">
+                                            <span class="route-btn-text">Download GeoJSON</span>
+                                            <span class="loader" aria-hidden="true"></span>
+                                        </button>
+                                        <button type="button" class="route-btn route-btn-delete">Delete route</button>
+                                    </div>
                                 </div>
                             </div>
                             `;
@@ -239,7 +250,7 @@ export function createRouteCard(routeName: string, formattedDate: string, distan
  * Returns a card showing users that there are no saved routes 
  */
 export function createNoRouteCard(): string {
-  return `<div id="no-routes-wrapper" class="no-routes-wrapper">
+  return `<div id="no-routes-wrapper-container" class="no-routes-wrapper">
               <div class="no-routes-card">
                   <h2 class="no-routes-title">No routes saved yet</h2>
                   <p class="no-routes-description">

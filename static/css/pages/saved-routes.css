@@ -1,11 +1,8 @@
 /*
   SAVED ROUTES DASHBOARD
 
-  The panel wrapper, .inner-content, #top-section header bar and .closebtn are now shared via layout/slide-panel.css
-
-  
-  Only the dashboard-specific content, such as the header text, the route card grid,
-  and the empty state
+  Route data is presented as a responsive CSS-grid list. It deliberately uses
+  ordinary divs instead of a table so the rows can reflow cleanly on phones.
 
   Depends on: base/tokens.css, layout/slide-panel.css.
 */
@@ -39,14 +36,12 @@ body {
   font-weight: 700;
   color: var(--ink-strong);
   white-space: nowrap;
-  overflow: visible;
 }
 
 #go-back-button-container {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  width: auto;
   flex-shrink: 0;
 }
 
@@ -63,141 +58,205 @@ body {
 }
 
 #saved-routes-dash-go-back-button:hover {
-  color: #000000;
-}
-
-/* Dashboard content */
-#all-routes-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 35px;
-  padding: 2rem 4rem 3rem 4rem;
-  max-width: 1400px;
-  width: 100%;
-  margin: 0 auto;
-  flex: 0 1 auto;
-  box-sizing: border-box;
-}
-
-#all-routes-container:has(.route-card) .saved-route-dash-no-route-content {
-  display: none;
-}
-
-/* Route Cards (inc. internal metrics) */
-.route-card {
-  border-radius: 8px;
-  background-color: var(--surface-bg);
-  border: 1px solid var(--card-border);
-  padding: 1.25rem;
-  width: 24.5rem;
-  max-height: 17rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  transition: all 0.3s ease;
-  box-sizing: border-box;
-}
-
-.route-card:hover {
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
-  transform: translateY(-2px);
-}
-
-.route-header {
-  gap: 0px;
-}
-
-.route-card-name {
-  margin: 0 0 0.25rem 0;
-  font-size: 1.2rem;
-  font-weight: 700;
   color: var(--ink-strong);
 }
 
-.route-card-date {
-  font-size: 0.85rem;
-  color: #6b7280;
+/* Route list */
+#all-routes-container {
+  padding: 2rem 4rem 3rem;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
-.route-card-stats {
-  padding-top: 8px;
-  padding-bottom: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+.route-list-header,
+.route-card {
+  grid-template-columns:
+    minmax(13rem, 2fr)
+    minmax(7rem, 1fr)
+    minmax(7rem, 0.8fr)
+    minmax(7rem, 0.8fr)
+    minmax(8.5rem, 1fr)
+    4rem;
+  column-gap: 1rem;
+  align-items: center;
 }
 
-.stat-item {
-  display: flex;
-  justify-content: space-between;
+.route-list-header {
+  display: none;
+  padding: 0 1.25rem 0.7rem;
+  color: var(--muted-strong);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+}
+
+#all-routes-container:has(.route-card) .route-list-header {
+  display: grid;
+}
+
+.route-list-options-heading {
+  text-align: right;
+}
+
+.route-card {
+  position: relative;
+  display: grid;
+  width: 100%;
+  min-height: 72px;
+  padding: 0.9rem 1.25rem;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-bottom-width: 0;
+  box-sizing: border-box;
+  transition: background-color 0.2s ease;
+}
+
+.route-list-header + .route-card {
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+
+.route-card:last-child {
+  border-bottom-width: 1px;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+}
+
+.route-list-header + .route-card:last-child {
+  border-radius: var(--radius-sm);
+}
+
+.route-card:hover,
+.route-card:focus-within {
+  background: var(--surface-subtle);
+}
+
+.route-card-cell {
+  min-width: 0;
+  color: var(--ink);
+  font-weight: 600;
   font-size: 0.9rem;
 }
 
-.stat-label {
-  color: var(--ink);
-}
-
-.stat-value {
-  color: var(--ink);
+.route-card-name {
+  margin: 0;
+  overflow: hidden;
+  color: var(--ink-strong);
+  font-size: 1rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .route-card-date {
-  color: var(--ink);
+  color: var(--muted-strong);
 }
 
+.route-card-mobile-label {
+  display: none;
+}
 
-/* Route action buttons */
+/* Ellipsis action menu */
 .route-card-actions {
+  position: relative;
   display: flex;
-  flex-direction: row;
-  gap: 5px;
-  margin-top: auto;
+  justify-content: flex-end;
+}
+
+.route-options-button {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.route-options-button:hover,
+.route-options-button[aria-expanded="true"] {
+  background: var(--secondary-bg);
+  border-color: var(--card-border);
+}
+
+.route-options-button:focus-visible,
+.route-btn:focus-visible {
+  outline: 3px solid var(--blue-ring);
+  outline-offset: 2px;
+}
+
+.route-actions-menu {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  width: max-content;
+  min-width: 180px;
+  padding: 0.35rem;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-surface);
+}
+
+.route-actions-menu[hidden] {
+  display: none;
 }
 
 .route-btn {
-  flex: 1;
-  min-width: 0;
-  padding: .65rem 1rem;
-  background: var(--blue);
-  color: white;
-  border: none;
+  position: relative;
+  display: block;
+  width: 100%;
+  min-height: 38px;
+  padding: 0.6rem 0.75rem;
+  color: var(--ink);
+  background: transparent;
+  border: 0;
   border-radius: 6px;
-  font-size: 12px;
+  font-size: 0.875rem;
   font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+  text-align: left;
   white-space: nowrap;
-  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .route-btn:hover {
-  background: #1e40af;
-  box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
-  transform: translateY(-1px);
-}
-
-.route-btn-download-geojson,
-.route-btn-download-gpx {
-  background-color: #10b981;
-}
-
-.route-btn-download-geojson:hover,
-.route-btn-download-gpx:hover {
-  background-color: #0a885e;
+  background: var(--list-item-bg-hover);
 }
 
 .route-btn-delete {
-  background-color: #db4040;
+  color: var(--error);
 }
 
 .route-btn-delete:hover {
-  background-color: #ea2323;
+  color: var(--error);
+  background: var(--danger-btn-bg-transparent);
+}
+
+.route-btn:disabled {
+  opacity: 0.7;
+}
+
+.route-btn .loader {
+  width: 18px;
+  height: 18px;
+  border-width: 3px;
+  border-color: var(--blue);
+  border-bottom-color: transparent;
 }
 
 /* Empty state */
 .no-routes-wrapper {
-  grid-column: 1 / -1;
   display: flex;
   justify-content: center;
   padding-top: 80px;
@@ -216,13 +275,13 @@ body {
 .no-routes-title {
   font-size: 1.9rem;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--ink-strong);
   margin-bottom: 1rem;
 }
 
 .no-routes-description {
   font-size: 1.1rem;
-  color: #475569;
+  color: var(--muted-strong);
   margin-bottom: 2rem;
   line-height: 1.55;
 }
@@ -234,22 +293,72 @@ body {
   border-radius: 10px;
 }
 
-/* DARK MODE */
-html.dark #saved-routes-dashboard .inner-content {
-  background: transparent;
+@media (max-width: 900px) {
+  #top-section,
+  #all-routes-container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+
+  #dashboard-header h1 {
+    white-space: normal;
+  }
+
+  .route-list-header {
+    display: none !important;
+  }
+
+  .route-card,
+  .route-list-header + .route-card,
+  .route-card:last-child,
+  .route-list-header + .route-card:last-child {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+    padding: 1rem;
+    border-width: 1px;
+    border-radius: var(--radius-sm);
+  }
+
+  .route-card-primary {
+    grid-column: 1 / -1;
+    padding-right: 3rem;
+  }
+
+  .route-card-mobile-label {
+    display: block;
+    margin-bottom: 0.15rem;
+    color: var(--muted);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.035em;
+    text-transform: uppercase;
+  }
+
+  .route-card-actions {
+    position: absolute;
+    top: 0.8rem;
+    right: 0.8rem;
+  }
 }
 
-html.dark #saved-routes-dashboard .route-card {
-  background-color: #374151;
-  border-color: #4b5563;
-}
+@media (max-width: 520px) {
+  #top-section {
+    padding: 1.5rem 1rem;
+  }
 
-html.dark #saved-routes-dashboard .route-btn {
-  background-color: #4b5563;
-  color: #f3f4f6;
-}
+  #all-routes-container {
+    padding: 1.25rem 1rem 2rem;
+  }
 
-html.dark .no-routes-title,
-html.dark .no-routes-description {
-  color: #f3f4f6;
+  .route-card,
+  .route-list-header + .route-card,
+  .route-card:last-child,
+  .route-list-header + .route-card:last-child {
+    grid-template-columns: 1fr;
+  }
+
+  .route-card-primary {
+    grid-column: 1;
+  }
 }
