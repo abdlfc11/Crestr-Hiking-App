@@ -21,6 +21,8 @@ import {
 
 import { formatDistance } from "../utils/format-utils.js";
 
+import { nanoid } from "nanoid";
+
 const allRoutesContainer = document.getElementById("all-routes-container");
 
 function closeRouteMenus(exceptMenu?: HTMLElement) {
@@ -153,14 +155,7 @@ async function onDownloadClick(
   
   try {
 
-    console.log('BEFORE DOWNLOAD ROUTE')
-
     const blob = await downloadRoute(route.routeName, format, DOMElement); 
-
-    console.log('AFTER DOWNLOAD ROUTE')
-
-    console.log(route.routeName)
-    console.log(format)
 
     const filename = `${route.routeName}.${format}`
 
@@ -191,6 +186,25 @@ async function onDownloadClick(
   }
 }
 
+async function onShareRouteClick(
+  event: MouseEvent
+) {
+  event.preventDefault();
+
+  const routeCard = (event.target as HTMLElement).closest<HTMLElement>(".route-card")
+  const route = getRouteFromCard(routeCard);
+  if (!route) {
+    return;
+  }
+
+  const urlId = nanoid(); 
+
+  // Next call a backend API to add URLs to a psql database which stores the id and the corresponding route 
+  // Then build a URL based on the FasTAPI route defined
+  // FastAPI route should accept the ID as a query param, perhaps a good idea for url is DONAIN/route/{ID}
+  
+}
+
 /** 
 * Handles adding the event listeners for each button on the route card
 */
@@ -203,8 +217,9 @@ function bindRouteCardButtons() {
     const optionsButton = target.closest<HTMLButtonElement>('.route-options-button');
     const deleteButton = target.closest<HTMLButtonElement>('.route-btn-delete');
     const loadButton = target.closest<HTMLButtonElement>('.route-card-actions-load-route-button');
-    const gpxButton = target.closest<HTMLButtonElement>('.route-btn-download-gpx')
-    const geojsonButton = target.closest<HTMLButtonElement>('.route-btn-download-geojson')
+    const gpxButton = target.closest<HTMLButtonElement>('.route-btn-download-gpx');
+    const geojsonButton = target.closest<HTMLButtonElement>('.route-btn-download-geojson');
+    const shareRouteButton = target.closest<HTMLButtonElement>('.share-route-button'); 
 
     if (optionsButton) {
       e.preventDefault();
@@ -225,6 +240,10 @@ function bindRouteCardButtons() {
     else if (geojsonButton) {
       closeRouteMenus();
       void onDownloadClick(e, "geojson", geojsonButton)
+    }
+    else if (shareRouteButton) {
+      closeRouteMenus();
+      void onShareRouteClick(e)
     }
   })
 
