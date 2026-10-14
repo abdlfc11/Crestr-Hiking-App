@@ -27,9 +27,11 @@ interface CrestrAppConfig {
   apiRegisterUrl: string;
   apiDeleteAccountUrl: string;
   apiCalculatePathUrl: string;
+  apiGetRouteDataUrl: string
   apiSaveRouteUrl: string;
   apiLoadRouteUrl: string;
   apiDeleteRouteUrl: string;
+  apiAddSharedRouteUrl: string;
   apiDownloadRouteFileUrl: string;
   apiImportRouteUrl: string;
   apiNormaliseRouteStatsUrl: string;

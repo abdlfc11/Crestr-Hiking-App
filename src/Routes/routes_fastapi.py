@@ -19,7 +19,7 @@ from pyrate_limiter import Duration, Limiter, Rate
 # Local Modules
 from src.db import get_session, engine
 
-from src.models import Route, User
+from src.models import Route, User, RouteSharingTable
 
 from src.constants import DEFAULT_CENTRE
 
@@ -36,7 +36,9 @@ from src.Routes.routes_schemas import (
     LoadRouteModel,
     DeleteRouteModel,
     DownloadRouteModel,
-    NormaliseRouteModel
+    NormaliseRouteModel,
+    GetRouteDataModel,
+    AddSharedRouteModel
 )
 
 from src.Routes.helpers import (
@@ -617,6 +619,214 @@ def load_route(
             detail={
                 "success": False,
                 "message": "Sorry, there was an unexpected error whilst loading your route. "
+            }
+        )
+
+#endregion
+
+#region Get Route Data
+
+
+@router.post(
+    "/routing/get-route-data",
+    dependencies=[
+        Depends(
+            RateLimiter(
+                limiter=Limiter(Rate(110, Duration.MINUTE)),
+                callback=rate_limit_exceeded_callback
+            )
+        )
+    ]
+)
+def get_route_data(
+    data: GetRouteDataModel,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_session)
+):
+
+    if not user:
+        
+        raise HTTPException(
+            status_code=401,
+            detail={
+                "success": False,
+                "message": "Unauthenticated attempt to load a route.",
+                "user_message": "Please Login to share a route."
+            }
+        )
+
+    route_name = data.route_name
+    
+    if not route_name:
+
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "success": False,
+                "message": "Route name is required.",
+                "user_message": "A route name is required, please try again."
+            }
+        )
+    
+
+    route = db.exec(
+        select(Route)
+        .where(Route.name == route_name, Route.user_id==user.id)
+    ).first()
+
+    if not route:
+
+        raise HTTPException(
+            status_code=404,
+            detail={
+                "success": False,
+                "message": "The route could not be found in the server. ",
+                "user_message": "Sorry, the route could not be found in the server."
+            }
+        )
+    
+    coordinates = json.loads(route.coordinates)
+    eta_seconds = route.eta_seconds
+    distance = route.distance_km
+    elevation_change = route.elevation_change
+
+    has_elevation = check_elevation(coordinates)
+
+    try:
+        wgs84_coordinates = []
+
+        if check_web_mercator(coordinates[0]):
+            # in web mercator -> must convert to wgs84
+            for coord in coordinates:
+                x, y = coord[0], coord[1]
+                z = coord[2] if len(coord) >= 3 else 0   # default elevation = 0
+                lon, lat = service.convert_web_mercator_to_wgs84(x, y)
+                wgs84_coordinates.append([lon, lat, z])
+        else:
+            # already wgs84
+            for coord in coordinates:
+                x, y = coord[0], coord[1]
+                z = coord[2] if len(coord) >= 3 else 0
+                wgs84_coordinates.append([x, y, z])
+
+        if not wgs84_coordinates:
+
+            log_action('Getting Route Data', False, "No coordinates found in the route saved on the server", None, 'GET_ROUTE_DATA')
+
+            raise HTTPException(
+                status_code=422,
+                detail={
+                    "success": False,
+                    "message": "There are no valid coordinates within the route saved on the server's database. ",
+                }
+            )
+
+        return {
+            "success": True, 
+            "coordinates": wgs84_coordinates,
+            "distance_km": distance,
+            "eta_seconds": eta_seconds,
+            "elevation_gain": elevation_change,
+            "name": route_name
+        }
+
+        return
+    except HTTPException:
+        raise
+    except Exception as e:
+
+        short_traceback = "".join(traceback.format_exception_only(type(e), e)).strip()
+        
+        log_action('Loading Route', False, short_traceback, None, 'GET_ROUTE_DATA')
+
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "success": False,
+                "message": "Sorry, there was an unexpected error whilst loading your route. "
+            }
+        )
+
+
+#endregion
+
+#region Adding Shared Route
+
+@router.post(
+    "/routing/add-shared-route",
+    dependencies=[
+        Depends(
+            RateLimiter(
+                limiter=Limiter(Rate(110, Duration.MINUTE)),
+                callback=rate_limit_exceeded_callback
+            )
+        )
+    ]
+)
+def add_shared_route(
+    data: AddSharedRouteModel,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_session)
+):
+    if not user:
+        raise HTTPException(
+            status_code=401,
+            detail={
+                "success": False,
+                "message": "Unauthenticated attempt to share a route",
+                "user_message": "Please login to share a route"
+            }
+        )
+    
+    try: 
+
+        eta_seconds = data.eta_seconds
+        distance_km = data.distance_km
+        elevation_gain = data.elevation_gain
+        coordinates = data.coordinates
+        route_id = data.route_id
+
+        existing_route = db.exec(
+            select(RouteSharingTable)
+            .where(RouteSharingTable.route_id == route_id)
+        ).first()
+
+        if existing_route:
+            return {
+                "success": False,
+                "code": route_id
+            }
+        else:
+
+            SharedRoute = RouteSharingTable(
+                route_id=route_id,
+                coordinates=json.dumps(coordinates),
+                distance_km=distance_km,
+                eta_seconds=eta_seconds,
+                elevation_gain=elevation_gain
+            )
+
+            db.add(SharedRoute)
+            db.commit()
+
+            return {
+                "success": True,
+                "code": route_id
+            }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        short_traceback = "".join(traceback.format_exception_only(type(e), e)).strip()
+        
+        log_action('Sharing Route', False, short_traceback, None, 'ADD_SHARED_ROUTE')
+
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "success": False,
+                "message": "Error whilst sharing route",
+                "user_message": "Sorry, there was an unexpected error whilst sharing your route. "
             }
         )
 

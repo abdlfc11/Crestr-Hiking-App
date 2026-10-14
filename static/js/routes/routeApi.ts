@@ -3,11 +3,70 @@
  * Implement the TODO blocks when you wire up each button.
  */
 
+import { ERROR_MESSAGES } from "../utils/error-constants"
 import type { LoadRouteResponse } from "./route_types"
 
 interface DeleteRouteResponse {
   success: boolean,
   message: string
+}
+
+interface GetRouteDataResponse {
+  success: boolean
+  coordinates: number[][]
+  elevation_gain: string
+  distance_km: number
+  eta_seconds: number
+  name: string
+}
+
+interface AddSharedRouteInput {
+  coordinates: number[][]
+  elevation_gain: string
+  distance_km: number
+  eta_seconds: number
+  name: string
+  route_id: string
+}
+
+export async function getRouteData(routeName: string): Promise<GetRouteDataResponse> {
+
+  const url = window.appConfig.apiGetRouteDataUrl; 
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      route_name: routeName
+    })
+  })
+
+  const data = await response.json();
+
+  if (!response.ok || !data.success) {
+    throw new Error(data.message || `getRouteData() : ${response.status}`, {cause: data.user_message || ERROR_MESSAGES.generic})
+  }
+  
+  return data
+
+}
+
+export async function addSharedRoute(routeData: AddSharedRouteInput): Promise<boolean> {
+  const url = window.appConfig.apiAddSharedRouteUrl
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(routeData)
+  });
+
+  const data = await response.json();
+
+  if (!response.ok || !data.success) {
+    throw new Error(data.message || `addSharedRoute() : ${response.status}`, {cause: data.user_message || ERROR_MESSAGES.generic})
+  }; 
+
+  return true
 }
 
 export async function deleteRoute(routeName: string): Promise<DeleteRouteResponse> {
