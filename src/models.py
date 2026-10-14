@@ -209,4 +209,4 @@ class RouteSharingTable(SQLModel, table=True):
     coordinates: str = Field(sa_column=Column(Text, nullable=False))
     eta_seconds: int = Field(nullable=False)
     distance_km: Optional[float] = Field(default=None)
-    elevation_change: str = Field(max_length=30, nullable=False)
+    elevation_gain: str = Field(max_length=30, nullable=False)
