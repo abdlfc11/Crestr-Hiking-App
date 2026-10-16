@@ -244,15 +244,36 @@ export function createRouteRow(routeName: string, formattedDate: string, distanc
                                         <span aria-hidden="true">&#8230;</span> 
                                     </button>
                                     <div class="route-actions-menu" hidden>
-                                        <button type="button" class="route-btn route-btn-download-gpx">
+
+                                        <button
+                                            type="button"
+                                            class="route-btn share-route-button"
+                                        >
+                                            Share Route
+                                        </button>
+
+                                        <button 
+                                            type="button" 
+                                            class="route-btn route-btn-download-gpx"
+                                        >
                                             <span class="route-btn-text">Download GPX</span>
                                             <span class="loader" aria-hidden="true"></span>
                                         </button>
-                                        <button type="button" class="route-btn route-btn-download-geojson">
+
+                                        <button
+                                            type="button"
+                                            class="route-btn route-btn-download-geojson"
+                                        >
                                             <span class="route-btn-text">Download GeoJSON</span>
                                             <span class="loader" aria-hidden="true"></span>
                                         </button>
-                                        <button type="button" class="route-btn route-btn-delete">Delete route</button>
+
+                                        <button
+                                            type="button"
+                                            class="route-btn route-btn-delete"
+                                        >
+                                            Delete route
+                                        </button>
                                     </div>
                                 </div>
                             </div>
