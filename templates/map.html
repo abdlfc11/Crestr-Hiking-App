@@ -425,6 +425,26 @@
             </div>
         </dialog>
 
+        <!-- ##### SHARE ROUTE MODAL (QR Code) ##### -->
+        <dialog id="share-route-dialog" class="modal-overlay">
+            <div class="modal-wrapper">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Share Route</h2>
+                    </div>
+                    <div class="modal-body">
+                        <canvas id="share-route-dialog-canvas"></canvas>
+                        <p>This QR code opens the route on Crestr for viewing (and eventually editing). </p>
+                        
+                        <p>Alternatively you can share the link copied to the clipboard.</p>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" id="share-route-dialog-exit-button" class="modal-btn modal-btn-secondary">Exit</button>
+                    </div>
+                </div>
+            </div>
+        </dialog>
+
         <div id="map"></div>
     </div>
 
@@ -855,12 +875,6 @@
 
         </div>
     </div>
-
-
-
-
-
-
 
     <!-- ##### AppConfig to access API Enpoint URLS ##### -->
     <script>
