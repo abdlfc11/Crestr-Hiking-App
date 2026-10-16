@@ -29,6 +29,11 @@ interface AddSharedRouteInput {
   route_id: string
 }
 
+interface AddSharedRouteResponse {
+  success: boolean
+  code: string
+}
+
 export async function getRouteData(routeName: string): Promise<GetRouteDataResponse> {
 
   const url = window.appConfig.apiGetRouteDataUrl; 
@@ -51,7 +56,7 @@ export async function getRouteData(routeName: string): Promise<GetRouteDataRespo
 
 }
 
-export async function addSharedRoute(routeData: AddSharedRouteInput): Promise<boolean> {
+export async function addSharedRoute(routeData: AddSharedRouteInput): Promise<AddSharedRouteResponse> {
   const url = window.appConfig.apiAddSharedRouteUrl
 
   const response = await fetch(url, {
@@ -66,7 +71,7 @@ export async function addSharedRoute(routeData: AddSharedRouteInput): Promise<bo
     throw new Error(data.message || `addSharedRoute() : ${response.status}`, {cause: data.user_message || ERROR_MESSAGES.generic})
   }; 
 
-  return true
+  return data
 }
 
 export async function deleteRoute(routeName: string): Promise<DeleteRouteResponse> {
