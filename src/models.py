@@ -211,3 +211,8 @@ class RouteSharingTable(SQLModel, table=True):
     eta_seconds: int = Field(nullable=False)
     distance_km: Optional[float] = Field(default=None)
     elevation_gain: str = Field(max_length=30, nullable=False)
+    route_hash: str = Field(nullable=False, index=True)
+
+    __table_args__ = (
+        UniqueConstraint("user_id", "route_hash", name="unique_user_route_hash"),
+    )
