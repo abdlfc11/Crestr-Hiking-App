@@ -169,7 +169,7 @@ export function createElevationProfile(coordinates: number[][]) {
     // light / dark mode logic 
 
 
-    const theme = getTheme(); // "light" | "dark"
+    const theme: "light" | "dark" = getTheme();
     const isDark = theme === "dark";
 
     const text = isDark ? "#ffffff" : "#1f2937";

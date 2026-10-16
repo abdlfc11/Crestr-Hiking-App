@@ -13,6 +13,19 @@ class SaveRouteModel(BaseModel):
 class LoadRouteModel(BaseModel):
     route_name: str
 
+class GetRouteDataModel(BaseModel):
+    route_name: str
+
+class AddSharedRouteModel(BaseModel):
+    name: str
+    coordinates: list[
+        tuple[float, float] | tuple[float, float, float]
+    ]
+    elevation_gain: str
+    distance_km: float
+    eta_seconds: int
+    route_id: str
+
 class DeleteRouteModel(BaseModel):
     route_name: str
 
