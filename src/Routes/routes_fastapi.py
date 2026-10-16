@@ -4,6 +4,7 @@
 import io
 import json
 import traceback
+import hashlib
 
 # Third-Party Libraries
 from sqlalchemy.exc import IntegrityError
@@ -785,37 +786,41 @@ def add_shared_route(
         elevation_gain = data.elevation_gain
         coordinates = data.coordinates
         route_id = data.route_id
+        name = data.name
 
-        existing_route = db.exec(
-            select(RouteSharingTable)
-            .where(RouteSharingTable.route_id == route_id)
-        ).first()
+        normalised_coords = [
+            [round(float(coord[0]), 5), round(float(coord[1]), 5)]
+            for coord in coordinates
+        ]
+        route_json = json.dumps(normalised_coords, separators=(',', ':'))
+        route_hash = hashlib.sha256(route_json.encode('utf-8')).hexdigest()
 
-        if existing_route:
-            return {
-                "success": False,
-                "code": route_id
-            }
-        else:
+        SharedRoute = RouteSharingTable(
+            name=name,
+            route_id=route_id,
+            user_id=user.id,
+            coordinates=json.dumps(coordinates),
+            distance_km=distance_km,
+            eta_seconds=eta_seconds,
+            elevation_gain=elevation_gain,
+            route_hash=route_hash
+        )
 
-            SharedRoute = RouteSharingTable(
-                route_id=route_id,
-                coordinates=json.dumps(coordinates),
-                distance_km=distance_km,
-                eta_seconds=eta_seconds,
-                elevation_gain=elevation_gain
-            )
+        db.add(SharedRoute)
+        db.commit() #
 
-            db.add(SharedRoute)
-            db.commit()
-
-            return {
-                "success": True,
-                "code": route_id
-            }
+        return {
+            "success": True,
+            "code": route_id
+        }
     
     except HTTPException:
         raise
+    except IntegrityError as e:
+        return {
+            "success": False,
+            "code": route_id
+        }
     except Exception as e:
         short_traceback = "".join(traceback.format_exception_only(type(e), e)).strip()
         
