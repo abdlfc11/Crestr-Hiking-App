@@ -206,6 +206,7 @@ class RouteSharingTable(SQLModel, table=True):
         }, 
     )
     name: str = Field(max_length=100, nullable=False)
+    user_id: int = Field(default=None, nullable=False)
     coordinates: str = Field(sa_column=Column(Text, nullable=False))
     eta_seconds: int = Field(nullable=False)
     distance_km: Optional[float] = Field(default=None)
