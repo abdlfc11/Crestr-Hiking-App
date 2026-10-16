@@ -20,15 +20,52 @@ import {
 } from "../utils/style-utils.js"
 
 import {
-  createStatsPanel
+  createStatsPanel,
+  showToast
 } from "../utils/ui-utils.js"
 
-import { getLastLoadedRouteStats, setLastKnownDistanceKm, setLastLoadedRouteStats } from "./routeState.js";
+import { 
+  clearManualRouteState,
+  getLastLoadedRouteStats,
+  setCurrentPathData,
+  setLastKnownDistanceKm,
+  setLastLoadedRouteStats,
+  setLoadedRouteCoordinates
+} from "./routeState.js";
 
 import { getSavedPointStyle } from "../saved_points/style.js";
 
 import { MAP_VIEW_PADDING } from "../constants.js";
 import type { LoadRouteResponse } from "./route_types.js";
+import { createElevationProfile, initChartToggleListener } from "../elevationChart.js";
+
+export async function displaySharedRoute(routeId: string) {
+
+  try {
+    const url = `${window.appConfig.apiGetSharedRouteUrl}/${encodeURIComponent(routeId)}`;
+
+    const response = await fetch(url, {
+      method: "GET",
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || `Load Route Error : ${response.status}`, {cause: data.user_message || "Sorry, there was an error loading this route, please try again later."})
+    };
+
+    await displayLoadedRouteOnMap(data);
+    await initChartToggleListener();
+    await createElevationProfile(data.coordinates);
+
+    clearManualRouteState();
+    await setLoadedRouteCoordinates(data.coordinates);
+    await setCurrentPathData(data.coordinates);
+  } catch (error) {
+    console.error(error.message);
+    showToast(error.cause || "Sorry, there was an error loading this route, please try again later.")
+  }
+}
 
 
 export function displayLoadedRouteOnMap(data: LoadRouteResponse) {
