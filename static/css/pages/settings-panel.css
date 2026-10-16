@@ -341,7 +341,7 @@ html.dark .delete-account-btn {
 }
 
 html.dark .delete-account-btn:hover {
-  background: #450a0a;
+  background: var(--danger-btn-bg-transparent);
   border-color: #b91c1c;
 }
 

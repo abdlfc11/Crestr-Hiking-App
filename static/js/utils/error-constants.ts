@@ -1,4 +1,5 @@
 export const ERROR_MESSAGES = {
+    generic: "Sorry, there was an unexpected error, please try again later", 
     ROUTING: {
         PATH_CREATION_FAILED:
             "Sorry, there was an error whilst creating a path, please try again later.",

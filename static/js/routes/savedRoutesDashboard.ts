@@ -3,7 +3,7 @@
  * Event listeners are wired through the typed route API helpers.
  */
 
-import { deleteRoute, downloadRoute, loadRoute } from "./routeApi.js";
+import { addSharedRoute, deleteRoute, downloadRoute, getRouteData, loadRoute } from "./routeApi.js";
 
 import { closeSavedRoutesDash } from "../ui/ui.js"
 
@@ -16,12 +16,42 @@ import { createElevationProfile, initChartToggleListener } from "../elevationCha
 import {
   addClickListener,
   createNoRouteCard,
+  showModal,
   showToast
 } from "../utils/ui-utils.js"
 
 import { formatDistance } from "../utils/format-utils.js";
 
+import { nanoid } from "nanoid";
+
+import QRCode from "qrcode";
+
+
 const allRoutesContainer = document.getElementById("all-routes-container");
+
+const shareRouteModalCanvas = document.getElementById('share-route-dialog-canvas') as HTMLCanvasElement | null;
+const shareRouteModal = document.getElementById('share-route-dialog') as HTMLDialogElement | null;
+
+function closeRouteMenus(exceptMenu?: HTMLElement) {
+  document.querySelectorAll<HTMLElement>('.route-actions-menu:not([hidden])').forEach(menu => {
+    if (menu === exceptMenu) return;
+
+    menu.hidden = true;
+    menu.closest('.route-card-actions')
+      ?.querySelector<HTMLButtonElement>('.route-options-button')
+      ?.setAttribute('aria-expanded', 'false');
+  });
+}
+
+function toggleRouteMenu(button: HTMLButtonElement) {
+  const menu = button.parentElement?.querySelector<HTMLElement>('.route-actions-menu');
+  if (!menu) return;
+
+  const shouldOpen = menu.hidden;
+  closeRouteMenus(menu);
+  menu.hidden = !shouldOpen;
+  button.setAttribute('aria-expanded', String(shouldOpen));
+}
 
 /**
  * Function responsible for updating the distance values of saved route cards
@@ -96,6 +126,8 @@ async function onDeleteClick(event: MouseEvent) {
 
       if (remainingCards.length === 0) {
         allRoutesContainer.insertAdjacentHTML('beforeend', createNoRouteCard());
+        const createRouteButton = document.getElementById('no-route-create-button'); 
+        addClickListener(createRouteButton, closeSavedRoutesDash, "click")
       }
 
     }
@@ -130,14 +162,7 @@ async function onDownloadClick(
   
   try {
 
-    console.log('BEFORE DOWNLOAD ROUTE')
-
     const blob = await downloadRoute(route.routeName, format, DOMElement); 
-
-    console.log('AFTER DOWNLOAD ROUTE')
-
-    console.log(route.routeName)
-    console.log(format)
 
     const filename = `${route.routeName}.${format}`
 
@@ -168,6 +193,51 @@ async function onDownloadClick(
   }
 }
 
+async function onShareRouteClick(
+  event: MouseEvent
+) {
+  event.preventDefault();
+
+  const routeCard = (event.target as HTMLElement).closest<HTMLElement>(".route-card")
+  const route = getRouteFromCard(routeCard);
+  if (!route) {
+    return;
+  }
+
+  try {
+
+    const urlId = nanoid(); 
+
+    const routeData = await getRouteData(route.routeName); 
+
+    console.log(routeData);
+
+    const sharedRouteData = {
+      name: routeData.name,
+      coordinates: routeData.coordinates,
+      elevation_gain: routeData.elevation_gain,
+      distance_km: routeData.distance_km,
+      eta_seconds: routeData.eta_seconds,
+      route_id: urlId,
+    };
+
+    const addSharedRouteResponse = await addSharedRoute(sharedRouteData);
+
+    const url = new URL("/map", window.location.origin);
+    url.searchParams.set("route_id", addSharedRouteResponse.code)
+    
+    await QRCode.toCanvas(shareRouteModalCanvas, url.toString());
+    showModal(true, shareRouteModal);
+
+    await navigator.clipboard.writeText(url.toString());
+    
+    showToast("URL copied to clipboard", "success", shareRouteModal)
+  } catch (error) {
+    showToast(error.cause || "Sorry, there was an error sharing your route, please try again later.");
+  }
+  
+}
+
 /** 
 * Handles adding the event listeners for each button on the route card
 */
@@ -177,24 +247,55 @@ function bindRouteCardButtons() {
   allRoutesContainer.addEventListener('click', (e) => {
 
     const target = e.target as HTMLElement;
+    const optionsButton = target.closest<HTMLButtonElement>('.route-options-button');
     const deleteButton = target.closest<HTMLButtonElement>('.route-btn-delete');
-    const loadButton = target.closest<HTMLButtonElement>('.route-btn-load');
-    const gpxButton = target.closest<HTMLButtonElement>('.route-btn-download-gpx')
-    const geojsonButton = target.closest<HTMLButtonElement>('.route-btn-download-geojson')
+    const loadButton = target.closest<HTMLButtonElement>('.route-card-actions-load-route-button');
+    const gpxButton = target.closest<HTMLButtonElement>('.route-btn-download-gpx');
+    const geojsonButton = target.closest<HTMLButtonElement>('.route-btn-download-geojson');
+    const shareRouteButton = target.closest<HTMLButtonElement>('.share-route-button'); 
 
-    if (deleteButton) {
+    if (optionsButton) {
+      e.preventDefault();
+      toggleRouteMenu(optionsButton);
+    }
+    else if (deleteButton) {
+      closeRouteMenus();
       void onDeleteClick(e)
     }
     else if (loadButton) {
+      closeRouteMenus();
       void onLoadClick(e)
     }
     else if (gpxButton) {
+      closeRouteMenus();
       void onDownloadClick(e, "gpx", gpxButton)
     }
     else if (geojsonButton) {
+      closeRouteMenus();
       void onDownloadClick(e, "geojson", geojsonButton)
     }
+    else if (shareRouteButton) {
+      closeRouteMenus();
+      void onShareRouteClick(e)
+    }
   })
+
+  document.addEventListener('click', (event) => {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.route-card-actions')) closeRouteMenus();
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape') return;
+
+    const openMenu = document.querySelector<HTMLElement>('.route-actions-menu:not([hidden])');
+    if (!openMenu) return;
+
+    const optionsButton = openMenu.closest('.route-card-actions')
+      ?.querySelector<HTMLButtonElement>('.route-options-button');
+    closeRouteMenus();
+    optionsButton?.focus();
+  });
 }
 
 /**
@@ -217,4 +318,8 @@ export function initSavedRoutesDashboard() {
   bindRouteCardButtons();
 }
 
-addClickListener(document, initSavedRoutesDashboard, "DOMContentLoaded")
+if (document.readyState === "loading") {
+  addClickListener(document, initSavedRoutesDashboard, "DOMContentLoaded"); // HTML has not been fully read yet
+} else {
+  initSavedRoutesDashboard(); // HTML has been fully read
+}
