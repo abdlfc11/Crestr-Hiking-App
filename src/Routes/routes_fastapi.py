@@ -906,6 +906,16 @@ def add_shared_route(
         route_id = data.route_id
         name = data.name
 
+        if not coordinates:
+            raise HTTPException(
+                status_code=422,
+                detail={
+                    "success": False,
+                    "message": "Empty coordinates given",
+                    "user_message": "Sorry, the route you tried to share was invalid."
+                }
+            )
+
         normalised_coords = [
             [
                 round(float(coord[0]), 5),
