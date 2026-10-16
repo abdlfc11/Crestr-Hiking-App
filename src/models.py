@@ -190,3 +190,29 @@ class SessionTable(SQLModel, table=True):
     # relationships
     user_id: int = Field(foreign_key="user.id", nullable=False, ondelete="CASCADE")
     user: Optional[User] = Relationship(back_populates="session_table")
+
+# ID-ROUTE TABLE (used for route sharing)
+class RouteSharingTable(SQLModel, table=True):
+    __tablename__ = "route_sharing_table"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    route_id: str = Field(unique=True, index=True, nullable=False)
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        sa_type=DateTime(timezone=True),
+        sa_column_kwargs={
+            "server_default": func.now(),
+            "nullable": False,
+        }, 
+    )
+    name: str = Field(max_length=100, nullable=False)
+    user_id: int = Field(default=None, nullable=False)
+    coordinates: str = Field(sa_column=Column(Text, nullable=False))
+    eta_seconds: int = Field(nullable=False)
+    distance_km: Optional[float] = Field(default=None)
+    elevation_gain: str = Field(max_length=30, nullable=False)
+    route_hash: str = Field(nullable=False, index=True)
+
+    __table_args__ = (
+        UniqueConstraint("user_id", "route_hash", name="unique_user_route_hash"),
+    )

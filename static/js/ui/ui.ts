@@ -72,7 +72,6 @@ import {
 import {
   getCurrentMode,
   getCurrentPathData,
-  setCurrentPathData,
   getLoadedRouteCoordinates,
   clearPathState,
   clearManualRouteState,
@@ -95,9 +94,9 @@ import { setOnDistanceUnitChange } from "../settings.js";
 
 import { getTheme } from "../settingsState.js";
 
-import { displayLoadedRouteStats } from "../routes/loadRoute.js";
+import { displayLoadedRouteStats, displaySharedRoute } from "../routes/loadRoute.js";
 
-import { createElevationProfile, initChartToggleListener, resetElevationChart, setHoverPointFeature, toggleElevationChart } from "../elevationChart.js";
+import { createElevationProfile, initChartToggleListener, resetElevationChart, toggleElevationChart } from "../elevationChart.js";
 
 import { displayImportedRouteCard, processImportedRouteFile } from "../importRoute.js";
 
@@ -166,9 +165,7 @@ const deletePointModalContent = deletePointModal.querySelector('.modal-content')
 // save point modal
 const savePointModal = document.getElementById('save-point-dialog') as HTMLDialogElement | null;
 const savePointModalContent = savePointModal.querySelector('.modal-content');
-const savePointModalInput = document.getElementById('save-point-dialog-name-input') as HTMLInputElement | null;
 const savePointModalCloseButton = document.getElementById('save-point-dialog-close');
-const savePointModalSaveButton = document.getElementById('save-point-dialog-save');
 
 // login modal
 const loginModal = document.getElementById('login-dialog') as HTMLDialogElement | null;
@@ -202,6 +199,11 @@ const loadLastRouteModalRouteElevationGain = document.getElementById('load-last-
 const shortcutsModal = document.getElementById('shortcuts-dialog') as HTMLDialogElement | null;
 const shortcutsModalContent = shortcutsModal.querySelector('.modal-content');
 const shortcutsModalCloseButton = document.getElementById('shortcuts-dialog-close-button');
+
+// Route Sharing Modal
+const shareRouteModal = document.getElementById('share-route-dialog') as HTMLDialogElement | null;
+const shareRouteModalContent = shareRouteModal.querySelector('.modal-content');
+const shareRouteModalExitButton = document.getElementById('share-route-dialog-exit-button');
 
 // saved route dash panel
 const openSavedRoutesDashButton = document.getElementById('saved-routes-dash-open-button');
@@ -1709,7 +1711,7 @@ function handleSelectSavedPoint(event: MapBrowserEvent<PointerEvent>): boolean {
 export function applyTheme(theme: ThemePreference) {
   document.documentElement.classList.toggle("dark", theme === "dark");
 
-  const currentCoordinates =  getCurrentMode() === "auto" ? getCurrentPathData() : manualRouteState.pathCoords
+  const currentCoordinates =  getLoadedRouteCoordinates() || manualRouteState.pathCoords
 
   resetElevationChart();
   if (currentCoordinates) {
@@ -2067,6 +2069,10 @@ export function initUi() {
   addClickListener(shortcutsModalCloseButton, () => showModal(false, shortcutsModal), "click");
   addClickListener(shortcutsModal, (e) => closeModalUponOutsideClick(e, shortcutsModalContent, shortcutsModal), "click");
 
+  // Share Route Modal
+  addClickListener(shareRouteModalExitButton, () => showModal(false, shareRouteModal), "click");
+  addClickListener(shareRouteModal, (e) => closeModalUponOutsideClick(e, shareRouteModalContent, shareRouteModal), "click");
+
   onMapClick(manualRouteClickHandler);
 
   // These event listeners are for updating the map cursor.
@@ -2083,6 +2089,9 @@ export function initUi() {
 
     setCursor("grabbing");
   });
+
+  const routeId = new URLSearchParams(window.location.search).get("route_id");
+  if (routeId) displaySharedRoute(routeId)
 }
 
 
