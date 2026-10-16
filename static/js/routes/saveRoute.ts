@@ -136,6 +136,7 @@ async function handleSaveRoute(e: SubmitEvent) {
     homeButtonFunction();
     updateSaveRouteContainer();
 
+    showToast("Route saved successfully", "success", null);
   }
   catch (error) {
     showToast( error.cause || "Sorry, there was an error saving your route, please try again later.")
