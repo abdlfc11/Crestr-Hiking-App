@@ -318,4 +318,8 @@ export function initSavedRoutesDashboard() {
   bindRouteCardButtons();
 }
 
-addClickListener(document, initSavedRoutesDashboard, "DOMContentLoaded")
+if (document.readyState === "loading") {
+  addClickListener(document, initSavedRoutesDashboard, "DOMContentLoaded"); // HTML has not been fully read yet
+} else {
+  initSavedRoutesDashboard(); // HTML has been fully read
+}
