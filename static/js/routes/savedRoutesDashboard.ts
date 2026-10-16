@@ -3,7 +3,7 @@
  * Event listeners are wired through the typed route API helpers.
  */
 
-import { deleteRoute, downloadRoute, loadRoute } from "./routeApi.js";
+import { addSharedRoute, deleteRoute, downloadRoute, getRouteData, loadRoute } from "./routeApi.js";
 
 import { closeSavedRoutesDash } from "../ui/ui.js"
 
@@ -16,6 +16,7 @@ import { createElevationProfile, initChartToggleListener } from "../elevationCha
 import {
   addClickListener,
   createNoRouteCard,
+  showModal,
   showToast
 } from "../utils/ui-utils.js"
 
@@ -23,7 +24,13 @@ import { formatDistance } from "../utils/format-utils.js";
 
 import { nanoid } from "nanoid";
 
+import QRCode from "qrcode";
+
+
 const allRoutesContainer = document.getElementById("all-routes-container");
+
+const shareRouteModalCanvas = document.getElementById('share-route-dialog-canvas') as HTMLCanvasElement | null;
+const shareRouteModal = document.getElementById('share-route-dialog') as HTMLDialogElement | null;
 
 function closeRouteMenus(exceptMenu?: HTMLElement) {
   document.querySelectorAll<HTMLElement>('.route-actions-menu:not([hidden])').forEach(menu => {
@@ -197,11 +204,37 @@ async function onShareRouteClick(
     return;
   }
 
-  const urlId = nanoid(); 
+  try {
 
-  // Next call a backend API to add URLs to a psql database which stores the id and the corresponding route 
-  // Then build a URL based on the FasTAPI route defined
-  // FastAPI route should accept the ID as a query param, perhaps a good idea for url is DONAIN/route/{ID}
+    const urlId = nanoid(); 
+
+    const routeData = await getRouteData(route.routeName); 
+
+    console.log(routeData);
+
+    const sharedRouteData = {
+      name: routeData.name,
+      coordinates: routeData.coordinates,
+      elevation_gain: routeData.elevation_gain,
+      distance_km: routeData.distance_km,
+      eta_seconds: routeData.eta_seconds,
+      route_id: urlId,
+    };
+
+    const addSharedRouteResponse = await addSharedRoute(sharedRouteData);
+
+    const url = new URL("/map", window.location.origin);
+    url.searchParams.set("route_id", addSharedRouteResponse.code)
+    
+    QRCode.toCanvas(shareRouteModalCanvas, url.toString());
+    showModal(true, shareRouteModal);
+
+    await navigator.clipboard.writeText(url.toString());
+    
+    showToast("URL copied to clipboard", "success", shareRouteModal)
+  } catch (error) {
+    showToast(error.cause || "Sorry, there was an error sharing your route, please try again later.");
+  }
   
 }
 

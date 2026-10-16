@@ -751,6 +751,124 @@ def get_route_data(
 
 #endregion
 
+#region Get Shared Route
+@router.get(
+    "/routing/route/{route_id}",
+    dependencies=[
+        Depends(
+            RateLimiter(
+                limiter=Limiter(Rate(110, Duration.MINUTE)),
+                callback=rate_limit_exceeded_callback
+            )
+        )
+    ]
+)
+def get_shared_route(
+    route_id: str,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_session)
+):
+    if not route_id:
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "success": False,
+                "message": "A shared route ID is required.",
+                "user_message": "The shared route link is missing its route ID."
+            }
+        )
+
+    try:
+        route = db.exec(
+            select(RouteSharingTable)
+            .where(RouteSharingTable.route_id==route_id)
+        ).first()
+
+        if not route:
+            raise HTTPException(
+                status_code=404,
+                detail={
+                    "success": False,
+                    "message": "The route was not found",
+                    "user_message": "The route was not found in the server, please try again later"
+                }
+            )
+
+        coordinates = json.loads(route.coordinates)
+        if not coordinates:
+            log_action('Loading Shared Route', False, "No coordinates found in the shared route", None, 'GET_SHARED_ROUTE')
+
+            raise HTTPException(
+                status_code=422,
+                detail={
+                    "success": False,
+                    "message": "There are no valid coordinates within the shared route.",
+                    "user_message": "Sorry, this shared route does not contain valid coordinates."
+                }
+            )
+
+        wgs84_coordinates = []
+
+        # Shared routes may contain coordinates saved in either Web Mercator or WGS84.
+        if check_web_mercator(coordinates[0]):
+            for coord in coordinates:
+                x, y = coord[0], coord[1]
+                z = coord[2] if len(coord) >= 3 else 0
+                lon, lat = service.convert_web_mercator_to_wgs84(x, y)
+                wgs84_coordinates.append([lon, lat, z])
+        else:
+            for coord in coordinates:
+                x, y = coord[0], coord[1]
+                z = coord[2] if len(coord) >= 3 else 0
+                wgs84_coordinates.append([x, y, z])
+
+        path_geojson = {
+            "type": "FeatureCollection",
+            "features": [{
+                "type": "Feature",
+                "geometry": {
+                    "type": "LineString",
+                    "coordinates": wgs84_coordinates
+                },
+                "properties": {"color": "#2563eb"}
+            }]
+        }
+
+        midpoint = wgs84_coordinates[len(wgs84_coordinates) // 2]
+
+        route_stats = {
+            "total_distance": route.distance_km if route.distance_km is not None else 0,
+            "eta_seconds": route.eta_seconds,
+            "elevation_change": route.elevation_gain
+        }
+
+        return {
+            "success": True,
+            "message": f"Route '{route.name}' loaded successfully",
+            "pathGeoJSON": path_geojson,
+            "map_centre": midpoint,
+            "coordinates": wgs84_coordinates,
+            "route_stats": route_stats
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+
+        short_traceback = "".join(traceback.format_exception_only(type(e), e)).strip()
+
+        log_action('Loading Route', False, short_traceback, None, 'GET_SHARED_ROUTE')
+
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "success": False,
+                "message": "Sorry, there was an unexpected error whilst getting this route. "
+            }
+        )
+
+#endregion
+
 #region Adding Shared Route
 
 @router.post(
@@ -789,17 +907,38 @@ def add_shared_route(
         name = data.name
 
         normalised_coords = [
-            [round(float(coord[0]), 5), round(float(coord[1]), 5)]
+            [
+                round(float(coord[0]), 5),
+                round(float(coord[1]), 5),
+                float(coord[2]) if len(coord) >= 3 else 0,
+            ]
             for coord in coordinates
         ]
-        route_json = json.dumps(normalised_coords, separators=(',', ':'))
+        hash_coords = [
+            [coord[0], coord[1]]
+            for coord in normalised_coords
+        ]
+        route_json = json.dumps(hash_coords, separators=(',', ':'))
         route_hash = hashlib.sha256(route_json.encode('utf-8')).hexdigest()
+
+        existing_route = db.exec(
+            select(RouteSharingTable)
+            .where(
+                RouteSharingTable.user_id == user.id,
+                RouteSharingTable.route_hash == route_hash,
+            )
+        ).first()
+        if existing_route:
+            return {
+                "success": True,
+                "code": existing_route.route_id,
+            }
 
         SharedRoute = RouteSharingTable(
             name=name,
             route_id=route_id,
             user_id=user.id,
-            coordinates=json.dumps(coordinates),
+            coordinates=json.dumps(normalised_coords),
             distance_km=distance_km,
             eta_seconds=eta_seconds,
             elevation_gain=elevation_gain,
@@ -816,11 +955,28 @@ def add_shared_route(
     
     except HTTPException:
         raise
-    except IntegrityError as e:
-        return {
-            "success": False,
-            "code": route_id
-        }
+    except IntegrityError:
+        db.rollback()
+        existing_route = db.exec(
+            select(RouteSharingTable)
+            .where(
+                RouteSharingTable.user_id == user.id,
+                RouteSharingTable.route_hash == route_hash,
+            )
+        ).first()
+        if existing_route:
+            return {
+                "success": True,
+                "code": existing_route.route_id,
+            }
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "success": False,
+                "message": "The route could not be shared because its ID is already in use.",
+                "user_message": "Sorry, this route could not be shared. Please try again."
+            }
+        )
     except Exception as e:
         short_traceback = "".join(traceback.format_exception_only(type(e), e)).strip()
         
@@ -834,6 +990,10 @@ def add_shared_route(
                 "user_message": "Sorry, there was an unexpected error whilst sharing your route. "
             }
         )
+
+#endregion
+
+#region Load Shared Route
 
 #endregion
 
@@ -1320,8 +1480,3 @@ def download_route_file(
 
 
 #endregion
-
-
-
-
-
