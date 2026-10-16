@@ -37,7 +37,7 @@ import { getSavedPointStyle } from "../saved_points/style.js";
 
 import { MAP_VIEW_PADDING } from "../constants.js";
 import type { LoadRouteResponse } from "./route_types.js";
-import { createElevationProfile, initChartToggleListener } from "../elevationChart.js";
+import { createElevationProfile, initChartToggleListener, resetElevationChart } from "../elevationChart.js";
 
 export async function displaySharedRoute(routeId: string) {
 
@@ -132,6 +132,7 @@ export function displayLoadedRouteOnMap(data: LoadRouteResponse) {
 
 export function displayLoadedRouteStats(routeStats: RouteStats | null) {
   if (!routeStats) return;
+  if (getLastLoadedRouteStats()) resetElevationChart();
 
   setLastKnownDistanceKm(Number(routeStats.total_distance));
 
