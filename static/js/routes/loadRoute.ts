@@ -24,7 +24,14 @@ import {
   showToast
 } from "../utils/ui-utils.js"
 
-import { getLastLoadedRouteStats, setLastKnownDistanceKm, setLastLoadedRouteStats } from "./routeState.js";
+import { 
+  clearManualRouteState,
+  getLastLoadedRouteStats,
+  setCurrentPathData,
+  setLastKnownDistanceKm,
+  setLastLoadedRouteStats,
+  setLoadedRouteCoordinates
+} from "./routeState.js";
 
 import { getSavedPointStyle } from "../saved_points/style.js";
 
@@ -50,6 +57,10 @@ export async function displaySharedRoute(routeId: string) {
     await displayLoadedRouteOnMap(data);
     await initChartToggleListener();
     await createElevationProfile(data.coordinates);
+
+    clearManualRouteState();
+    await setLoadedRouteCoordinates(data.coordinates);
+    await setCurrentPathData(data.coordinates);
   } catch (error) {
     console.error(error.message);
     showToast(error.cause || "Sorry, there was an error loading this route, please try again later.")

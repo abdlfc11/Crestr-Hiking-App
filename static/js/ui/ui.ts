@@ -1711,7 +1711,7 @@ function handleSelectSavedPoint(event: MapBrowserEvent<PointerEvent>): boolean {
 export function applyTheme(theme: ThemePreference) {
   document.documentElement.classList.toggle("dark", theme === "dark");
 
-  const currentCoordinates =  getCurrentMode() === "auto" ? getCurrentPathData() : manualRouteState.pathCoords
+  const currentCoordinates =  getLoadedRouteCoordinates() || manualRouteState.pathCoords
 
   resetElevationChart();
   if (currentCoordinates) {
