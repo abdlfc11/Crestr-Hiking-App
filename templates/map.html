@@ -425,6 +425,26 @@
             </div>
         </dialog>
 
+        <!-- ##### SHARE ROUTE MODAL (QR Code) ##### -->
+        <dialog id="share-route-dialog" class="modal-overlay">
+            <div class="modal-wrapper">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Share Route</h2>
+                    </div>
+                    <div class="modal-body">
+                        <canvas id="share-route-dialog-canvas"></canvas>
+                        <p>This QR code opens the route on Crestr for viewing (and eventually editing). </p>
+                        
+                        <p>Alternatively you can share the link copied to the clipboard.</p>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" id="share-route-dialog-exit-button" class="modal-btn modal-btn-secondary">Exit</button>
+                    </div>
+                </div>
+            </div>
+        </dialog>
+
         <div id="map"></div>
     </div>
 
@@ -546,44 +566,92 @@
                 </header>
 
                 <div id="all-routes-container">
+                    <div class="route-list-header" aria-hidden="true">
+                        <span>Route</span>
+                        <span>Saved</span>
+                        <span>Distance</span>
+                        <span>ETA</span>
+                        <span>Elevation gain</span>
+                        <span class="route-list-options-heading">Options</span>
+                    </div>
                     {% if available_routes %}
                         {% for route in available_routes %}
                         <div class="route-card" data-route-name="{{ route.name }}">
-                            <div class="route-card-header">
+                            <div class="route-card-cell route-card-primary">
                                 <h3 class="route-card-name">{{ route.name }}</h3>
-                                <span class="route-card-date">Saved on {{ route.created_at | strftime("%d/%m/%Y") }}</span>
                             </div>
-                            <div class="route-card-stats">
-                                <div class="stat-item">
-                                    <span class="stat-label">Distance:</span>
-                                    <span class="stat-value" data-distance-km="{{ route.distance_km }}">{{ route.distance_km | format_distance }}</span>
-                                </div>
-                                <div class="stat-item">
-                                    <span class="stat-label">ETA:</span>
-                                    <span class="stat-value">{{ route.eta_seconds | format_eta }}</span>
-                                </div>
-                                <div class="stat-item">
-                                    <span class="stat-label">Elevation Gain:</span>
-                                    <span class="stat-value">{{ route.elevation_change | format_elevation }}</span>
-                                </div>
+                            <div class="route-card-cell">
+                                <span class="route-card-mobile-label">Saved</span>
+                                <span class="route-card-date">{{ route.created_at | strftime("%d/%m/%Y") }}</span>
+                            </div>
+                            <div class="route-card-cell">
+                                <span class="route-card-mobile-label">Distance</span>
+                                <span class="route-card-value" data-distance-km="{{ route.distance_km }}">{{ route.distance_km | format_distance }}</span>
+                            </div>
+                            <div class="route-card-cell">
+                                <span class="route-card-mobile-label">ETA</span>
+                                <span class="route-card-value">{{ route.eta_seconds | format_eta }}</span>
+                            </div>
+                            <div class="route-card-cell">
+                                <span class="route-card-mobile-label">Elevation gain</span>
+                                <span class="route-card-value">{{ route.elevation_change | format_elevation }}</span>
                             </div>
                             <div class="route-card-actions">
-                                <button type="button" class="route-btn route-btn-delete">Delete</button>
-                                <button type="button" class="route-btn route-btn-download-gpx">
-                                    <span class="route-btn-text">GPX</span>
-                                    <span class="loader"></span>
+                                <button
+                                    type="button"
+                                    class="route-card-actions-buttons route-card-actions-load-route-button"
+                                    aria-label="Load Route"
+                                    data-tooltip="Load Route"
+                                >
+                                    <i data-lucide="arrow-up-right"></i>
                                 </button>
-                                <button type="button" class="route-btn route-btn-download-geojson">
-                                    <span class="route-btn-text">GeoJSON</span>
-                                    <span class="loader"></span>
+                                <button
+                                    type="button"
+                                    class="route-options-button route-card-actions-buttons"
+                                    aria-label="Options for {{ route.name }}"
+                                    aria-haspopup="menu"
+                                    aria-expanded="false"
+                                >
+                                    <span aria-hidden="true">&#8230;</span> 
                                 </button>
-                                <button type="button" class="route-btn route-btn-load">Load</button>
+                                <div class="route-actions-menu" hidden>
+
+                                    <button
+                                        type="button"
+                                        class="route-btn share-route-button"
+                                    >
+                                        Share Route
+                                    </button>
+
+                                    <button 
+                                        type="button" 
+                                        class="route-btn route-btn-download-gpx"
+                                    >
+                                        <span class="route-btn-text">Download GPX</span>
+                                        <span class="loader" aria-hidden="true"></span>
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        class="route-btn route-btn-download-geojson"
+                                    >
+                                        <span class="route-btn-text">Download GeoJSON</span>
+                                        <span class="loader" aria-hidden="true"></span>
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        class="route-btn route-btn-delete"
+                                    >
+                                        Delete route
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         {% endfor %}
                     
                     {% else %}
-                        <div id="no-routes-wrapper" class="no-routes-wrapper">
+                        <div id="no-routes-wrapper-container" class="no-routes-wrapper">
                             <div class="no-routes-card">
                                 <h2 class="no-routes-title">No routes saved yet</h2>
                                 <p class="no-routes-description">
@@ -808,12 +876,6 @@
         </div>
     </div>
 
-
-
-
-
-
-
     <!-- ##### AppConfig to access API Enpoint URLS ##### -->
     <script>
         window.appConfig = {
@@ -836,12 +898,15 @@
 
             // routing API endpoints
             apiCalculatePathUrl: "/routing/calculate-path",
+            apiGetRouteDataUrl: "/routing/get-route-data",
             apiSaveRouteUrl: "/routing/save-route",
             apiLoadRouteUrl: "/routing/load-route",
             apiDeleteRouteUrl: "/routing/delete-route",
             apiDownloadRouteFileUrl: "/routing/download-route",
             apiImportRouteUrl: "/routing/import-route-file",
             apiNormaliseRouteStatsUrl: "/routing/normalise-route-stats",
+            apiAddSharedRouteUrl: "/routing/add-shared-route",
+            apiGetSharedRouteUrl: "/routing/route",
 
             // points + search API endpoints
             apiSearchAreaUrl: "/search/search-area",

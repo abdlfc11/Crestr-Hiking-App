@@ -17,8 +17,6 @@ import {
   getTheme,
 } from "./settingsState.js";
 
-import { formatDistance } from "./utils/format-utils.js";
-
 import { logout, deleteAccount } from "./auth/auth.js";
 
 import { applyTheme } from "./ui/ui.js";

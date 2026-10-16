@@ -1,6 +1,6 @@
 
 import {
-    createRouteCard
+    createRouteRow
 } from "./utils/ui-utils.js";
 
 import {
@@ -8,6 +8,8 @@ import {
     formatETA,
     formatElevation
 } from "./utils/format-utils.js";
+
+import { initIcons } from "./init/icons.js";
 
 const allRoutesContainer = document.getElementById("all-routes-container");
 
@@ -69,7 +71,10 @@ export function displayImportedRouteCard(data: ImportedRouteResponse): void {
 
     
 
-    const routeCard = createRouteCard(routeName, formattedToday, distanceKm, formattedDistanceKm, formattedETA, formattedElevation);
+    const routeCard = createRouteRow(routeName, formattedToday, distanceKm, formattedDistanceKm, formattedETA, formattedElevation);
 
-    if (allRoutesContainer) allRoutesContainer.insertAdjacentHTML("beforeend", routeCard);            
+    if (allRoutesContainer) {
+        allRoutesContainer.insertAdjacentHTML("beforeend", routeCard);
+        initIcons();
+    }
 }

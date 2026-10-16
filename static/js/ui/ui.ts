@@ -72,7 +72,6 @@ import {
 import {
   getCurrentMode,
   getCurrentPathData,
-  setCurrentPathData,
   getLoadedRouteCoordinates,
   clearPathState,
   clearManualRouteState,
@@ -95,9 +94,9 @@ import { setOnDistanceUnitChange } from "../settings.js";
 
 import { getTheme } from "../settingsState.js";
 
-import { displayLoadedRouteStats } from "../routes/loadRoute.js";
+import { displayLoadedRouteStats, displaySharedRoute } from "../routes/loadRoute.js";
 
-import { createElevationProfile, initChartToggleListener, resetElevationChart, setHoverPointFeature, toggleElevationChart } from "../elevationChart.js";
+import { createElevationProfile, initChartToggleListener, resetElevationChart, toggleElevationChart } from "../elevationChart.js";
 
 import { displayImportedRouteCard, processImportedRouteFile } from "../importRoute.js";
 
@@ -166,9 +165,7 @@ const deletePointModalContent = deletePointModal.querySelector('.modal-content')
 // save point modal
 const savePointModal = document.getElementById('save-point-dialog') as HTMLDialogElement | null;
 const savePointModalContent = savePointModal.querySelector('.modal-content');
-const savePointModalInput = document.getElementById('save-point-dialog-name-input') as HTMLInputElement | null;
 const savePointModalCloseButton = document.getElementById('save-point-dialog-close');
-const savePointModalSaveButton = document.getElementById('save-point-dialog-save');
 
 // login modal
 const loginModal = document.getElementById('login-dialog') as HTMLDialogElement | null;
@@ -203,12 +200,17 @@ const shortcutsModal = document.getElementById('shortcuts-dialog') as HTMLDialog
 const shortcutsModalContent = shortcutsModal.querySelector('.modal-content');
 const shortcutsModalCloseButton = document.getElementById('shortcuts-dialog-close-button');
 
+// Route Sharing Modal
+const shareRouteModal = document.getElementById('share-route-dialog') as HTMLDialogElement | null;
+const shareRouteModalContent = shareRouteModal.querySelector('.modal-content');
+const shareRouteModalExitButton = document.getElementById('share-route-dialog-exit-button');
+
 // saved route dash panel
 const openSavedRoutesDashButton = document.getElementById('saved-routes-dash-open-button');
 const closeSavedRoutesDashButton = document.getElementById('saved-routes-dash-go-back-button');
 const savedRoutesDashContent = document.getElementById('saved-routes-dashboard');
-const noRouteCreateButton = document.getElementById("no-route-create-button");
-const noRouteCreateDiv = document.getElementById('no-routes-wrapper');
+const noRouteCardButton = document.getElementById("no-route-create-button");
+const noRouteCardDiv = document.getElementById('no-routes-wrapper-container');
 
 // setting panel
 const settingOpenButton = document.getElementById("settings-open-button");
@@ -737,7 +739,7 @@ async function handleRouteImport() {
       }
 
       displayImportedRouteCard(result);
-      removeDOMElement(noRouteCreateDiv);
+      removeDOMElement(noRouteCardDiv);
       cancelRouteImport();
       return true;
 
@@ -1707,14 +1709,9 @@ function handleSelectSavedPoint(event: MapBrowserEvent<PointerEvent>): boolean {
 
 // ##### LIGHT / DARK THEME #####
 export function applyTheme(theme: ThemePreference) {
-  const effective: Exclude<ThemePreference, "system"> = 
-    theme === "system" ? 
-    (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light") : 
-    theme
+  document.documentElement.classList.toggle("dark", theme === "dark");
 
-  document.documentElement.classList.toggle("dark", effective === "dark");
-
-  const currentCoordinates =  getCurrentMode() === "auto" ? getCurrentPathData() : manualRouteState.pathCoords
+  const currentCoordinates =  getLoadedRouteCoordinates() || manualRouteState.pathCoords
 
   resetElevationChart();
   if (currentCoordinates) {
@@ -2033,7 +2030,7 @@ export function initUi() {
 
   addClickListener(undoManualRouteButton, undoManualRoutePoint, "click");
   addClickListener(redoManualRouteButton, redoManualRoutePoint, "click");
-  addClickListener(noRouteCreateButton, closeSavedRoutesDash, "click");
+  addClickListener(noRouteCardButton, closeSavedRoutesDash, "click");
   
   addClickListener(generatePathButton, () => void handleManualRouteGeneration(), "click");
 
@@ -2072,6 +2069,10 @@ export function initUi() {
   addClickListener(shortcutsModalCloseButton, () => showModal(false, shortcutsModal), "click");
   addClickListener(shortcutsModal, (e) => closeModalUponOutsideClick(e, shortcutsModalContent, shortcutsModal), "click");
 
+  // Share Route Modal
+  addClickListener(shareRouteModalExitButton, () => showModal(false, shareRouteModal), "click");
+  addClickListener(shareRouteModal, (e) => closeModalUponOutsideClick(e, shareRouteModalContent, shareRouteModal), "click");
+
   onMapClick(manualRouteClickHandler);
 
   // These event listeners are for updating the map cursor.
@@ -2088,6 +2089,9 @@ export function initUi() {
 
     setCursor("grabbing");
   });
+
+  const routeId = new URLSearchParams(window.location.search).get("route_id");
+  if (routeId) displaySharedRoute(routeId)
 }
 
 

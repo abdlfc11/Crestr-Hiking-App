@@ -20,15 +20,52 @@ import {
 } from "../utils/style-utils.js"
 
 import {
-  createStatsPanel
+  createStatsPanel,
+  showToast
 } from "../utils/ui-utils.js"
 
-import { getLastLoadedRouteStats, setLastKnownDistanceKm, setLastLoadedRouteStats } from "./routeState.js";
+import { 
+  clearManualRouteState,
+  getLastLoadedRouteStats,
+  setCurrentPathData,
+  setLastKnownDistanceKm,
+  setLastLoadedRouteStats,
+  setLoadedRouteCoordinates
+} from "./routeState.js";
 
 import { getSavedPointStyle } from "../saved_points/style.js";
 
 import { MAP_VIEW_PADDING } from "../constants.js";
 import type { LoadRouteResponse } from "./route_types.js";
+import { createElevationProfile, initChartToggleListener, resetElevationChart } from "../elevationChart.js";
+
+export async function displaySharedRoute(routeId: string) {
+
+  try {
+    const url = `${window.appConfig.apiGetSharedRouteUrl}/${encodeURIComponent(routeId)}`;
+
+    const response = await fetch(url, {
+      method: "GET",
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || `Load Route Error : ${response.status}`, {cause: data.user_message || "Sorry, there was an error loading this route, please try again later."})
+    };
+
+    await displayLoadedRouteOnMap(data);
+    await initChartToggleListener();
+    await createElevationProfile(data.coordinates);
+
+    clearManualRouteState();
+    await setLoadedRouteCoordinates(data.coordinates);
+    await setCurrentPathData(data.coordinates);
+  } catch (error) {
+    console.error(error.message);
+    showToast(error.cause || "Sorry, there was an error loading this route, please try again later.")
+  }
+}
 
 
 export function displayLoadedRouteOnMap(data: LoadRouteResponse) {
@@ -82,47 +119,20 @@ export function displayLoadedRouteOnMap(data: LoadRouteResponse) {
 
   const view = map.getView();
 
-  // if zoom is greater than 10.5 (zoomed in)
-  if (view.getZoom() > 11) {
-
-    // zoom out slightly 
-    view.animate(
-      { center: view.getCenter(),
-        duration: 1000,
-        zoom: 10.5 
-      }, 
-      
-      // then zoom into the route
-      function(complete: boolean) {
-        if (complete) {
-          setTimeout(() => {
-            view.fit(vectorSource.getExtent(), {
-              size: map.getSize(),
-              padding: MAP_VIEW_PADDING,
-              duration: 1000
-            })
-          }, 100)
-        }
-      }
-    );
-  } 
-  
-  // otherwise, zoom into the route immediately
-  else {
-    setTimeout(() => {
-      view.fit(vectorSource.getExtent(), {
-        size: map.getSize(),
-        padding: MAP_VIEW_PADDING,
-        duration: 1000
-      })
-    }, 100)
-  }
+  setTimeout(() => {
+    view.fit(vectorSource.getExtent(), {
+      size: map.getSize(),
+      padding: MAP_VIEW_PADDING,
+      duration: 1100
+    })
+  }, 100)
   setLastLoadedRouteStats(data.route_stats)
   displayLoadedRouteStats(getLastLoadedRouteStats());
 }
 
 export function displayLoadedRouteStats(routeStats: RouteStats | null) {
   if (!routeStats) return;
+  if (getLastLoadedRouteStats()) resetElevationChart();
 
   setLastKnownDistanceKm(Number(routeStats.total_distance));
 
