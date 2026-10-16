@@ -226,7 +226,7 @@ async function onShareRouteClick(
     const url = new URL("/map", window.location.origin);
     url.searchParams.set("route_id", addSharedRouteResponse.code)
     
-    QRCode.toCanvas(shareRouteModalCanvas, url.toString());
+    await QRCode.toCanvas(shareRouteModalCanvas, url.toString());
     showModal(true, shareRouteModal);
 
     await navigator.clipboard.writeText(url.toString());
