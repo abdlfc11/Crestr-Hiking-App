@@ -62,7 +62,7 @@ export async function addSharedRoute(routeData: AddSharedRouteInput): Promise<bo
 
   const data = await response.json();
 
-  if (!response.ok || !data.success) {
+  if (!response.ok || (!data.success && !data.code)) {
     throw new Error(data.message || `addSharedRoute() : ${response.status}`, {cause: data.user_message || ERROR_MESSAGES.generic})
   }; 
 
