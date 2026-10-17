@@ -28,22 +28,6 @@
   --point-name-color: #ef4444;
 }
 
-html.dark {
-  --coord-input-bg: #374151;
-  --coord-input-text: #f3f4f6;
-  --coord-input-border: #4b5563;
-  --coord-input-placeholder: #6b7280;
-  --coord-button-bg: #4b5563;
-  --coord-button-border: #6b7280;
-  --coord-button-hover-bg: #6b7280;
-  --coord-button-hover-border: #9ca3af;
-  --mode-button-bg: #374151;
-  --mode-button-text: #d1d5db;
-  --mode-button-border: #4b5563;
-  --mode-button-hover-bg: #4b5563;
-  --error-message-color: #f87171;
-}
-
 /* Map container */
 #map {
   position: absolute;
@@ -58,7 +42,7 @@ html.dark {
 }
 
 /* RIGHT-CLICK MAP OPTIONS */
-.map-context-menu {
+.context-menu {
   position: fixed;
   z-index: 1200;
   min-width: 5rem;
@@ -70,40 +54,38 @@ html.dark {
   font-family: var(--font-sans);
 }
 
-.map-context-menu-options {
+.context-menu-options {
   padding: 0;
   margin: var(--space-sm) var(--space-2xs);
   list-style: none;
 }
 
-.map-context-menu-option {
+.context-menu-option {
   display: block;
   box-sizing: border-box;
   width: 100%;
-  margin-block: var(--space-2xs);
-  margin-inline: 0;
   padding: var(--space-xs) var(--space-sm);
   color: var(--ink);
-  background: var(--list-item-bg);
+  background: var(--bg);
   border: 0;
-  border-radius: var(--radius-md);
   cursor: pointer;
   font-family: inherit;
   font-size: 0.75rem;
   font-weight: 500;
   text-align: left;
+  text-decoration: underline;
 }
 
-.map-context-menu-option:hover {
-  background-color: var(--list-item-bg-hover);
+.context-menu-option:hover {
+  color: var(--blue)
 }
 
-.map-context-menu-option:focus {
+.context-menu-option:focus {
   outline: none;
 }
 
 .map-context-menu-option:focus-visible {
-  background-color: var(--list-item-bg-hover);
+  color: var(--blue);
   outline: 2px solid var(--focus-ring, currentColor);
   outline-offset: 2px;
 }
@@ -112,6 +94,53 @@ html.dark {
 .ol-control {
   right: 8px;
   left: auto;
+}
+
+.mobile-attribution-control {
+  display: none;
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  z-index: 2;
+}
+
+.mobile-attribution-control .mobile-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: Georgia, serif;
+  font-size: 1rem;
+  font-style: italic;
+  font-weight: 700;
+}
+
+.mobile-attributions {
+  display: none;
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 0.35rem);
+  max-width: min(90vw, 30rem);
+  padding: 0.35rem 0.5rem;
+  color: var(--ink);
+  background: var(--panel-glass-bg);
+  border: 1px solid var(--border-alt);
+  border-radius: var(--radius-xs);
+  box-shadow: var(--panel-shadow);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  font-family: var(--font-sans);
+  font-size: 0.625rem;
+  line-height: 1.35;
+  text-align: right;
+}
+
+.mobile-attributions a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.mobile-attributions a:hover {
+  color: var(--blue);
 }
 
 /* MANUAL ROUTE CREATION */
@@ -185,7 +214,7 @@ html.dark {
   border-radius: 6px;
   font-size: 12px;
   font-family: inherit;
-  background: white;
+  background: var(--field-bg);
   color: var(--ink);
   width: 150px;
   max-width: 100%;
@@ -200,6 +229,10 @@ html.dark {
 
 .coord-input.input-error {
   border-color: var(--error-accent);
+}
+
+.coord-input::placeholder {
+  color: var(--placeholder);
 }
 
 .coord-input.is-active {
@@ -283,6 +316,11 @@ html.dark {
 }
 
 /* SAVE / LOAD ROUTE PANEL */
+
+#mobile-save-route-container {
+  display: none;
+}
+
 #save-route-container {
   position: static;
 }
@@ -407,17 +445,153 @@ html.dark {
 
 /* RESPONSIVE STYLES */
 
+.mobile-nav-container {
+    display: none;
+    position: absolute;
+    top: 50px;
+    left: 15px;
+    z-index: 3;
+    flex-direction: column;
+}
+
+.mobile-actions-container {
+    display: none;
+    position: absolute;
+    top: 10px;
+    left: 15px;
+    z-index: 2;
+    align-items: center;
+}
+
+.mobile-button {
+    background: var(--secondary-btn-bg);
+    color: white;
+    border: 1px solid white;
+    border-radius: var(--radius-md);
+    height: 2rem;
+    width: 2.5rem;
+    text-align: center;
+}
+
+.mobile-button svg {
+    height: 1rem;
+    width: 1rem;
+}
+
+.mobile-button:hover {
+    background: var(--secondary-btn-bg-hover);
+}
+
+.mobile-routing-button {
+  background: var(--blue);
+}
+
+.mobile-routing-button:hover {
+  background-color: var(--blue-dark);
+}
+
+#mobile-nav-dropdown-content {
+  display: flex;
+  flex-direction: column;
+  margin-top: 40px;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  visibility: hidden;
+  transform: translateY(-.5rem);
+  pointer-events: none;
+  transition:
+    max-height .25s ease,
+    opacity .2s ease,
+    transform .25s ease,
+    visibility 0s linear .25s;
+}
+
+#mobile-nav-dropdown-content.show {
+  max-height: 24rem;
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+  transition-delay: 0s;
+}
+
+#mobile-save-route-container {
+    display: none;
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    z-index: 2;
+  }
+
+  #mobile-actions {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: .35rem;
+    max-width: 0;
+    margin-left: 0;
+    padding: .35rem 0;
+    overflow: hidden;
+    visibility: hidden;
+    opacity: 0;
+    transform: translateX(-.5rem);
+    border: 1px solid transparent;
+    border-radius: var(--radius-pill);
+    z-index: 3;
+    transition:
+      max-width .25s ease,
+      margin-left .25s ease,
+      padding-inline .25s ease,
+      opacity .2s ease,
+      transform .25s ease,
+      visibility 0s linear .25s;
+  }
+
+  #mobile-actions.show {
+    max-width: 12rem;
+    margin-left: .5rem;
+    padding-inline: .35rem;
+    visibility: visible;
+    opacity: 1;
+    transform: translateX(0);
+    background: none;
+    transition-delay: 0s;
+  }
+
+  #mobile-actions .mobile-routing-button {
+    flex: 0 0 auto;
+    transform: scale(.85);
+    transition: transform .2s ease;
+  }
+
+  #mobile-actions.show .mobile-routing-button {
+    transform: scale(1);
+  }
+
+  #mobile-actions-button[aria-expanded="true"] {
+    background: var(--secondary-btn-bg-hover);
+    box-shadow: var(--panel-shadow);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #mobile-actions,
+    #mobile-actions .mobile-routing-button {
+      transition: none;
+    }
+  }
+
 @media (max-width: 1024px) {
   #start-end {
-    left: 14px;
+    left: var(--side-nav-space);
     max-width: calc(100vw - 28px);
   }
 
   #save-route-button-container {
-    right: 1rem;
+    right: 2.5rem;
     width: 12rem;
   }
-
+  
   #save-route {
     width: 12rem;
   }
@@ -425,127 +599,42 @@ html.dark {
 
 @media (max-width: 768px) {
   #start-end {
-    top: 42px;
-    left: 10px;
-    min-width: 0;
-    width: calc(100vw - 20px);
-    max-width: 300px;
+    display: none;
   }
 
-  .coords-header,
-  .coords-content {
-    padding: 7px 10px;
+  .mobile-nav-container {
+      display: flex;
   }
 
-  .coords-title {
-    font-size: 12px;
-  }
-
-  .coord-label {
-    font-size: 11px;
-  }
-
-  .coord-input {
-    width: auto;
-    min-width: 110px;
-    padding: 5px 8px;
-    font-size: 12px;
-  }
-
-  .coord-input-group {
-    flex-direction: column;
-    gap: 5px;
-  }
-
-  .coord-button {
-    width: 100%;
-    padding: 6px 10px;
-    font-size: 11px;
-    text-align: center;
-  }
-
-  .generate-button {
-    padding: 7px;
-    font-size: 12px;
-    margin-top: 6px;
-  }
-
-  .manual-instruction {
-    font-size: 11px;
-    padding: 5px 7px;
-    margin-bottom: 6px;
+  .mobile-actions-container {
+    display: flex;
   }
 
   #save-route-button-container {
-    right: 10px;
-    width: min(12rem, calc(100vw - 20px));
+    display: none;
+  }
+  
+  #mobile-save-route-container.show {
+    display: flex;
   }
 
-  #save-route {
-    width: 100%;
-    margin-right: 0;
+  .ol-control {
+    display: none;
   }
 
-  #save-route-toggle-button {
-    padding: 5px 10px;
-    font-size: 12px;
+  .mobile-attributions {
+    display: none;
   }
-}
 
-/* DARK MODE
-   Backgrounds/text now inherit from --panel-glass-bg, --panel-glass-bg-hover,
-   --surface-subtle and --muted-strong (all redefined in html.dark in tokens.css),
-   so the panel containers no longer need page-local dark overrides here — only
-   the values with no token equivalent remain. */
+  .mobile-attribution-control {
+    display: block;
+  }
 
-html.dark .coord-input {
-  background: var(--coord-input-bg);
-  color: var(--coord-input-text);
-  border-color: var(--coord-input-border);
-}
+  .mobile-attributions.show {
+    display: block;
+  }
 
-html.dark .coord-input:focus,
-html.dark .coord-input.is-active {
-  border-color: var(--coord-input-focus-border);
-  box-shadow: var(--coord-input-focus-ring);
-  outline: none;
-}
-
-html.dark .coord-input.input-error {
-  border-color: var(--error-accent);
-}
-
-html.dark .coord-input::placeholder {
-  color: var(--coord-input-placeholder);
-}
-
-html.dark .coord-button {
-  background: var(--coord-button-bg);
-  color: var(--coord-input-text);
-  border-color: var(--coord-button-border);
-}
-
-html.dark .coord-button:hover {
-  background: var(--coord-button-hover-bg);
-  border-color: var(--coord-button-hover-border);
-}
-
-html.dark .mode-button {
-  background: var(--mode-button-bg);
-  color: var(--mode-button-text);
-  border-color: var(--mode-button-border);
-}
-
-html.dark .mode-button.active {
-  background: var(--blue);
-  color: #ffffff;
-  border-color: var(--coord-input-focus-border);
-}
-
-html.dark .mode-button:hover {
-  background: var(--mode-button-hover-bg);
-}
-
-html.dark .error-message {
-  color: var(--error-message-color);
+  #sidenav-shortcuts-button {
+    display: none;
+  }
 }
