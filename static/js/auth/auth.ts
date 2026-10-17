@@ -167,8 +167,8 @@ export async function logout() {
     })    
   } catch (error) {
     console.error(error.message);
-  } finally {
-    window.location.href = "https://crestr.co.uk";
+  } finally { 
+    window.location.href = "https://crestr.co.uk"; // expired cookie / other associated issues = logout already happened, so redirect to main page happens regardless
   }
 }
 
