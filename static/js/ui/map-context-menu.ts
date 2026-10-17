@@ -131,7 +131,7 @@ export function initMapContextMenu() {
 
   saveButton.addEventListener('click', () => {
     closePopup();
-    savePointModal.show();
+    savePointModal.showModal();
   })
 
   savePointModalSaveButton.addEventListener('click', async () => {
