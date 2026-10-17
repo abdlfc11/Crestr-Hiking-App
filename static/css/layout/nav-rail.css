@@ -129,11 +129,8 @@ html.dark {
 }
 
 /* Nav limits for short viewports */
-@media screen and (max-height: 450px) {
-  .sidenav-inner {
-    padding-top: 8px;
-  }
-  .sidenav-button {
-    height: var(--nav-link-height-compact);
+@media (max-width: 768px) {
+  .sidenav {
+    display: none;
   }
 }

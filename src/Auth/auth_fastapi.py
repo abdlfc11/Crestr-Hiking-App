@@ -69,11 +69,6 @@ def login(
         
        
 
-        # this deletes all other valid sessions that the user currently has
-        db.exec(
-            delete(SessionTable).where(SessionTable.user_id == user.id)
-        )
-
         session = SessionTable(
             session_id=secrets.token_urlsafe(32),
             user_id=user.id,
@@ -125,13 +120,11 @@ def logout(
     db: Session = Depends(get_session)
 ):
     if session_id is None:
-        raise HTTPException(
-            status_code=401,
-            detail={
-                "success": False,
-                "message": "Not logged in"
-            }
-        )
+
+        return {
+            "success": False,
+            "message": "Not logged in"
+        }
 
 
     db.exec(delete(SessionTable).where(SessionTable.session_id == session_id))

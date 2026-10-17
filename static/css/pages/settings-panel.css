@@ -165,6 +165,7 @@
   cursor: pointer;
   width: fit-content;
   max-width: 100%;
+  min-width: 0;
   box-sizing: border-box;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
   font-family: inherit;
@@ -352,4 +353,61 @@ html.dark .cancel-delete-btn {
 
 html.dark .confirm-delete-btn {
   background: #b91c1c;
+}
+
+@media (max-width: 768px) {
+  .settings-header-container {
+    padding: 1.5rem 1rem 1.25rem;
+  }
+
+  .settings-header h1 {
+    font-size: 1.8rem;
+  }
+
+  .settings-content {
+    padding: 1.5rem 1rem;
+    gap: 1rem;
+  }
+
+  .settings-item {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.25rem;
+    border-radius: 1.5rem;
+  }
+
+  .settings-item > :not(.settings-text) {
+    align-self: flex-end;
+  }
+
+  .settings-input,
+  .settings-select {
+    width: 100%;
+  }
+
+  .settings-radio-pills {
+    max-width: 100%;
+  }
+
+  .settings-item-destructive .delete-normal-state,
+  .settings-item-destructive .delete-confirm-state {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .settings-item-destructive .delete-account-btn,
+  .settings-item-destructive .delete-confirm-state > div:last-child {
+    align-self: stretch;
+  }
+
+  .settings-item-destructive .delete-confirm-state > div:last-child {
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+
+  .settings-range-wrapper {
+    justify-content: flex-end;
+  }
 }
