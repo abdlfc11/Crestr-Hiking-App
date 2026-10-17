@@ -43,7 +43,10 @@ html.dark input:-webkit-autofill {
   opacity: 1 !important;
 }
 
-
+button,
+a {
+  touch-action: manipulation;
+}
 
 /* This respects reduced-motion preference 
   Implemented as a general accessibility rule that applies

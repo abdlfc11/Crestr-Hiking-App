@@ -3,15 +3,32 @@
  * Event listeners are wired through the typed route API helpers.
  */
 
-import { addSharedRoute, deleteRoute, downloadRoute, getRouteData, loadRoute } from "./routeApi.js";
+import {
+  addSharedRoute,
+  deleteRoute,
+  downloadRoute,
+  getRouteData,
+  loadRoute
+} from "./routeApi.js";
 
-import { closeSavedRoutesDash } from "../ui/ui.js"
+import {
+  closeSavedRoutesDash
+} from "../ui/ui.js"
 
-import { displayLoadedRouteOnMap } from "./loadRoute.js";
+import {
+  displayLoadedRouteOnMap
+} from "./loadRoute.js";
 
-import { setLoadedRouteCoordinates, setCurrentPathData, clearManualRouteState } from "./routeState.js";
+import {
+  setLoadedRouteCoordinates,
+  setCurrentPathData,
+  clearManualRouteState
+} from "./routeState.js";
 
-import { createElevationProfile, initChartToggleListener } from "../elevationChart.js";
+import {
+  createElevationProfile,
+  initChartToggleListener
+} from "../elevationChart.js";
 
 import {
   addClickListener,
@@ -25,7 +42,6 @@ import { formatDistance } from "../utils/format-utils.js";
 import { nanoid } from "nanoid";
 
 import QRCode from "qrcode";
-
 
 const allRoutesContainer = document.getElementById("all-routes-container");
 
