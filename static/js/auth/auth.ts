@@ -21,6 +21,7 @@ const loginValidationLabel = document.getElementById("login_validation_label");
 const loginUsernameEntry = document.getElementById("login_username_entry") as HTMLInputElement | null;
 const loginPasswordEntry = document.getElementById("login_password_entry") as HTMLInputElement | null;
 const loginButton = document.getElementById("login_button");
+const mobileNavLogin = document.getElementById('mobile-nav-login');
 const switchToRegisterButton = document.getElementById("switch_to_register_button");
 
 // Logout elements
@@ -155,20 +156,20 @@ export async function login() {
 /**
  * Handles user logout 
  */
-export function logout() {
+export async function logout() {
 
   const url = window.appConfig.apiLogoutUrl
 
-  fetch(url, {
-    method: "POST",
-    credentials: "same-origin",
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.success) {
-        window.location.href = "https://crestr.co.uk";
-      }
-    });
+  try { 
+    await fetch(url, {
+      method: "POST",
+      credentials: "same-origin",
+    })    
+  } catch (error) {
+    console.error(error.message);
+  } finally {
+    window.location.href = "https://crestr.co.uk";
+  }
 }
 
 //#endregion
@@ -270,6 +271,7 @@ export function initAuth() {
   addClickListener(logoutButton, logout, "click");
   addClickListener(mobileNavLogout, logout, "click");
   addClickListener(loginButton, login, "click");
+  addClickListener(mobileNavLogin, () => window.location.href = "/login-page", "click");
   addClickListener(registerButton, register, "click");
   addClickListener(switchToRegisterButton, switchToRegister, "click");
   addClickListener(switchToLoginButton, switchToLogin, "click");

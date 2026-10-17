@@ -67,13 +67,64 @@ export function initMapContextMenu() {
     popup.style.top = `${Math.min(Math.max(gap, event.clientY), maxTop)}px`;
   };
 
-  viewport.addEventListener("contextmenu", (event) => {
+  const openPopup = (event: MouseEvent) => {
     event.preventDefault();
 
     coordinate = map.getEventCoordinate(event);
     popup.hidden = false;
     positionPopup(event);
+  };
+
+  const longPressDuration = 600; 
+  const moveThreshold = 10;
+  let longPressTimer: number | undefined;
+  let startX = 0;
+  let startY = 0;
+
+  const cancelLongPress = () => {
+    if (longPressTimer !== undefined) {
+      window.clearTimeout(longPressTimer);
+      longPressTimer = undefined;
+    }
+  };
+
+
+  viewport.addEventListener("contextmenu", (event) => {
+    openPopup(event);
   });
+
+  viewport.addEventListener("pointerdown", (event) => {
+    if (event.pointerType !== "touch" || !event.isPrimary) {
+      return;
+    }
+
+    cancelLongPress();
+    startX = event.clientX;
+    startY = event.clientY;
+
+    longPressTimer = window.setTimeout(() => {
+      longPressTimer = undefined;
+      openPopup(event);
+    }, longPressDuration);
+  });
+
+  viewport.addEventListener("pointermove", (event) => {
+    if (event.pointerType !== "touch") {
+      return;
+    }
+
+    const distanceMoved = Math.hypot(
+      event.clientX - startX,
+      event.clientY - startY
+    );
+
+    if (distanceMoved > moveThreshold) {
+      cancelLongPress();
+    }
+  });
+
+  viewport.addEventListener("pointerup", cancelLongPress);
+  viewport.addEventListener("pointercancel", cancelLongPress);
 
 
   // Event Listeners 

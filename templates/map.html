@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <title>Crestr Hiking App</title>
 
     <!-- Favicon -->
@@ -42,7 +42,7 @@
     <link rel="stylesheet" href="{{ url_for('static', path='css/components/form-fields.css') }}">
 
     <!-- Layout CSS Files -->
-    <link rel="stylesheet" href="{{ url_for('static', path='css/layout/nav-menu.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/layout/nav-rail.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', path='css/layout/slide-panel.css') }}">
 
     <!-- Tours.js CSS File-->
@@ -59,7 +59,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <!-- Umami Analytics -->
-    <!-- SELF HOSTERS: Change values in you .env file -->
+    <!-- SELF HOSTERS: Change values in your .env file -->
     <!-- Umami Analytics -->
     {% if config.UMAMI_WEBSITE_ID %}
     <script async defer 
@@ -76,6 +76,29 @@
 
 
     <div id="map-content">
+
+        <div class="mobile-attribution-control">
+            <button
+                id="mobile-attribution-button"
+                class="mobile-button"
+                type="button"
+                aria-label="Show map attributions"
+                aria-expanded="false"
+                aria-controls="mobile-attributions"
+            >i</button>
+            <div id="mobile-attributions" class="mobile-attributions" aria-label="Map attributions">
+                <a href="/privacy-policy" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+                <span aria-hidden="true">|</span>
+                <span>
+                    Map data: © <a href="https://www.openstreetmap.org/copyright/">OpenStreetMap</a>,
+                    SRTM
+                </span>
+                <span aria-hidden="true">|</span>
+                <span>
+                    Map style: © <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA)
+                </span>
+            </div>
+        </div>
 
         <!-- ##### MAIN ROUTING PANEL ##### -->
         <div id="start-end">
@@ -181,6 +204,71 @@
 
         </div>
 
+        <div id="mobile-save-route-container">
+            <button
+                id="mobile-save-route-button"
+                class="mobile-button"
+                type="button"
+                
+            >
+                <i data-lucide="bookmark"></i>
+            </button>
+        </div>
+
+        <div class="mobile-nav-container">
+            <button id="mobile-nav-button" class="mobile-button">
+                <i data-lucide="menu"></i>
+            </button>
+            
+            <div id="mobile-nav-dropdown-content" class="context-menu">
+                <button id="mobile-nav-saved-routes" class="context-menu-option">Saved Routes</button>
+                <button id="mobile-nav-import-route" class="context-menu-option">Import Routes</button>
+                <button id="mobile-nav-settings" class="context-menu-option">Settings</button>
+                <button id="mobile-nav-report-bug" class="context-menu-option">Report Bug</button>
+                <button id="mobile-nav-donate" class="context-menu-option">Donate</button>
+                {% if user is none %} 
+                <button id="mobile-nav-login" class="context-menu-option">Login</button>
+                {% else %}
+                <button id="mobile-nav-logout" class="context-menu-option">Log out</button>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="mobile-actions-container">
+            <button
+                id="mobile-actions-button"
+                class="mobile-button"
+                aria-controls="mobile-actions"
+                aria-expanded="false"
+                aria-label="Show route actions"
+            >
+                <i data-lucide="route"></i>
+            </button>
+
+            <div id="mobile-actions" class="mobile-actions">
+                <button 
+                    id="mobile-undo-button"
+                    class="mobile-button mobile-routing-button"
+                >
+                    <i data-lucide="undo-2"></i>
+                </button>
+
+                <button
+                    id="mobile-redo-button" 
+                    class="mobile-button mobile-routing-button"
+                >
+                    <i data-lucide="redo-2"></i>
+                </button>
+
+                <button
+                    id="mobile-clear-button"
+                    class="mobile-button mobile-routing-button"
+                >
+                    <i data-lucide="eraser"></i>
+                </button>
+            </div>
+        </div>
+
         <!-- ##### DONATE MODAL ##### -->
         <dialog class="modal-overlay" id="donate-modal">
             <div class="modal-wrapper" id="donate-modal-wrapper">
@@ -227,13 +315,13 @@
         </dialog>
 
         <!-- ##### CONTEXT MENU ##### -->
-        <div id="map-context-menu" class="map-context-menu" role="menu" aria-label="Map options" hidden>
-            <ul class="map-context-menu-options">
+        <div id="map-context-menu" class="context-menu" role="menu" aria-label="Map options" hidden>
+            <ul class="context-menu-options">
                 <li>
-                    <button id="map-context-save-point" class="map-context-menu-option" type="button" role="menuitem">
+                    <button id="map-context-save-point" class="context-menu-option" type="button" role="menuitem">
                         Save point
                     </button>
-                    <button id="map-context-copy-coordinate" class="map-context-menu-option" type="button" role="menuitem">
+                    <button id="map-context-copy-coordinate" class="context-menu-option" type="button" role="menuitem">
                         Copy Coordinates
                     </button>
                 </li>
@@ -255,6 +343,26 @@
                     <div class="modal-actions">
                         <button type="button" id="save-point-dialog-close" class="modal-btn modal-btn-secondary">Close</button>
                         <button id="save-point-dialog-save" class="modal-btn modal-btn-normal">Save</button>
+                    </div>
+                </div>
+            </div>
+        </dialog>
+
+        <!-- ##### SAVE ROUTE ##### -->
+        <dialog id="save-route-dialog" class="modal-overlay">
+            <div class="modal-wrapper">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Save Route</h2>
+                    </div>
+                    <div class="modal-body">
+                        <div class="field">
+                            <input type="text" id="save-route-dialog-name-input" name="save-route-name" class="field-input" aria-label="Input name to save route" placeholder="Name" required>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" id="save-route-dialog-close" class="modal-btn modal-btn-secondary">Close</button>
+                        <button id="save-route-dialog-save" class="modal-btn modal-btn-normal">Save</button>
                     </div>
                 </div>
             </div>

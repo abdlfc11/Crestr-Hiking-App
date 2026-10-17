@@ -16,7 +16,10 @@ import {
   Eraser,
   Redo2,
   Undo2,
-  ArrowUpRight
+  ArrowUpRight,
+  Bookmark,
+  Menu,
+  Route
 } from 'lucide';
 
 export function initIcons() {
@@ -38,7 +41,10 @@ export function initIcons() {
             Eraser,
             Redo2,
             Undo2,
-            ArrowUpRight
+            ArrowUpRight,
+            Bookmark,
+            Menu,
+            Route
         }
     })
 }

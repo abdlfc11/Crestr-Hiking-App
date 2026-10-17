@@ -9,10 +9,12 @@ import {
 import {
   homeButtonFunction,
   updateSaveRouteContainer,
-  showLoginModal
+  showLoginModal,
+  isMobileOrTablet
 } from "../ui/ui.js";
 
 import {
+  addClickListener,
   createRouteRow,
   removeDOMElement,
   showToast
@@ -31,6 +33,11 @@ import { logError } from "../utils/logError-utils.js";
 import { initIcons } from "../init/icons.js";
 
 let saveRouteForm: HTMLFormElement | null = null;
+
+const saveRouteModal = document.getElementById('save-route-dialog') as HTMLDialogElement | null;
+const saveRouteModalNameInput = document.getElementById('save-route-dialog-name-input') as HTMLInputElement | null;
+const saveRouteModalButton = document.getElementById('save-route-dialog-save');
+
 const allRoutesContainer = document.getElementById("all-routes-container");
 const routeNameEntry = document.getElementById("route-name") as HTMLInputElement | null;
 const routeETADisplay = document.getElementById("route-eta-display");
@@ -40,12 +47,11 @@ const routeElevationDisplay = document.getElementById("route-elevation-change-di
 
 export function initSaveRoute() {
   saveRouteForm = document.getElementById("save-route-form") as HTMLFormElement | null;
-  if (saveRouteForm) {
-    saveRouteForm.addEventListener("submit", handleSaveRoute);
-  }
+  addClickListener(saveRouteForm, handleSaveRoute, "submit");
+  addClickListener(saveRouteModalButton, handleSaveRoute, "click");
 }
 
-async function handleSaveRoute(e: SubmitEvent) {
+async function handleSaveRoute(e: Event) {
   e.preventDefault();
 
   let elevDisplayValue; 
@@ -56,7 +62,7 @@ async function handleSaveRoute(e: SubmitEvent) {
   let rawDistanceKm;
 
   try {
-    routeName = routeNameEntry.value;
+    routeName =  isMobileOrTablet ? saveRouteModalNameInput.value : routeNameEntry.value;
     eta = routeETADisplay?.textContent;
     elevationChange = routeElevationDisplay?.textContent
 
@@ -69,6 +75,11 @@ async function handleSaveRoute(e: SubmitEvent) {
       throw new Error("No coords in pathCoords array", {cause : "Sorry, there was an error saving your route, please try again later."});
     }
 
+    if (pathCoordinates.length === 1) {
+      logError('Saving Route', "No coordinates found in pathCoords array", null, 'SAVE_ROUTE');
+      throw new Error("No coords in pathCoords array", {cause : "You need 2 or more waypoints, add another waypoint to save this route. "});
+    }
+
     rawDistanceKm = getLastKnownDistanceKm();
 
     if (rawDistanceKm === null || isNaN(rawDistanceKm)) {
@@ -78,7 +89,7 @@ async function handleSaveRoute(e: SubmitEvent) {
   }
   catch (e) {
     logError('Saving Route', e.message || 'None', null, 'SAVE_ROUTE')
-    showToast(e.cause || "Sorry, there was an error saving your route, please try again later.");
+    showToast(e.cause || "Sorry, there was an error saving your route, please try again later.", "error", isMobileOrTablet ? saveRouteModal : null);
     return false;
   }
 
@@ -132,6 +143,8 @@ async function handleSaveRoute(e: SubmitEvent) {
       initIcons();
     }
 
+    if (saveRouteModal.open) saveRouteModal.close()
+      
     // Resetting UI state
     homeButtonFunction();
     updateSaveRouteContainer();
@@ -139,7 +152,7 @@ async function handleSaveRoute(e: SubmitEvent) {
     showToast("Route saved successfully", "success", null);
   }
   catch (error) {
-    showToast( error.cause || "Sorry, there was an error saving your route, please try again later.")
+    showToast( error.cause || "Sorry, there was an error saving your route, please try again later.", "error", isMobileOrTablet ? saveRouteModal : null)
   }
 };
 
