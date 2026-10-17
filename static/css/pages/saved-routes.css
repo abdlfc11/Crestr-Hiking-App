@@ -360,6 +360,7 @@ body {
     position: absolute;
     top: 0.8rem;
     right: 0.8rem;
+    flex-direction: column;
   }
 }
 
