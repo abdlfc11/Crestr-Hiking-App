@@ -21,8 +21,11 @@ const loginValidationLabel = document.getElementById("login_validation_label");
 const loginUsernameEntry = document.getElementById("login_username_entry") as HTMLInputElement | null;
 const loginPasswordEntry = document.getElementById("login_password_entry") as HTMLInputElement | null;
 const loginButton = document.getElementById("login_button");
-const logoutButton = document.getElementById("logout-button");
 const switchToRegisterButton = document.getElementById("switch_to_register_button");
+
+// Logout elements
+const logoutButton = document.getElementById("logout-button");
+const mobileNavLogout = document.getElementById('mobile-nav-logout');
 
 // Registering elements
 const switchToLoginButton = document.getElementById("register-switch-to-login-button")
@@ -265,6 +268,7 @@ export function initAuth() {
   initDarkMode();
 
   addClickListener(logoutButton, logout, "click");
+  addClickListener(mobileNavLogout, logout, "click");
   addClickListener(loginButton, login, "click");
   addClickListener(registerButton, register, "click");
   addClickListener(switchToRegisterButton, switchToRegister, "click");
