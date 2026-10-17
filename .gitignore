@@ -22,7 +22,7 @@ dist/
 *.local
 
 # environment variables
-.env
+*.env
 
 # IDEs and Editors 
 .DS_Store
