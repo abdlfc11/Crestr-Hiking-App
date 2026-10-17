@@ -120,6 +120,8 @@ export const defaultCentre = Array.isArray(window.appConfig?.mapInitialCentre)
   ? window.appConfig.mapInitialCentre
   : [-3.198308, 54.465458];
 
+export const isMobileOrTablet = window.screen.width <= 1024;
+
 const setStartCoordButton = document.getElementById("set-start-coord-button");
 const setEndCoordButton = document.getElementById("set-end-coord-button");
 
@@ -148,12 +150,40 @@ const saveContainer = document.getElementById('save-route-container');
 const saveRouteToggleButton = document.getElementById("save-route-toggle-button");
 const saveRouteContainer = document.getElementById('save-route-container');
 
+const mobileSaveRouteContainer = document.getElementById('mobile-save-route-container');
+const mobileSaveRouteButton = document.getElementById('mobile-save-route-button');
+
+// MOBILE
+
+// Mobile Nav
+const mobileNavButton = document.getElementById('mobile-nav-button');
+const mobileNavDropdownContent = document.getElementById('mobile-nav-dropdown-content');
+const mobileNavSavedRoutes = document.getElementById('mobile-nav-saved-routes');
+const mobileNavImportRoutes = document.getElementById('mobile-nav-import-route');
+const mobileNavSettings = document.getElementById('mobile-nav-settings');
+const mobileNavReportBug = document.getElementById('mobile-nav-report-bug');
+const mobileNavDonate = document.getElementById('mobile-nav-donate');
+
+// Mobile actions
+const mobileActionsButton = document.getElementById('mobile-actions-button');
+const mobileActions = document.getElementById('mobile-actions');
+const mobileUndoAction = document.getElementById('mobile-undo-button')
+const mobileRedoAction = document.getElementById('mobile-redo-button')
+const mobileClearAction = document.getElementById('mobile-clear-button')
+const mobileAttributionButton = document.getElementById('mobile-attribution-button');
+const mobileAttributions = document.getElementById('mobile-attributions');
+
+
+// NAVIGATION
+
 // Navigation Rail Buttons 
 const donateModalOpenButton = document.getElementById('donate-button');
 const reportIssueOpenButton = document.getElementById('report-issues-open-button')
 const shortcutsModalOpenButton = document.getElementById('sidenav-shortcuts-button');
 const loginNavBarButton = document.getElementById('sidenav-login-button');
 const logoutNavBarButton = document.getElementById('sidenav-logout-button');
+
+// MODALS
 
 // delete point modal
 const deletePointModal = document.getElementById("delete-point-confirmation-dialog") as HTMLDialogElement | null;
@@ -166,6 +196,11 @@ const deletePointModalContent = deletePointModal.querySelector('.modal-content')
 const savePointModal = document.getElementById('save-point-dialog') as HTMLDialogElement | null;
 const savePointModalContent = savePointModal.querySelector('.modal-content');
 const savePointModalCloseButton = document.getElementById('save-point-dialog-close');
+
+// save route modal
+const saveRouteModal = document.getElementById('save-route-dialog') as HTMLDialogElement | null;
+const saveRouteModalContent = saveRouteModal.querySelector('.modal-content');
+const saveRouteModalCloseButton = document.getElementById('save-route-dialog-close');
 
 // login modal
 const loginModal = document.getElementById('login-dialog') as HTMLDialogElement | null;
@@ -204,6 +239,8 @@ const shortcutsModalCloseButton = document.getElementById('shortcuts-dialog-clos
 const shareRouteModal = document.getElementById('share-route-dialog') as HTMLDialogElement | null;
 const shareRouteModalContent = shareRouteModal.querySelector('.modal-content');
 const shareRouteModalExitButton = document.getElementById('share-route-dialog-exit-button');
+
+// PANELS
 
 // saved route dash panel
 const openSavedRoutesDashButton = document.getElementById('saved-routes-dash-open-button');
@@ -250,36 +287,6 @@ let manualRouteFeature: Feature<LineString> | null = null;
 let interactivePointLayerInteraction: Translate | null = null; // holds the OpenLayer interaction for the start and end points 
 let interactivePointLayer: VectorLayer<VectorSource> | null = null; // stores the vector layer which holds the point features 
 
-//#endregion
-
-//#region MOBILE CHECK
-
-/**
- * Checks if user is on mobile device and advices to use Crestr on desktop / laptop instead 
- */
-function checkIfMobile() {
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 1024;   
-  if (isMobile) {
-      document.body.innerHTML = `
-          <div style="height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; padding: 20px; font-family: system-ui;">
-              <div>
-                  <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">Crestr Hiking App</h1>
-                  <p style="font-size: 1.3rem; margin-bottom: 2rem;">
-                      This website is designed for desktop only.
-                  </p>
-                  <p style="max-width: 500px; margin: 0 auto 2rem;">
-                      For the best experience on your phone, we’re building a dedicated mobile app.<br><br>
-                      In the meantime, please visit us on a laptop or desktop computer.
-                  </p>
-                  <button onclick="window.location.reload()" 
-                          style="padding: 14px 32px; font-size: 1.1rem; background: #2563eb; color: white; border: none; border-radius: 8px; cursor: pointer;">
-                      Refresh Anyway
-                  </button>
-              </div>
-          </div>
-      `;
-  }
-}
 //#endregion
 
 //#region LOGIN MODAL
@@ -588,6 +595,8 @@ function openSavedRoutesDash() {
     return;
   };
 
+  if (mobileNavDropdownContent.classList.contains("show")) mobileNavDropdownContent.classList.remove("show");
+
   savedRoutesDashContent.style.width = "100vw";
 
   if (!localStorage.getItem('seenSavedRouteDashTour')) {
@@ -608,6 +617,8 @@ export function closeSavedRoutesDash() {
 function openSettings() {
   settingPanel.style.width = "100vw";
 
+  if (mobileNavDropdownContent.classList.contains("show")) mobileNavDropdownContent.classList.remove("show");
+
   if (!localStorage.getItem('seenSettingsTour')) {
     const settingsTourDriver = createSettingsTour();
 
@@ -625,11 +636,13 @@ export function closeSettings() {
 
 function openImportRoute() {
 
-  // This prevents non-logged in and registered users from opening the save route panel
+  // This prevents non-logged in and registered users from opening the import route panel
   if (!window.appConfig.loggedIn) {
     showLoginModal(true, "import routes");
     return;
   };
+
+  if (mobileNavDropdownContent.classList.contains("show")) mobileNavDropdownContent.classList.remove("show");
 
   importRoutePanel.style.width = "100vw";
 
@@ -647,26 +660,6 @@ function openImportRoute() {
 export function  closeImportRoute() {
   importRoutePanel.style.width = "0";
 };
-
-export function toggleSaveRouteContainer() {
-  const isOpen = saveRouteToggleButton.classList.toggle("opened");
-
-    if (isOpen) {
-        saveRouteDiv.style.height = `${saveRouteDiv.scrollHeight}px`;
-    } else {
-        saveRouteDiv.style.height = "0px";
-    }
-};
-
-function collapseSaveRouteContainer() {
-  if (saveRouteToggleButton) {
-    saveRouteToggleButton.classList.remove("opened");
-  }
-
-  if (saveRouteDiv) {
-    saveRouteDiv.style.height = "0px";
-  }
-}
 
 //#endregion
 
@@ -955,6 +948,7 @@ export function clearAutoRoute() {
   if (endCoordEntry) endCoordEntry.value = "";
   if (routeNameEntry) routeNameEntry.value = "";
   if (saveContainer) saveContainer.style.display = "none";
+  if (mobileSaveRouteContainer.classList.contains("show")) mobileSaveRouteContainer.classList.remove("show");
   updateSaveRouteContainer();
 
 }
@@ -976,6 +970,7 @@ export function clearManualRoute() {
 
   document.getElementById("route-stats")?.remove();
   if (saveContainer) saveContainer.style.display = "none";
+  if (mobileSaveRouteContainer.classList.contains("show")) mobileSaveRouteContainer.classList.remove("show");
   if (startCoordEntry) startCoordEntry.value = "";
   if (endCoordEntry) endCoordEntry.value = "";
   updateSaveRouteContainer();
@@ -1033,6 +1028,7 @@ export function homeButtonFunction() {
   if (searchEntry) searchEntry.value = "";
   if (routeNameEntry) routeNameEntry.value = "";
   if (saveContainer) saveContainer.style.display = "none";
+  if (mobileSaveRouteContainer.classList.contains("show")) mobileSaveRouteContainer.classList.remove("show"); 
   updateSaveRouteContainer();
 
   // this resets the map view and re-shows saved points
@@ -1203,6 +1199,7 @@ function cleanRouteUI() {
     saveRouteContainer.style.display = "none";
     collapseSaveRouteContainer();
   }
+  if (mobileSaveRouteContainer.classList.contains("show")) mobileSaveRouteContainer.classList.remove("show");
 };
 
 /**
@@ -1286,7 +1283,7 @@ export async function updateManualRoute() {
       cleanRouteUI();
       return;
     } else {
-      saveContainer.style.display = "flex";
+      isMobileOrTablet ? mobileSaveRouteContainer.classList.add("show") : saveContainer.style.display = "flex";
     }
 
     if (pathCoords.length > 1) {
@@ -1487,8 +1484,29 @@ async function redoManualRoutePoint() {
 
 //#region SAVE ROUTE PANEL
 
+export function toggleSaveRouteContainer() {
+  const isOpen = saveRouteToggleButton.classList.toggle("opened");
+
+    if (isOpen) {
+        saveRouteDiv.style.height = `${saveRouteDiv.scrollHeight}px`;
+    } else {
+        saveRouteDiv.style.height = "0px";
+    }
+};
+
+function collapseSaveRouteContainer() {
+  if (saveRouteToggleButton) {
+    saveRouteToggleButton.classList.remove("opened");
+  }
+
+  if (saveRouteDiv) {
+    saveRouteDiv.style.height = "0px";
+  }
+}
+
 export function updateSaveRouteContainer() {
   collapseSaveRouteContainer();
+
   return true;
 }
 
@@ -1982,7 +2000,6 @@ export function initUi() {
   // These event listeners are for settings and preferences.
   setOnDistanceUnitChange(() => handleDistanceUnitToggle());
 
-  window.addEventListener("load", checkIfMobile);
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
     applyTheme(getTheme());
   });
@@ -2003,6 +2020,31 @@ export function initUi() {
 
   addClickListener(reportIssueOpenButton, () => showReportIssueModal(true), "click");
 
+  // MOBILE
+
+  // These event listeners are for the mobile nav
+  addClickListener(mobileNavButton, () => mobileNavDropdownContent.classList.toggle('show'), "click");
+  addClickListener(mobileNavDonate, () => showModal(true, donateModal), "click");
+  addClickListener(mobileNavReportBug, () => showModal(true, reportIssueModal), "click");
+  addClickListener(mobileNavSettings, openSettings, "click");
+  addClickListener(mobileNavImportRoutes, openImportRoute, "click"); 
+  addClickListener(mobileNavSavedRoutes, openSavedRoutesDash, "click");
+
+  // These event listeners are for mobile routing actions
+  addClickListener(mobileActionsButton, () => {
+    const isOpen = mobileActions.classList.toggle("show");
+    mobileActionsButton.setAttribute("aria-expanded", String(isOpen));
+    mobileActionsButton.setAttribute("aria-label", isOpen ? "Hide route actions" : "Show route actions");
+  }, "click")
+
+  addClickListener(mobileClearAction, clearManualRoute, "click")
+  addClickListener(mobileUndoAction, undoManualRoutePoint, "click")
+  addClickListener(mobileRedoAction, redoManualRoutePoint, "click");
+  addClickListener(mobileAttributionButton, () => {
+    const isOpen = mobileAttributions.classList.toggle("show");
+    mobileAttributionButton.setAttribute("aria-expanded", String(isOpen));
+    mobileAttributionButton.setAttribute("aria-label", isOpen ? "Hide map attributions" : "Show map attributions");
+  }, "click");
 
   // These event listeners are for route import.
   importRouteFileInput.addEventListener("change", (e) => {
@@ -2048,6 +2090,11 @@ export function initUi() {
   // Save Point Modal
   addClickListener(savePointModalCloseButton, () => showModal(false, savePointModal), "click");
   addClickListener(savePointModal, (e) => closeModalUponOutsideClick(e, savePointModalContent, savePointModal), "click");
+
+  // Save Route Modal
+  addClickListener(mobileSaveRouteButton, () => showModal(true, saveRouteModal), "click")
+  addClickListener(saveRouteModalCloseButton, () => showModal(false, saveRouteModal), "click");
+  addClickListener(saveRouteModal, (e) => closeModalUponOutsideClick(e, saveRouteModalContent, saveRouteModal), "click");
 
   // Report Issue Modal
   addClickListener(reportIssueModalExit, () => showReportIssueModal(false), "click");

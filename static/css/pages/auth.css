@@ -29,9 +29,24 @@
     overflow-y: auto;
 }
 
-/* override of body, overflow-y is prevented on the main map screen but is required in the auth (particularly register) page/s */
+/* This keeps the auth page within the viewport - longer forms scroll inside the screen wrapper. */
 body:has(.auth-screen) {
-    overflow-y: auto;
+    height: 100dvh;
+    min-height: 100dvh;
+    overflow: hidden;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+body:has(.auth-screen) #navbar {
+    flex: 0 0 auto;
+}
+
+body:has(.auth-screen) .auth-screen {
+    box-sizing: border-box;
+    flex: 1 1 auto;
+    min-height: 0;
 }
 
 /*  Card  */
@@ -247,4 +262,64 @@ body:has(.auth-screen) {
 
 #register-privacy-notice a:hover {
     text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .auth-screen {
+        box-sizing: border-box;
+        width: 100%;
+        min-height: 100dvh;
+        padding: 1rem;
+        overflow-x: hidden;
+        justify-content: flex-start;
+        gap: 0.75rem;
+    }
+
+    .auth-card {
+        box-sizing: border-box;
+        width: 100%;
+        max-width: 28rem;
+        padding: 1.25rem;
+        margin-bottom: 0;
+    }
+
+    .login_field,
+    .auth-field-input {
+        width: 100%;
+    }
+
+    .login_field {
+        min-width: 0;
+    }
+
+    .auth-field-input {
+        box-sizing: border-box;
+    }
+
+    .login_field:has(.fa-eye) .auth-field-input {
+        width: auto;
+        min-width: 0;
+        flex: 1 1 auto;
+    }
+
+    .inner-entry-asterisk {
+        left: auto;
+        right: 2.25rem;
+    }
+
+    .auth-button,
+    .auth-switch-button {
+        box-sizing: border-box;
+        width: 100%;
+        max-width: none;
+    }
+
+    .auth-validation-label {
+        width: calc(100% - 2.5rem);
+    }
+
+    #register-privacy-notice {
+        width: 100%;
+    }
 }

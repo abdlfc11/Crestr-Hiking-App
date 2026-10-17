@@ -131,18 +131,34 @@
     justify-content: center;
     text-align: center;
     padding: 1.5rem;
-    background-color: var(--surface-subtle); /* Subtle, clean off-white background */
-    border: 1px dashed var(--secondary-border); /* Clean dashed boundary border */
+    background-color: var(--surface-subtle);
+    border: 1px dashed var(--secondary-border);
     border-radius: 8px;
     width: 90%;
     max-width: 400px;
 }
 
-/* Simple typography styling matching your application colors */
 .empty-chart-state p {
     margin: 0;
-    color: var(--ink); /* Clean dark text */
+    color: var(--ink); 
     font-size: 0.95rem;
     font-weight: 500;
     line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+
+    /* elevation profile not available on mobile screens */ 
+    /* key details such as ETA, distance and elevation gain are already present */ 
+    .stats-button {
+        display: none;
+    }
+
+    .chart-wrapper {
+        display: none;
+    }
+
+    #route-stats {
+        left: 20px
+    }
 }
