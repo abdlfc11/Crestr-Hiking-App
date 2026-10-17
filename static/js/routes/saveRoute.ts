@@ -64,7 +64,11 @@ async function handleSaveRoute(e: Event) {
   try {
     routeName =  isMobileOrTablet ? saveRouteModalNameInput.value : routeNameEntry.value;
     eta = routeETADisplay?.textContent;
-    elevationChange = routeElevationDisplay?.textContent
+    elevationChange = routeElevationDisplay?.textContent;
+
+    if (!routeName) {
+      throw new Error('handleSaveRoute() : Name given is invalid', {cause : "Please enter a name to save a route. "});
+    }
 
     if (! await handleUnauthenticatedUser(routeName)) return;
 
@@ -117,6 +121,7 @@ async function handleSaveRoute(e: Event) {
     };
 
     if (routeNameEntry) routeNameEntry.value = "";
+    if (saveRouteModalNameInput) saveRouteModalNameInput.value = "";
 
     // Removing noRouteCard if present 
     const noRouteCard = document.getElementById('no-routes-wrapper-container');
