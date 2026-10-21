@@ -493,16 +493,16 @@ function validateInputCoords(startPoint: string, endPoint: string): boolean {
   const endLonLat = [endLon, endLat];
 
   if ( !isPointInPolygon(startLonLat)) {
-    showToast("Please select a starting location within Cumbria.")
+    showToast(ERROR_MESSAGES.ROUTING.INCORRECT_LOCATION)
     startCoordEntry.value = '';
-    showCoordInputError(startCoordEntry, "Please select a starting location within Cumbria.");
+    showCoordInputError(startCoordEntry, ERROR_MESSAGES.ROUTING.INCORRECT_LOCATION);
     return false
   }
 
   if (!isPointInPolygon(endLonLat)) {
-    showToast("Please select a destination within Cumbria.");
+    showToast(ERROR_MESSAGES.ROUTING.INCORRECT_LOCATION);
     endCoordEntry.value = ''
-    showCoordInputError(endCoordEntry, "Please select a destination within Cumbria.");
+    showCoordInputError(endCoordEntry, ERROR_MESSAGES.ROUTING.INCORRECT_LOCATION);
     return false;
   }
 
@@ -864,25 +864,24 @@ async function manualRouteClickHandler(event: MapBrowserEvent<PointerEvent>) {
 
   try { 
     const coordinate = event.coordinate;
+
+    const lonLat = toLonLat(coordinate);
+    if (!isPointInPolygon(lonLat)) throw new Error("manualRouteClickHandler() : User attempting to plot point outside UK", {cause : ERROR_MESSAGES.ROUTING.INCORRECT_LOCATION});
+
     const type = clickMode === "setStart"
       ? "start"
       : clickMode === "setEnd"
         ? "end"
         : "normal";
 
-    if (type === "end" && manualRouteState.userClicks.length === 0) {
-      throw new Error("Start point required", { cause: "Set a start point before setting the end point." });
-    }
+    if (type === "end" && manualRouteState.userClicks.length === 0) throw new Error("Start point required", { cause: "Set a start point before setting the end point." });
 
     if (manualRouteState.userClicks.length === 0) clearAutoRoute();
 
     const response = await addManualPoint(coordinate[0], coordinate[1], type);
 
     // This checks success status
-    if (!response || !response.success) {
-
-      throw new Error(response?.message || "Error : manualRouteClickHandler()")
-    }
+    if (!response || !response.success) throw new Error(response?.message || "Error : manualRouteClickHandler()");
 
     clickMode = null;
     syncCoordinateInputs();
@@ -1570,7 +1569,7 @@ async function handleCoordEntryChange(entry: HTMLInputElement, type: "start" | "
 
   // returning prematurely if the point is not in Cumbria 
   if (!isPointInPolygon(toLonLat(mercatorCoords))) {
-    showToast("Please choose a point within Cumbria.")
+    showToast(ERROR_MESSAGES.ROUTING.INCORRECT_LOCATION)
     return;
   }
 
@@ -1654,7 +1653,7 @@ export function setUpPointInteraction(layers: Array<VectorLayer<VectorSource>>) 
     const pointType = movedFeature.get("type");
     try {
       if (!isPointInPolygon(toLonLat(newCoordinates))) {
-        throw new Error("Waypoint moved outside Cumbria", { cause: ERROR_MESSAGES.ROUTING.OUTSIDE_CUMBRIA });
+        throw new Error("Waypoint moved outside UK", { cause: ERROR_MESSAGES.ROUTING.INCORRECT_LOCATION });
       }
 
       if (pointType === "start") {
