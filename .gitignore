@@ -23,6 +23,7 @@ dist/
 
 # environment variables
 .env
+caddy.env
 
 # IDEs and Editors 
 .DS_Store
