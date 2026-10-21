@@ -135,7 +135,7 @@ export function createElevationProfile(coordinates: number[][]) {
         } else {
           lonLat = toLonLat([coord[0], coord[1]]);
         }
-        return [lonLat[0], lonLat[1], coord[2] || 0];
+        return [lonLat[0], lonLat[1], Math.round(coord[2]) || 0];
     });
 
     const chartData = []; // {x: distance, y: elevation}
