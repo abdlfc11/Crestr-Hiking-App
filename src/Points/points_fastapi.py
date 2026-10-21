@@ -14,7 +14,7 @@ from sqlalchemy.exc import IntegrityError
 
 # Local Modules
 from src.db import engine
-from src.extensions import service, log_action, get_current_user
+from src.extensions import log_action, get_current_user
 from src.models import Point, User
 from .points_schemas import PointSchema
 
@@ -49,7 +49,7 @@ def get_saved_points(user: User | None = Depends(get_current_user)):
 
             # converts coordinates to Lon/Lat if it detects web mercator coordinates
             if abs(coord_x) > 181 or abs(coord_y) > 181:
-                coord_x, coord_y = service.convert_web_mercator_to_wgs84(coord_x, coord_y)
+                coord_x, coord_y = ensure_wgs84([coord_x, coord_y])
 
             wgs84_points.append({
                 "name": point.name,

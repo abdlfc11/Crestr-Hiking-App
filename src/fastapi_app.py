@@ -16,7 +16,7 @@ import traceback
 from sqlmodel import Session, select
 
 # Local Module Imports
-from src.extensions import service, get_current_user, log_action
+from src.extensions import get_current_user, log_action
 from src.constants import DEFAULT_CENTRE, DEFAULT_ZOOM
 from src.models import User, Route, Settings, Point
 from src.config import Config
@@ -184,9 +184,6 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException):
         status_code=exc.status_code,
         content=exc.detail if isinstance(exc.detail, (dict, list)) else {"detail": exc.detail},
     )
-# Graph initialisation
-if os.getenv("LOAD_GRAPH_ON_IMPORT", "1").lower() not in ("0", "false", "no"):
-    service.load_graph()
 
 # View endpoints
 @app.get("/")

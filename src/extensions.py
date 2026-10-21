@@ -17,11 +17,9 @@ from src.config import Config
 from src.constants import DEFAULT_CENTRE
 from src.db import get_session, engine
 from src.models import ActionLog, User, SessionTable, Route
-from src.Pathfinding.Nodefinder import NodeFinder
 
 #endregion
 
-service = NodeFinder(graph_path=Config.GRAPH_PATH)
 
 async def rate_limit_exceeded_callback(request: Request, response: Response):
     """

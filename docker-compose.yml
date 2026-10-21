@@ -25,14 +25,13 @@ services:
   # FASTAPI APP
   web-fastapi:
     build: .
-    command: gunicorn -c src/gunicorn.config.py fastapi_app:app # Prod
-    ### command: uvicorn fastapi_app:app --reload --host 0.0.0.0 --port 5001 # DEVELOPERS: use this command when debugging 
+    ### command: gunicorn -c src/gunicorn.config.py fastapi_app:app # Prod
+    command: uvicorn fastapi_app:app --reload --host 0.0.0.0 --port 5001 # DEVELOPERS: use this command when debugging 
     volumes:
       - ./src:/app/src
       - ./templates:/app/templates
       - ./static:/app/static
       - ./migrations:/app/migrations
-      - graph_cache:/app/graph_generation/cache
     environment:
       - PYTHONDONTWRITEBYTECODE=1
       - PYTHONUNBUFFERED=1
@@ -123,10 +122,21 @@ services:
     depends_on:
       - web-fastapi
 
+    # BROUTER ROUTING ENGINE
+  brouter:
+    image: ghcr.io/abrensch/brouter:master
+    platform: linux/amd64
+    container_name: crestr-brouter
+    restart: unless-stopped
+    volumes:
+      - ./data/brouter/segments4:/segments4
+      - ./data/brouter/profiles/hiking-profile.brf:/profiles2/hiking-profile.brf:ro
+    ports:
+      - "17777:17777"
+
 volumes:
   postgres_data:
   pgadmin_data:
   umami_postgres_data:
   caddy_data:
   caddy_config:
-  graph_cache:
