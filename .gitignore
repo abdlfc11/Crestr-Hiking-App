@@ -54,6 +54,9 @@ htmlcov/
 *.gpkg
 *.pkl
 
+# BRouter .rd5 files 
+*.rd5
+
 # graph testing files
 testing_stuff.py
 
