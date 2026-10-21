@@ -11,7 +11,7 @@ from fastapi_limiter.depends import RateLimiter
 from pyrate_limiter import Duration, Limiter, Rate
 
 # Local Module Imports
-from src.extensions import service, log_action, rate_limit_exceeded_callback
+from src.extensions import log_action, rate_limit_exceeded_callback
 from src.Search.search_schemas import SearchModel
 from src.config import Config
 
