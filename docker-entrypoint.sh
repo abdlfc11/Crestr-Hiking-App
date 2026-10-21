@@ -14,18 +14,6 @@ done
 echo "PostgreSQL is ready. Running the database migration..."
 alembic upgrade heads
 
-GRAPH_PATH="/app/graph_generation/cache/elevation_populated_igraph.pkl"
-
-if [ ! -f "$GRAPH_PATH" ]; then
-    echo "Pathfinding graph ($GRAPH_PATH) is missing, downloading from github releases..."
-    mkdir -p "$(dirname "$GRAPH_PATH")"
-    curl -L -o "$GRAPH_PATH" "https://github.com/abdlfc11/Crestr-Hiking-App/releases/download/v0.3.2/graph.pkl"
-    echo "Pathfinding graph downloaded"
-else
-    echo "Pathfinding graph found locally"
-fi
-
-
 
 echo "Starting application..."
 exec "$@"
