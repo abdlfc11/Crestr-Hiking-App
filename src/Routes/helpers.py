@@ -7,9 +7,9 @@ import math
 # Third-Party Libraries
 import gpxpy
 import gpxpy.gpx
+from pyproj import Transformer
 
 # Local Imports 
-from extensions import service
 from constants import MAX_X, MAX_Y, MIN_X, MIN_Y
 
 #endregion
@@ -19,7 +19,7 @@ from constants import MAX_X, MAX_Y, MIN_X, MIN_Y
 def isRoughlyInCumbria(x: float, y: float) -> bool:
 
     if (-180 <= x <= 180) and (-90 <= y <= 90):
-        x, y = service.convert_wgs84_to_web_mercator(x, y)
+        x, y = ensure_wgs84([x, y])
 
     return x >= MIN_X and x <= MAX_X and y >= MIN_Y and y <= MAX_Y 
 
@@ -77,6 +77,53 @@ def haversine(x1: float, y1: float, x2: float, y2: float) -> float:
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
 
     return R * c
+
+def total_haversine_distance(coords: list[list[float]]) -> float:
+    """Sums haversine distance (metres) over a list of [lon, lat, ...] points"""
+    if len(coords) < 2:
+        return 0.0
+    total = 0.0
+    for i in range(1, len(coords)):
+        lon1, lat1 = coords[i-1][0], coords[i-1][1]
+        lon2, lat2 = coords[i][0], coords[i][1]
+        total += haversine(lon1, lat1, lon2, lat2)
+    return total
+
+def calculate_map_centre_and_zoom_wgs84(coords: list[list[float]]) -> tuple[list[float], int]:
+    if len(coords) <= 1:
+        c = coords[0] if coords else [0, 0]
+        return [c[0], c[1]], 10
+
+    lons = [c[0] for c in coords]
+    lats = [c[1] for c in coords]
+    min_lon, max_lon = min(lons), max(lons)
+    min_lat, max_lat = min(lats), max(lats)
+
+    centre = [(min_lon + max_lon) / 2, (min_lat + max_lat) / 2]
+
+    # This creates a rough diagonal distance in metres to pick zoom
+    diag_m = haversine(min_lon, min_lat, max_lon, max_lat) * 1.4
+    if diag_m < 1000:
+        zoom = 14
+    elif diag_m < 5000:
+        zoom = 12
+    elif diag_m < 20000:
+        zoom = 10
+    elif diag_m < 50000:
+        zoom = 8
+    else:
+        zoom = 6
+
+    return centre, zoom
+
+def ensure_wgs84(coord: list[float, float]) -> list[float, float]:
+    """Converts coordinates to WGS84 projection if needed and returns them"""
+    transformer = Transformer.from_crs("EPSG:3857", "EPSG:4326", always_xy=True)
+    x, y = coord[0], coord[1]
+    if abs(x) > 180 or abs(y) > 90:
+        lon, lat = transformer.transform(x, y)
+        return [lon, lat]
+    return [x, y]
 
 def normalise_route(coordinates: list, avg_speed_kmh: float = 3) -> dict:
     """Converts raw route geometry into metrics like ETA and elevation data.
@@ -235,7 +282,7 @@ def generate_geojson(route: object) -> str:
 
         # coords stored as lat/lon going forward; legacy mercator rows are converted on the fly
         if is_legacy_mercator:
-            lon, lat = service.convert_web_mercator_to_wgs84(x, y)
+            lon, lat = ensure_wgs84([x, y])
         else:
             lon, lat = x, y
 
@@ -290,7 +337,7 @@ def generate_gpx(route: object) -> str:
 
         # coords stored as lat/lon going forward; legacy mercator rows are converted on the fly
         if is_legacy_mercator:
-            lon, lat = service.convert_web_mercator_to_wgs84(x, y)
+            lon, lat = ensure_wgs84([x, y])
         else:
             lon, lat = x, y
 
