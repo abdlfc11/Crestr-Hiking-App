@@ -15,7 +15,7 @@ async function initApp() {
     import('../ui/map-context-menu.ts')
   ])
 
-  initMap();
+  await initMap();
   initIcons();
   initAuth();
   initSettings();
