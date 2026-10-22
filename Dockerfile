@@ -29,8 +29,6 @@ RUN apt-get update \
  && apt-get install -y --no-install-recommends postgresql-client curl \
  && rm -rf /var/lib/apt/lists/*
 
-RUN mkdir -p /app/Pathfinding
-
 # this copies python backend 
 COPY src/ /app/src/
 
@@ -44,9 +42,6 @@ COPY static/ static/
 # database copies 
 COPY alembic.ini /app/alembic.ini
 COPY migrations/ migrations/
-
-# graph copies
-COPY graph_generation/ graph_generation/
 
 # this sets the python path so imports are clean
 ENV PYTHONPATH=/app/src

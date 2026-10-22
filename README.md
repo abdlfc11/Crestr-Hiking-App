@@ -1,4 +1,4 @@
-# Crestr - Hiking Route Finder
+# Crestr - Hiking Route Planner 
 
 [![Stars](https://img.shields.io/github/stars/abdlfc11/Crest-Hiking-App?style=for-the-badge&logo=github&color=blue)](https://github.com/abdlfc11/Crest-Hiking-App/stargazers)
 [![Forks](https://img.shields.io/github/forks/abdlfc11/Crest-Hiking-App?style=for-the-badge&logo=github&color=blue)](https://github.com/abdlfc11/Crest-Hiking-App/network/members)
@@ -8,8 +8,13 @@
 [![Issues](https://img.shields.io/github/issues/abdlfc11/Crest-Hiking-App?style=for-the-badge&logo=github)](https://github.com/abdlfc11/Crest-Hiking-App/issues)
 [![Pull Requests](https://img.shields.io/github/issues-pr/abdlfc11/Crest-Hiking-App?style=for-the-badge&logo=github)](https://github.com/abdlfc11/Crest-Hiking-App/pulls)
 
-**An open-source hiking route planner for Cumbria.** Generate optimal routes with elevation awareness, save points of interest, and export to GPX or GeoJSON, without any subscriptions.
+## What is Crestr ? 
 
-> **Disclaimer:** This is a desktop planning tool only. Always carry an OS map and compass, check weather conditions, and never rely solely on the app for navigation in the field. Only use routes within your skill level.
+Crestr is an **open-source hiking route planner for the UK and Ireland**. You can use Crestr to generate hiking routes, export routes to GPX or GeoJSON, or import routes, without any subscriptions. 
 
-**Full documentation, setup guides, and technical details:** [crestr.co.uk/docs](https://crestr.co.uk/docs)
+More details on what you can do with Crestr, along with technical details and a roadmap, can be found **[in the docs](https://crestr.co.uk/docs)**. 
+
+## Contributing
+Contributing in any form, whether that be submitting an issue or a pull request, is appreciated. As of this time, contributing is limited to submitting issues without prior approval, with pull requests requiring approval to submit. To save both reviewers' and your time, please read the more about this in the [Contributing Guidelines](CONTRIBUTING.md) 
+
+> **Disclaimer:** This is a planning tool only. Always carry a map and compass, check weather conditions, and never rely solely on the app for navigation when Hiking. Only use routes within your skill level.

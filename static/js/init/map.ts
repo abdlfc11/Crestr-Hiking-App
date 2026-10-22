@@ -1,4 +1,4 @@
-// IMPORTS 
+// IMPORTS
 
 import "ol/ol.css?inline"
 
@@ -24,12 +24,31 @@ import Stroke from "ol/style/Stroke.js";
 
 
 export let map: Map | null = null;
+
+export let resolveMapReady: ((map: Map) => void) | null = null;
+
+const mapReady = new Promise<Map>((resolve) => {
+  resolveMapReady = resolve;
+})
+
+const UKAndIrishRectangleBorder = [-11.0, 2.1, 49.8, 60.9]; // in the form of [min_lon, max_lon, min_lat, max_lat]
+
 export let tileLayer: Tile<XYZ> | null = null;
 export let routeLayer: VectorLayer<VectorSource> | null = null;
 export let manualRouteLayer: VectorLayer<VectorSource> | null = null;
 
+let locationCoords: [number, number] | null = null; // WGS84 -> [lon, lat]
+
 export function getMap() {
   return map;
+}
+
+export function waitForMap(): Promise<Map> {
+  if (map) {
+    return Promise.resolve(map);
+  } else {
+    return mapReady
+  }
 }
 
 export function setRouteLayer(layer: VectorLayer<VectorSource> | null) {
@@ -74,29 +93,29 @@ export function setTileLayer(layer: Tile<XYZ> | null) {
   tileLayer = layer;
 }
 
-export function createMap() {
-  const initialCentreLatLon = Array.isArray(window.appConfig?.mapInitialCentre)
-    ? window.appConfig.mapInitialCentre
-    : [-3.198308, 54.465458];
-  const initialCentre = fromLonLat(initialCentreLatLon);
+export function createMap(coords: [number, number]) {
+
   const initialZoom = window.appConfig?.mapInitialZoom ?? 10.5;
 
   map = new Map({
-    layers: [tileLayer],
+    layers: tileLayer ? [tileLayer] : [],
     target: "map",
     controls: defaultControls({
       attributionOptions: {
-        collapsible: false
-      }
+        collapsible: false,
+      },
     }),
     view: new View({
       projection: "EPSG:3857",
       maxZoom: 17,
       minZoom: 0,
-      center: initialCentre,
+      center: fromLonLat(coords),
       zoom: initialZoom,
     }),
   });
+
+  resolveMapReady?.(map);
+  resolveMapReady = null;
 }
 
 export function onMapClick(handler: (...args: any[]) => void) {
@@ -164,10 +183,48 @@ export function getPathColour() {
 
 let mapInitialised = false;
 
-export function initMap() {
-    if (mapInitialised) return;
-    mapInitialised = true;
-    createTileLayer();
-    createMap();
-    createRouteLayer();
+export async function initMap(): Promise<Map> {
+  if (mapInitialised) return waitForMap();
+  mapInitialised = true;
+
+  const fallbackCoords: [number, number] = Array.isArray(window.appConfig.mapInitialCentre)
+    ? window.appConfig.mapInitialCentre
+    : [-3.198308, 54.465458];
+
+  let coords = fallbackCoords;
+
+  if (navigator.geolocation) {
+    coords = await new Promise<[number, number]>((resolve) => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const minLon = UKAndIrishRectangleBorder[0];
+          const maxLon = UKAndIrishRectangleBorder[1];
+          const minLat = UKAndIrishRectangleBorder[2];
+          const maxLat = UKAndIrishRectangleBorder[3];
+          if (
+            minLon <= position.coords.longitude &&
+            position.coords.longitude <= maxLon &&
+            minLat <= position.coords.latitude &&
+            position.coords.latitude <= maxLat
+          ) {
+            locationCoords = [position.coords.longitude, position.coords.latitude];
+            resolve(locationCoords);
+          } else {
+            resolve(fallbackCoords)
+          }
+        },
+        (error) => {
+          console.warn(`Geolocation was denied or unavailable : ${error.message}`);
+          resolve(fallbackCoords);
+        },
+        { enableHighAccuracy: false, timeout: 5000 },
+      );
+    });
+  }
+
+  createTileLayer();
+  createMap(coords);
+  createRouteLayer();
+
+  return map;
 }
