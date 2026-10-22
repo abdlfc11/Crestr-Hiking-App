@@ -4,7 +4,7 @@
 
 services:
 
-  # POSTGRES DATABASE 
+  # POSTGRES DATABASE
   db:
     image: postgres:16-alpine
     env_file:
@@ -15,18 +15,18 @@ services:
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"] 
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
       timeout: 5s
       retries: 10
     volumes:
       - postgres_data:/var/lib/postgresql/data
-  
+
   # FASTAPI APP
   web-fastapi:
     build: .
-    ### command: gunicorn -c src/gunicorn.config.py fastapi_app:app # Prod
-    command: uvicorn fastapi_app:app --reload --host 0.0.0.0 --port 5001 # DEVELOPERS: use this command when debugging 
+    command: gunicorn -c src/gunicorn.config.py fastapi_app:app # Prod
+    ### command: uvicorn fastapi_app:app --reload --host 0.0.0.0 --port 5001 # DEVELOPERS: use this command when debugging
     volumes:
       - ./src:/app/src
       - ./templates:/app/templates
@@ -49,8 +49,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
-  
-  # UMAMI ANALYTICS 
+
+  # UMAMI ANALYTICS
   umami-db:
     image: postgres:16-alpine
     restart: unless-stopped
@@ -86,8 +86,8 @@ services:
     #   interval: 30s
     #   timeout: 10s
     #   retries: 3
-  
-  # PGADMIN 
+
+  # PGADMIN
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: crestr-pgadmin
@@ -104,7 +104,7 @@ services:
       db:
         condition: service_healthy
     restart: unless-stopped
-  
+
   # CADDY SERVICe
   caddy:
     image: caddy:2-alpine
@@ -115,6 +115,8 @@ services:
     env_file:
       - path: caddy.env
         required: true
+      - path: caddy.example.env
+        required: false
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
