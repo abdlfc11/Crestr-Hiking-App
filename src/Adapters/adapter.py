@@ -4,6 +4,7 @@ import math
 from typing import List, Tuple, Optional, Dict
 import requests
 from src.Routes.helpers import ensure_wgs84
+from src.config import Config
 
 
 class BRouterAdapter():
@@ -13,15 +14,15 @@ class BRouterAdapter():
         profile_name: Optional[str] = None,
         timeout: Optional[float] = None,
     ):
-        self.base_url = (base_url or os.getenv("BROUTER_BASE_URL", "http://brouter:17777")).rstrip("/")
-        self.profile_name = profile_name or os.getenv("BROUTER_PROFILE_NAME", "trekking")
-        self.timeout = timeout or float(os.getenv("BROUTER_TIMEOUT_SECONDS", "10"))
+        self.base_url = (base_url or Config.BROUTER_BASE_URL).rstrip("/")
+        self.profile_name = profile_name or Config.BROUTER_PROFILE or "trekking"
+        self.timeout = timeout or float(Config.BROUTER_TIMEOUT_SECONDS or 10)
 
     @staticmethod
     def _extract_coordinates(data: dict) -> List[List[float]]:
         """
         Gets coordinates from a BRouter response in the form [ [x1, y1], [x2, y2], ...]
-        
+
         """
         if not isinstance(data, dict):
             raise ValueError("BRouter response is not a JSON object")
@@ -69,10 +70,10 @@ class BRouterAdapter():
     ) -> Optional[List[List[float]]]:
         """
 
-        Returns the coordinates of a path from 
+        Returns the coordinates of a path from
 
         Parameters:
-    
+
             - start_xy list[float] : Start in the form [lon, lat]
 
             - end_xy list[float] : End in the form [lon, lat]
@@ -81,7 +82,7 @@ class BRouterAdapter():
 
         Returns:
             None
-        
+
         """
         start_lonlat = ensure_wgs84(start_xy)
         end_lonlat = ensure_wgs84(end_xy)
