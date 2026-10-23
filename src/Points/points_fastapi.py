@@ -1,7 +1,7 @@
 
 #region IMPORTS
 
-# Standard Library Imports 
+# Standard Library Imports
 import json
 from traceback import format_exception_only
 
@@ -16,6 +16,7 @@ from sqlalchemy.exc import IntegrityError
 from src.db import engine
 from src.extensions import log_action, get_current_user
 from src.models import Point, User
+from src.Routes.helpers import ensure_wgs84
 from .points_schemas import PointSchema
 
 #endregion
@@ -30,7 +31,7 @@ def get_saved_points(user: User | None = Depends(get_current_user)):
             status_code=401,
             detail={
                 "success": False,
-                "message": "User not logged in, no saved points to load."  
+                "message": "User not logged in, no saved points to load."
             }
         )
 
@@ -67,7 +68,7 @@ def get_saved_points(user: User | None = Depends(get_current_user)):
 # route which saves a user-chosen point on the map
 @router.post(
     '/points/save-point',
-    dependencies=[Depends(RateLimiter(limiter=Limiter(Rate(10, Duration.MINUTE * 1))))] # 10 calls per minute 
+    dependencies=[Depends(RateLimiter(limiter=Limiter(Rate(10, Duration.MINUTE * 1))))] # 10 calls per minute
 )
 def save_point(
     point: PointSchema,
@@ -75,12 +76,12 @@ def save_point(
 ):
 
     if not user:
-        
+
         raise HTTPException(
             status_code=401,
             detail={
                 "success": False,
-                "message": "Please Login to save points." # used by the frontend as the login modal body text 
+                "message": "Please Login to save points." # used by the frontend as the login modal body text
             }
         )
 
@@ -89,7 +90,7 @@ def save_point(
     point_name = point.point_name
     lon = point.lon
     lat = point.lat
-    
+
     try:
 
         # this validates that lat/lon are present
@@ -105,14 +106,14 @@ def save_point(
         coords = json.dumps([float(lon), float(lat)])
 
         with Session(engine) as db:
-            new_point = Point(name=point_name, coordinates=coords, user_id=user.id) 
+            new_point = Point(name=point_name, coordinates=coords, user_id=user.id)
             db.add(new_point)
             db.commit()
 
             log_action('Saving Point', True, None, None, 'SAVING_POINT')
 
         return {"success": True, "message": 'Successfully saved the point'}
-    
+
     except IntegrityError as exception:
         raise HTTPException(
             status_code=409,
@@ -124,11 +125,11 @@ def save_point(
 
     except HTTPException:
         raise
-    
+
     # if float() fails
     except ValueError as e:
 
-        short_traceback = "".join(format_exception_only(type(e), e)).strip()     
+        short_traceback = "".join(format_exception_only(type(e), e)).strip()
         log_action('Saving Point', False, short_traceback, None, 'SAVING_POINT')
 
         raise HTTPException(
@@ -138,13 +139,13 @@ def save_point(
                 "message": "Invalid coordinate format. Coordinates must be numbers."
             }
         )
-        
+
     except Exception as e:
 
-        with Session(engine) as db: 
+        with Session(engine) as db:
 
             short_traceback = "".join(format_exception_only(type(e), e)).strip()
-        
+
             log_action('Saving Point', False, short_traceback, None, 'SAVING_POINT')
 
         raise HTTPException(
@@ -177,7 +178,7 @@ def delete_point(
     point_name = point.point_name
 
     if not point_name:
-        
+
         raise HTTPException(
             status_code=400,
             detail= {
@@ -185,7 +186,7 @@ def delete_point(
                 "message": "Point name is missing"
             }
         )
-    
+
     try:
         with Session(engine) as db:
 
@@ -195,7 +196,7 @@ def delete_point(
             ).first()
 
             if not point_to_delete:
-                
+
                 raise HTTPException(
                     status_code=404,
                     detail={
@@ -214,7 +215,7 @@ def delete_point(
     except Exception as e:
 
         short_traceback = "".join(format_exception_only(type(e), e)).strip()
-        
+
         log_action('Deleting Point', False, short_traceback, None, 'DELETE_POINT')
 
         raise HTTPException(
