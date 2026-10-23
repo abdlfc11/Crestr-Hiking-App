@@ -14,7 +14,11 @@ class BRouterAdapter():
         profile_name: Optional[str] = None,
         timeout: Optional[float] = None,
     ):
-        self.base_url = (base_url or Config.BROUTER_BASE_URL).rstrip("/")
+        resolved_base_url = base_url or Config.BROUTER_BASE_URL
+        if not resolved_base_url:
+            raise RuntimeError("BROUTER_BASE_URL not set")
+
+        self.base_url = resolved_base_url.rstrip("/")
         self.profile_name = profile_name or Config.BROUTER_PROFILE or "trekking"
         self.timeout = timeout or float(Config.BROUTER_TIMEOUT_SECONDS or 10)
 
