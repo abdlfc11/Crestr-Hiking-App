@@ -105,7 +105,7 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  # CADDY SERVICe
+  # CADDY SERVICE
   caddy:
     image: caddy:2-alpine
     restart: unless-stopped
@@ -113,10 +113,10 @@ services:
       - "80:80"
       - "443:443"
     env_file:
-      - path: caddy.env
-        required: true
       - path: caddy.example.env
         required: false
+      - path: caddy.env
+        required: true
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
