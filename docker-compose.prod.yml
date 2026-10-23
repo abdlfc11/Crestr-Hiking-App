@@ -9,7 +9,7 @@ services:
     ports: !override []
     volumes: !override
     - ./migrations:/app/migrations
-  crestr-brouter:
+  brouter:
     ports: !override []
   umami:
     ports: !override []
