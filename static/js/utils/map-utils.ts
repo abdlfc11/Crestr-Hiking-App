@@ -1,8 +1,8 @@
 /**
  * This file is intended to hold all OpenLayers map related helper functions
  * As of August 2026 this file hold the following functions:
- *      
- *      - moveMapToPosition(map, position = null, duration = 1200, zoom = 10.5)
+ *
+ *      - moveMapToPosition(map, position = null, duration = 1200, zoom = 6)
  */
 
 import { fromLonLat } from "ol/proj";
@@ -11,7 +11,7 @@ import type Map from "ol/Map.js";
 /**
  * Function to move the map to a specific coordinate or the centre of the map via an animation
  */
-export function moveMapToPosition(map: Map | null, position: number[] | null = null, duration: number = 1200, zoom: number = 10.5) {
+export function moveMapToPosition(map: Map | null, position: number[] | null = null, duration: number = 1200, zoom: number = 6) {
   if (!map) {
     console.warn("No map, returning");
     return;
@@ -21,7 +21,7 @@ export function moveMapToPosition(map: Map | null, position: number[] | null = n
     ? position
     : (Array.isArray(window.appConfig?.mapInitialCentre) ? window.appConfig.mapInitialCentre : [-3.198308, 54.465458]);
 
-  // this converts [Lon, Lat] coordinates into Web Mercator coordinates that the OpenLayers map can use 
+  // this converts [Lon, Lat] coordinates into Web Mercator coordinates that the OpenLayers map can use
   const targetPosition = fromLonLat(targetLatLon);
 
   map.getView().animate({
