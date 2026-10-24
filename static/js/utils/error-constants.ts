@@ -1,5 +1,5 @@
 export const ERROR_MESSAGES = {
-    generic: "Sorry, there was an unexpected error, please try again later", 
+    generic: "Sorry, there was an unexpected error, please try again later",
     ROUTING: {
         PATH_CREATION_FAILED:
             "Sorry, there was an error whilst creating a path, please try again later.",
@@ -10,7 +10,7 @@ export const ERROR_MESSAGES = {
         GENERIC_SAVE_ROUTE:
             "There was an unexpected error whilst saving your point, try again later.",
         INCORRECT_LOCATION:
-            "Please place/enter a point within the UK. "
+            "Please place/enter a point within the UK or Ireland. "
     },
     SEARCH : {
         GENERIC : "Sorry, there was an unexpected error finding that location, please try again later. "
