@@ -43,7 +43,7 @@ interface mapViewObject {
   zoom: number
 }
 
-let mapView: mapViewObject | null = JSON.parse(localStorage.getItem('mapView'));
+let mapView: mapViewObject | null = null;
 
 export function getMap() {
   return map;
@@ -192,6 +192,20 @@ let mapInitialised = false;
 export async function initMap(): Promise<Map> {
   if (mapInitialised) return waitForMap();
   mapInitialised = true;
+
+  // Populating mapView
+  try {
+    const mapViewData: mapViewObject = JSON.parse(localStorage.getItem("mapView"));
+    if (isFinite(mapViewData.lon) && isFinite(mapViewData.lat) && isFinite(mapViewData.zoom)) {
+      mapView = {
+        "lon": mapViewData.lon,
+        "lat": mapViewData.lat,
+        "zoom": mapViewData.zoom
+      }
+    }
+  } catch (error) {
+    console.error("initMap() : Invalid mapView data recieved")
+  };
 
   const fallbackCoords: [number, number] = Array.isArray(window.appConfig.mapInitialCentre)
     ? window.appConfig.mapInitialCentre
