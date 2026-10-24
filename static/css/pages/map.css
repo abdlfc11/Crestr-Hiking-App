@@ -6,7 +6,7 @@
   delete confirmation dialog itself is styled by components/modal.css;
   only its page-specific content styling (the highlighted point name)
   lives here.
-  
+
   Depends on: base/tokens.css, components/loading-spinner.css,
   components/modal.css, and pages/stats-panel.css (dark-mode rules below
   reference it since both are always shown together on this page).
@@ -16,7 +16,7 @@
 :root {
   --map-bg-fallback: #f8f9fa;
   --mode-button-hover-text: #334155;
-  --action-shadow-sm: 0 1px 3px rgba(37, 99, 235, 0.2); 
+  --action-shadow-sm: 0 1px 3px rgba(37, 99, 235, 0.2);
   --generate-button-hover-shadow: 0 3px 6px rgba(37, 99, 235, 0.3);
   --generate-button-active-shadow: 0 1px 2px rgba(37, 99, 235, 0.2);
   --coord-input-focus-border: #3b82f6;
@@ -96,6 +96,8 @@
   left: auto;
 }
 
+/* Attributions on Mobile */
+
 .mobile-attribution-control {
   display: none;
   position: absolute;
@@ -143,15 +145,13 @@
   color: var(--blue);
 }
 
-/* MANUAL ROUTE CREATION */
+/* ROUTE CREATION */
 #start-end {
   position: absolute;
   top: 1rem;
   left: var(--side-nav-space);
   z-index: 1000;
-  background: var(--panel-glass-bg);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: var(--bg);
   border-radius: var(--panel-radius);
   box-shadow: var(--panel-shadow);
   border: 1px solid var(--border-alt);
@@ -210,11 +210,11 @@
   padding: 6px 10px;
   border-width: 1px;
   border-style: solid;
-  border-color: var(--border-alt);
+  border-color: var(--panel-input-border-bg);
   border-radius: 6px;
   font-size: 12px;
   font-family: inherit;
-  background: var(--field-bg);
+  background: var(--panel-input-bg);
   color: var(--ink);
   width: 150px;
   max-width: 100%;
@@ -591,7 +591,7 @@
     right: 2.5rem;
     width: 12rem;
   }
-  
+
   #save-route {
     width: 12rem;
   }
@@ -613,7 +613,7 @@
   #save-route-button-container {
     display: none;
   }
-  
+
   #mobile-save-route-container.show {
     display: flex;
   }
