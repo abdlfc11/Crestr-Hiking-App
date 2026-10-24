@@ -1,5 +1,5 @@
-/* STATS PANEL 
-    
+/* STATS PANEL
+
     This defines the panel which appears when routes are loaded, generated or plotted
 */
 
@@ -8,9 +8,7 @@
     bottom: 20px;
     left: var(--side-nav-space);
     z-index: 2;
-    background: var(--panel-glass-bg);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: var(--bg);
     border-radius: 8px;
     box-shadow: 0 2px 8px var(--panel-shadow);
     border: 1px solid var(--border-alt);
@@ -114,7 +112,7 @@
     width: 800px; /* this is to  expand size */
     max-width: 100%; /* this prevents it from spilling off the right screen boundary */
     padding: 0 1rem;
-    border-left: 1px solid var(--border-alt); 
+    border-left: 1px solid var(--border-alt);
 }
 
 #stat-content-and-chart-container {
@@ -140,7 +138,7 @@
 
 .empty-chart-state p {
     margin: 0;
-    color: var(--ink); 
+    color: var(--ink);
     font-size: 0.95rem;
     font-weight: 500;
     line-height: 1.4;
@@ -148,8 +146,8 @@
 
 @media (max-width: 768px) {
 
-    /* elevation profile not available on mobile screens */ 
-    /* key details such as ETA, distance and elevation gain are already present */ 
+    /* elevation profile not available on mobile screens */
+    /* key details such as ETA, distance and elevation gain are already present */
     .stats-button {
         display: none;
     }
