@@ -8,7 +8,7 @@ import { getRouteStrokeStyle } from "../utils/style-utils.js";
 import Map from "ol/Map.js";
 import View from "ol/View.js";
 import { defaults as defaultControls } from "ol/control.js";
-import { fromLonLat } from "ol/proj.js";
+import { fromLonLat, toLonLat } from "ol/proj.js";
 
 // OpenLayers Layers
 import Tile from "ol/layer/Tile.js";
@@ -31,13 +31,19 @@ const mapReady = new Promise<Map>((resolve) => {
   resolveMapReady = resolve;
 })
 
-const UKAndIrishRectangleBorder = [-11.0, 2.1, 49.8, 60.9]; // in the form of [min_lon, max_lon, min_lat, max_lat]
+const defaultZoom = 6
 
 export let tileLayer: Tile<XYZ> | null = null;
 export let routeLayer: VectorLayer<VectorSource> | null = null;
 export let manualRouteLayer: VectorLayer<VectorSource> | null = null;
 
-let locationCoords: [number, number] | null = null; // WGS84 -> [lon, lat]
+interface mapViewObject {
+  lon: number
+  lat: number
+  zoom: number
+}
+
+let mapView: mapViewObject | null = JSON.parse(localStorage.getItem('mapView'));
 
 export function getMap() {
   return map;
@@ -93,9 +99,9 @@ export function setTileLayer(layer: Tile<XYZ> | null) {
   tileLayer = layer;
 }
 
-export function createMap(coords: [number, number]) {
+export function createMap(coords: number[], zoom?: number | null) {
 
-  const initialZoom = window.appConfig?.mapInitialZoom ?? 10.5;
+  const mapZoom = zoom || window.appConfig?.mapInitialZoom || defaultZoom;
 
   map = new Map({
     layers: tileLayer ? [tileLayer] : [],
@@ -110,7 +116,7 @@ export function createMap(coords: [number, number]) {
       maxZoom: 17,
       minZoom: 0,
       center: fromLonLat(coords),
-      zoom: initialZoom,
+      zoom: mapZoom,
     }),
   });
 
@@ -191,40 +197,30 @@ export async function initMap(): Promise<Map> {
     ? window.appConfig.mapInitialCentre
     : [-3.198308, 54.465458];
 
-  let coords = fallbackCoords;
-
-  if (navigator.geolocation) {
-    coords = await new Promise<[number, number]>((resolve) => {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const minLon = UKAndIrishRectangleBorder[0];
-          const maxLon = UKAndIrishRectangleBorder[1];
-          const minLat = UKAndIrishRectangleBorder[2];
-          const maxLat = UKAndIrishRectangleBorder[3];
-          if (
-            minLon <= position.coords.longitude &&
-            position.coords.longitude <= maxLon &&
-            minLat <= position.coords.latitude &&
-            position.coords.latitude <= maxLat
-          ) {
-            locationCoords = [position.coords.longitude, position.coords.latitude];
-            resolve(locationCoords);
-          } else {
-            resolve(fallbackCoords)
-          }
-        },
-        (error) => {
-          console.warn(`Geolocation was denied or unavailable : ${error.message}`);
-          resolve(fallbackCoords);
-        },
-        { enableHighAccuracy: false, timeout: 5000 },
-      );
-    });
-  }
+  const coords = mapView ? [mapView.lon, mapView.lat] : fallbackCoords
+  const zoom = mapView ? mapView.zoom : null
 
   createTileLayer();
-  createMap(coords);
+  createMap(coords, zoom);
   createRouteLayer();
+
+  map.addEventListener("moveend", () => {
+    const view = map.getView();
+
+    const coordinates = toLonLat(view.getCenter());
+    const lon = coordinates[0];
+    const lat = coordinates[1];
+
+    const zoom = view.getZoom();
+
+    mapView = {
+      "lon": lon,
+      "lat": lat,
+      "zoom": zoom
+    }
+
+    localStorage.setItem("mapView", JSON.stringify(mapView));
+  })
 
   return map;
 }
