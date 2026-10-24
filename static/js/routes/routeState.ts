@@ -1,4 +1,4 @@
-// Shared route path / mode state for save, load, and map display. 
+// Shared route path / mode state for save, load, and map display.
 
 import localforage from "localforage";
 
@@ -22,8 +22,7 @@ let lastAutoRouteStats: RouteStats | null = null;
 let lastLoadedRouteStats: RouteStats | null = null;
 
 // Simple border to have performace over exact accuracy
-export const UKAndIrelandBorder = [[[-11.0, 51.0], [-11.0, 55.5], [-8.5, 59.0], [-5.0, 60.0], [-1.0, 61.0], [2.0, 57.0], [2.0, 52.0], [1.5, 51.0], [-3.0, 50.0], [-6.0, 49.5], [-9.0, 49.5], [-11.0, 51.0]]];
-
+export const UKAndIrelandBorder = [[[-0.8064124, 60.922936], [-8.7507195, 57.7762541], [-11.1133208, 55.5921692], [-10.7167118, 51.0366736], [-6.9485639, 49.8769085], [-3.4347601, 49.884204], [-1.1748384, 50.473193], [0.8882817, 50.3480502], [2.9078657, 52.5198242], [-1.2916597, 56.2893662], [-0.2700197, 60.7103367], [-0.8064124, 60.922936]]];
 export const manualRouteState: ManualRouteState = {
   userClicks: [],
   pathCoords: [],
@@ -65,7 +64,7 @@ export function getCurrentMode() {
 export function setCurrentMode(mode: RoutingMode) {
   currentMode = mode;
 }
- 
+
 // may now receive coordinates where each coord is made of 3 elements, x, y and elevation
 export function getCurrentPathData() {
   return currentPathData;
@@ -113,12 +112,12 @@ export async function clearManualRouteState() {
 }
 
 export function hasActiveRouteStatsPanel() {
-  return manualRouteState.pathCoords.length > 0 || lastAutoRouteStats !== null || lastLoadedRouteStats !== null; 
+  return manualRouteState.pathCoords.length > 0 || lastAutoRouteStats !== null || lastLoadedRouteStats !== null;
 };
 
 /**
- * Function to determine whether or not each coordinate of a path contains elevation 
- * @param {Array} coords 
+ * Function to determine whether or not each coordinate of a path contains elevation
+ * @param {Array} coords
  * @returns boolean value
  */
 export function hasElevation(coords: number[][]): boolean {
@@ -127,7 +126,7 @@ export function hasElevation(coords: number[][]): boolean {
 
 /**
  * Function to retrieve elevation of each coordinate in the path
- * @param {Array} coords 
+ * @param {Array} coords
  * @returns The elevation for each coordinate in the set of coordinates passed in, in the form of an array
  */
 export function extractElevation(coords: number[][]): number[] {
@@ -135,8 +134,8 @@ export function extractElevation(coords: number[][]): number[] {
 }
 
 /**
- * 
- * @param {Array} coords 
+ *
+ * @param {Array} coords
  * @returns An object formed of index : elevation pairs in the form { }
  */
 export function extractElevationProfile(coords: number[][]): Array<{ index: number; elevation: number }> {
@@ -147,8 +146,8 @@ export function extractElevationProfile(coords: number[][]): Array<{ index: numb
 };
 
 /**
- * 
- * @param {Array} coords 
+ *
+ * @param {Array} coords
  * @returns The range of elevation of a path in the form { min: min_elevation, max: max_elevation }
  */
 export function getElevationRange(coords: number[][]): { min: number | null; max: number | null } {
@@ -171,7 +170,7 @@ export function getElevationRange(coords: number[][]): { min: number | null; max
 
 /**
  * @param {Array} coords - Array of [long, lat, elev] arrays
- * @returns {number} The total elevation gain 
+ * @returns {number} The total elevation gain
 */
 export function calculateElevationGain(coords: number[][]): number {
   if (!coords || coords.length < 2) return 0;
