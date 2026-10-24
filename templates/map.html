@@ -29,7 +29,7 @@
     <link rel="stylesheet" href="{{ url_for('static', path='css/pages/settings-panel.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', path='css/pages/import-route.css') }}">
 
-    <!-- Component CSS Files --> 
+    <!-- Component CSS Files -->
     <link rel="stylesheet" href="{{ url_for('static', path='css/components/toggle-switch.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', path='css/components/error-toast.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', path='css/components/loading-spinner.css') }}">
@@ -62,8 +62,8 @@
     <!-- SELF HOSTERS: Change values in your .env file -->
     <!-- Umami Analytics -->
     {% if config.UMAMI_WEBSITE_ID %}
-    <script async defer 
-            src="{{ config.UMAMI_SCRIPT_URL }}" 
+    <script async defer
+            src="{{ config.UMAMI_SCRIPT_URL }}"
             data-website-id="{{ config.UMAMI_WEBSITE_ID }}">
     </script>
     {% endif %}
@@ -74,6 +74,10 @@
     <!-- ##### ERROR TOAST CONTAINER ##### -->
     <div id="error-toast-container"></div>
 
+    <div id="loading-panel">
+        <img id="loading-panel-crestr-logo" src="https://images.crestr.co.uk/Crest-Logo.png">
+        <span id="loading-page-spinner" class="loader"></span>
+    </div>
 
     <div id="map-content">
 
@@ -210,7 +214,7 @@
                 class="mobile-button"
                 type="button"
                 aria-label="Open modal to save a route"
-                
+
             >
                 <i data-lucide="bookmark"></i>
             </button>
@@ -220,14 +224,14 @@
             <button id="mobile-nav-button" class="mobile-button" aria-label="Open navigation dropdown">
                 <i data-lucide="menu"></i>
             </button>
-            
+
             <div id="mobile-nav-dropdown-content" class="context-menu">
                 <button id="mobile-nav-saved-routes" class="context-menu-option" aria-label="Open saved routes panel">Saved Routes</button>
                 <button id="mobile-nav-import-route" class="context-menu-option" aria-label="Open import route panel">Import Routes</button>
                 <button id="mobile-nav-settings" class="context-menu-option" aria-label="Open settings panel">Settings</button>
                 <button id="mobile-nav-report-bug" class="context-menu-option" aria-label="Open report issue modal">Report Bug</button>
                 <button id="mobile-nav-donate" class="context-menu-option" aria-label="Open donate modal">Donate</button>
-                {% if user is none %} 
+                {% if user is none %}
                 <button id="mobile-nav-login" class="context-menu-option" aria-label="Press to login">Login</button>
                 {% else %}
                 <button id="mobile-nav-logout" class="context-menu-option" aria-label="Press to logout">Log out</button>
@@ -247,7 +251,7 @@
             </button>
 
             <div id="mobile-actions" class="mobile-actions">
-                <button 
+                <button
                     id="mobile-undo-button"
                     class="mobile-button mobile-routing-button"
                     aria-label="undo route point"
@@ -256,7 +260,7 @@
                 </button>
 
                 <button
-                    id="mobile-redo-button" 
+                    id="mobile-redo-button"
                     class="mobile-button mobile-routing-button"
                     aria-label="redo route point"
                 >
@@ -278,15 +282,15 @@
             <div class="modal-wrapper" id="donate-modal-wrapper">
                 <div class="modal-content donate-modal-content" id="donate-modal-content">
                     <button class="donate-modal-close" id="donate-modal-close-button" data-donate-close aria-label="Close">&times;</button>
-                
+
                     <div class="modal-header">
                         <h2>Support Crestr</h2>
                     </div>
-                
+
                     <div class="modal-body donate-modal-body">
                         <p>Crestr is free and in active development. Donations go toward hosting costs, no pressure, and Crestr stays free either way.</p>
                     </div>
-                
+
                     <div class="donate-options">
                         <a class="donate-option" href="https://liberapay.com/abd_ulll16/donate" target="_blank" rel="noopener noreferrer">
                         <span class="donate-option-icon">
@@ -298,7 +302,7 @@
                         </span>
                         <i data-lucide="move-right"></i>
                         </a>
-                
+
                         <a class="donate-option" href="https://ko-fi.com/abdulsultan" target="_blank" rel="noopener noreferrer">
                         <span class="donate-option-icon">
                             <i data-lucide="coffee"></i>
@@ -310,7 +314,7 @@
                         <i data-lucide="move-right"></i>
                         </a>
                     </div>
-            
+
                     <div class="modal-actions">
                         <button id="donate-modal-maybe-later-button" class="modal-btn modal-btn-secondary" data-donate-close type="button">Maybe later</button>
                     </div>
@@ -547,7 +551,7 @@
                     <div class="modal-body">
                         <canvas id="share-route-dialog-canvas"></canvas>
                         <p>This QR code opens the route on Crestr for viewing (and eventually editing). </p>
-                        
+
                         <p>Alternatively you can share the link copied to the clipboard.</p>
                     </div>
                     <div class="modal-actions">
@@ -624,7 +628,7 @@
                     <span class="nav-label">Shortcuts</span>
                 </button>
 
-                {% if user is none %} 
+                {% if user is none %}
                     <button
                         type="button"
                         id="sidenav-login-button"
@@ -653,14 +657,14 @@
     <!-- ##### SAVED ROUTE DASHBOARD ##### -->
     <div id="saved-routes-dashboard">
         <div class="inner-content">
-            
+
                 {% if user is none or not user.preferred_name %}
                     <header id="dashboard-header" class="saved-route-header">
                         <div id="top-section">
                             <h1>Please Login to save routes</h1>
                             <div id="go-back-button-container">
                                 <a class="closebtn" id="saved-routes-dash-go-back-button">&times;</a>
-                            </div>  
+                            </div>
 
                         </div>
                     </header>
@@ -672,7 +676,7 @@
 
                         <div id="go-back-button-container">
                             <a class="closebtn" id="saved-routes-dash-go-back-button">&times;</a>
-                        </div>  
+                        </div>
 
                     </div>
                 </header>
@@ -724,7 +728,7 @@
                                     aria-haspopup="menu"
                                     aria-expanded="false"
                                 >
-                                    <span aria-hidden="true">&#8230;</span> 
+                                    <span aria-hidden="true">&#8230;</span>
                                 </button>
                                 <div class="route-actions-menu" hidden>
 
@@ -735,8 +739,8 @@
                                         Share Route
                                     </button>
 
-                                    <button 
-                                        type="button" 
+                                    <button
+                                        type="button"
                                         class="route-btn route-btn-download-gpx"
                                     >
                                         <span class="route-btn-text">Download GPX</span>
@@ -761,7 +765,7 @@
                             </div>
                         </div>
                         {% endfor %}
-                    
+
                     {% else %}
                         <div id="no-routes-wrapper-container" class="no-routes-wrapper">
                             <div class="no-routes-card">
@@ -788,7 +792,7 @@
                 <div class="settings-header-container">
 
                     <h1>Settings</h1>
-                    
+
                     <div id="settings-close-button-container">
                         <a class="settingCloseButton" id="settings-close-button">&times;</a>
                     </div>
@@ -801,20 +805,20 @@
                         <span class="settings-title">Distance Units</span>
                         <span class="settings-description">Toggle between Kilometres and Miles</span>
                     </div>
-                    
+
                     <label class="switch-toggle">
                         <input type="checkbox" id="distance-unit-checkbox">
                         <span class="switch-slider"></span>
                     </label>
                  </div>
- 
+
                  <!-- Theme -->
                  <div class="settings-item">
                      <div class="settings-text">
                          <span class="settings-title">Theme</span>
                          <span class="settings-description">Choose appearance</span>
                      </div>
- 
+
                      <div class="settings-radio-pills">
                          <label class="radio-pill">
                              <input type="radio" name="theme" value="light">
@@ -830,12 +834,12 @@
                          </label>
                      </div>
                  </div>
- 
+
                  <!-- Delete Account -->
 
-                 {% if user is none or not user.preferred_name %} 
+                 {% if user is none or not user.preferred_name %}
 
-                {% else %} 
+                {% else %}
                     <div class="settings-item settings-item-destructive" id="delete-account-container">
                         <div class="delete-normal-state">
 
@@ -843,13 +847,13 @@
                                 <span class="settings-title">Delete Account</span>
                                 <span class="settings-description">Permanently remove your account and all data</span>
                             </div>
-                            
+
                             <button
                                 class="delete-account-btn"
                                 type="button"
                                 id="settings-delete-account-button"
                             >Delete</button>
-                            
+
                         </div>
 
                         <div class="delete-confirm-state" style="display: none; width: 100%;">
@@ -919,7 +923,7 @@
                         <span class="import-route-item-description">Supported: GPX, KML, FIT, GeoJSON</span>
                     </div>
 
-                    <input 
+                    <input
                         type="file"
                         id="import-route-file-input"
                         accept=".gpx,.kml,.fit,.geojson"
@@ -934,10 +938,10 @@
                         <span class="import-route-item-description">Paste a public route link</span>
                     </div>
 
-                    <input 
-                        type="url" 
-                        id="import-route-url-input" 
-                        class="settings-input" 
+                    <input
+                        type="url"
+                        id="import-route-url-input"
+                        class="settings-input"
                         placeholder="https://example.com/route"
                     >
                 </div>
@@ -949,10 +953,10 @@
                         <span class="import-route-item-description">Name your imported route before saving</span>
                     </div>
 
-                    <input 
-                        type="text" 
-                        id="import-route-name-input" 
-                        class="settings-input" 
+                    <input
+                        type="text"
+                        id="import-route-name-input"
+                        class="settings-input"
                         placeholder="My Route"
                         required
                         aria-required="true"
@@ -1030,10 +1034,10 @@
             apiGetSettings: "/settings/get-settings",
             apiSaveSettings: "/settings/save-settings",
 
-            // navigation API endpoint 
+            // navigation API endpoint
             mapPageUrl: "/map",
 
-            // utility and error logging endpoints 
+            // utility and error logging endpoints
             apiLogErrorUrl: '/api/log-error',
             apiReportIssueUrl: '/api/report-issue'
         };
