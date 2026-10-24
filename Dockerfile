@@ -23,10 +23,9 @@ RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
 # this installs pg_isready so the entrypoint can wait for postgres
-# it also installs curl (to be used when getting the graph)
 # no install recommends is used to keep the layer small
 RUN apt-get update \
- && apt-get install -y --no-install-recommends postgresql-client curl \
+ && apt-get install -y --no-install-recommends postgresql-client \
  && rm -rf /var/lib/apt/lists/*
 
 # this copies python backend 
