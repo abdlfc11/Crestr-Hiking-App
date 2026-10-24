@@ -40,6 +40,7 @@
   --list-item-bg: rgba(206, 203, 203, 0.85);
   --list-item-bg-hover: rgba(169, 166, 166, 0.85);
 
+  --panel-glass-bg: rgb(255 255 255 / 0.65);
   --panel-input-bg: #FFFFFF;
   --panel-input-border-bg: #E2E8F0;
 
@@ -130,6 +131,7 @@ html.dark {
   --list-item-bg: rgb(101, 100, 100);
   --list-item-bg-hover: rgba(79, 77, 77, 0.85);
 
+  --panel-glass-bg: rgb(31 41 55 / 0.75);
   --panel-input-bg: #2C333E;
   --panel-input-border-bg: #3A4150;
 
