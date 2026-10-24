@@ -50,10 +50,8 @@ html.dark {
   display: flex;
   flex-direction: column;
   transition: var(--nav-transition);
-  backdrop-filter: blur(30px);
-  -webkit-backdrop-filter: blur(30px);
+  background-color: var(--bg);
   border-right: var(--nav-border);
-  background: var(--glass-bg);
   border-right: 1px solid var(--border);
   border-top-right-radius: var(--nav-border-radius);
   border-bottom-right-radius: var(--nav-border-radius);
