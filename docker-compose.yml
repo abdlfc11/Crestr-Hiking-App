@@ -136,7 +136,7 @@ services:
       - |
         set -eu
         mkdir -p /segments4
-        for seg in E0_N50 E0_N55 E0_N60 W5_N50 W5_N55 W5_N60 W10_N50 W10_N55; do
+        for seg in E0_N50 E0_N55 E0_N60 W5_N50 W5_N55 W5_N60 W10_N45 W10_N50 W10_N55 W15_N50; do
           if [ ! -s "/segments4/$$seg.rd5" ]; then
             echo "Downloading $$seg.rd5..."
             curl --fail --location --retry 3 --output "/segments4/$$seg.rd5" \
