@@ -1577,7 +1577,7 @@ async function handleCoordEntryChange(entry: HTMLInputElement, type: "start" | "
   try {
     if (type === "end") {
       if (raw === startCoordEntry?.value?.trim()) {
-        showToast("Please enter a different coordinate to the start point", "error", null);
+        showToast("Please enter a different coordinate to the start point. ", "error", null);
         entry.value = "";
         return;
       }
