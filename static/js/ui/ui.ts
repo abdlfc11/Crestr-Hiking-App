@@ -954,6 +954,7 @@ export function clearManualRoute() {
   const map = getMap();
   if (!map) return;
 
+  resetCoordInputState()
   clearManualRouteState();
   removeManualRouteLayer();
   manualRouteFeature = null;
@@ -974,19 +975,7 @@ export function clearManualRoute() {
   resetElevationChart();
 }
 
-export function homeButtonFunction() {
-  const map = getMap();
-  if (!map) return;
-
-  // closes any modals / panels to return to the map view
-  closeModals();
-  closePanels();
-
-  if (map.getView().getAnimating()) {
-    return;
-  }
-
-  // this resets the coordinate input UI state
+function resetCoordInputState() {
   if (startCoordEntry) {
     startCoordEntry.classList.remove("input-error", "is-active");
     startCoordEntry.placeholder = "Coordinates";
@@ -996,6 +985,20 @@ export function homeButtonFunction() {
     endCoordEntry.classList.remove("input-error", "is-active");
     endCoordEntry.placeholder = "Coordinates";
     endCoordEntry.value = "";
+  }
+}
+
+export function homeButtonFunction() {
+  const map = getMap();
+  if (!map) return;
+
+  // closes any modals / panels to return to the map view
+  closeModals();
+  closePanels();
+  resetCoordInputState();
+
+  if (map.getView().getAnimating()) {
+    return;
   }
 
   clickMode = null;
