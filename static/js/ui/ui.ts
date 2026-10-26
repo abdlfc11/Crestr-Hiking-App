@@ -1575,10 +1575,18 @@ async function handleCoordEntryChange(entry: HTMLInputElement, type: "start" | "
   map.renderSync();
 
   try {
-    if (type === "end" && manualRouteState.userClicks.length === 0) {
-      showToast("Set a start point before setting the end point.", "error");
-      entry.value = "";
-      return;
+    if (type === "end") {
+      if (raw === startCoordEntry?.value?.trim()) {
+        showToast("Please enter a different coordinate to the start point", "error", null);
+        entry.value = "";
+        return;
+      }
+
+      if (manualRouteState.userClicks.length === 0) {
+        showToast("Set a start point before setting the end point.", "error");
+        entry.value = "";
+        return;
+      }
     }
 
     await addManualPoint(mercatorCoords[0], mercatorCoords[1], type);
