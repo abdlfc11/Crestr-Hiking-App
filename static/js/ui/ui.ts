@@ -1576,7 +1576,14 @@ async function handleCoordEntryChange(entry: HTMLInputElement, type: "start" | "
 
   try {
     if (type === "end") {
-      if (raw === startCoordEntry?.value?.trim()) {
+
+      const startMercatorCoords = toWebMercator(parseCoordString(startCoordEntry?.value?.trim()));
+
+      if (
+        startMercatorCoords &&
+        mercatorCoords[0] === startMercatorCoords[0] &&
+        mercatorCoords[1] === startMercatorCoords[1]
+      ) {
         showToast("Please enter a different coordinate to the start point. ", "error", null);
         entry.value = "";
         return;
