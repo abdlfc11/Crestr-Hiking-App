@@ -853,6 +853,7 @@ function handleRouteImportType() {
 async function manualRouteClickHandler(event: MapBrowserEvent<PointerEvent>) {
 
   if (handleSelectSavedPoint(event)) return;
+  resetCoordInputState(false)
 
   generatePathButton.disabled = true;
   generatePathButton.classList.add('loading');
@@ -954,6 +955,7 @@ export function clearManualRoute() {
   const map = getMap();
   if (!map) return;
 
+  resetCoordInputState()
   clearManualRouteState();
   removeManualRouteLayer();
   manualRouteFeature = null;
@@ -974,6 +976,19 @@ export function clearManualRoute() {
   resetElevationChart();
 }
 
+function resetCoordInputState(clearValues = true) {
+  if (startCoordEntry) {
+    startCoordEntry.classList.remove("input-error", "is-active");
+    startCoordEntry.placeholder = "Coordinates";
+    if (clearValues) startCoordEntry.value = "";
+  }
+  if (endCoordEntry) {
+    endCoordEntry.classList.remove("input-error", "is-active");
+    endCoordEntry.placeholder = "Coordinates";
+    if (clearValues) endCoordEntry.value = "";
+  }
+}
+
 export function homeButtonFunction() {
   const map = getMap();
   if (!map) return;
@@ -981,21 +996,10 @@ export function homeButtonFunction() {
   // closes any modals / panels to return to the map view
   closeModals();
   closePanels();
+  resetCoordInputState(false);
 
   if (map.getView().getAnimating()) {
     return;
-  }
-
-  // this resets the coordinate input UI state
-  if (startCoordEntry) {
-    startCoordEntry.classList.remove("input-error", "is-active");
-    startCoordEntry.placeholder = "Coordinates";
-    startCoordEntry.value = "";
-  }
-  if (endCoordEntry) {
-    endCoordEntry.classList.remove("input-error", "is-active");
-    endCoordEntry.placeholder = "Coordinates";
-    endCoordEntry.value = "";
   }
 
   clickMode = null;
