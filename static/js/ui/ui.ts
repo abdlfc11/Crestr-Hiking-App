@@ -186,6 +186,13 @@ const logoutNavBarButton = document.getElementById('sidenav-logout-button');
 // MODALS
 
 // delete point modal
+export const deleteRouteModal = document.getElementById("delete-route-confirmation-dialog") as HTMLDialogElement | null;
+const deleteRouteModalNameDisplay = document.getElementById("delete-route-dialog-name-display");
+export const deleteRouteModalDeleteButton = document.getElementById("route-delete-delete-button");
+const deleteRouteModalExitButton = document.getElementById("route-delete-exit-button");
+const deleteRouteModalContent = deleteRouteModal.querySelector('.modal-content');
+
+// delete point modal
 const deletePointModal = document.getElementById("delete-point-confirmation-dialog") as HTMLDialogElement | null;
 const deletePointModalNameDisplay = document.getElementById("point-name-display");
 const deletePointModalDeleteButton = document.getElementById("point-delete-delete-button");
@@ -440,6 +447,36 @@ export async function handleReportIssueSubmission(title: string, description: st
     }
 }
 
+//#endregion
+
+//#region Delete Route Modal
+
+export function populateDeleteRouteModal(routeName: string) {
+  deleteRouteModalNameDisplay.textContent = routeName;
+}
+
+export async function waitForDeleteRouteConfirmation(): Promise<boolean> {
+  const check = await new Promise<boolean>((resolve) => {
+
+    showModal(true, deleteRouteModal);
+
+    deleteRouteModalDeleteButton.onclick = () => {
+      resolve(true);
+    }
+
+    deleteRouteModal.onclose = () => {
+      resolve(false);
+    }
+
+  })
+
+  showModal(false, deleteRouteModal);
+  return check;
+}
+
+export function cleanDeleteRouteModal() {
+  deleteRouteModalNameDisplay.textContent = "";
+}
 
 //#endregion
 
@@ -1968,24 +2005,6 @@ function initInteractivePointLayer(map: Map) {
   map.addLayer(interactivePointLayer);
 }
 
-function initPointDeleteHandlers() {
-  if (!deletePointModal) return;
-
-  deletePointModal.addEventListener("click", (e) => {
-    closeModalUponOutsideClick(e, deletePointModalContent, deletePointModal)
-  });
-
-  deletePointModal.addEventListener("close", deselectSelectedPoint);
-
-  deletePointModalExitButton?.addEventListener("click", () => {
-    showModal(false, deletePointModal)
-  });
-
-  deletePointModalDeleteButton?.addEventListener("click", () => {
-    deleteSavedPoint(selectedPoint)
-  });
-}
-
 export function initUi() {
   const map = getMap();
 
@@ -2002,7 +2021,6 @@ export function initUi() {
   applyTheme(getTheme());
 
   initSaveRoute();
-  initPointDeleteHandlers();
 
   initInteractivePointLayer(map);
   loadAndDisplaySavedPoints();
@@ -2097,6 +2115,18 @@ export function initUi() {
 
   // These event listeners are for keyboard shortcuts.
   addClickListener(document, handleKeyboardShortcuts, "keydown");
+
+  // MODALS
+
+  // Delete Point Modal
+  addClickListener(deletePointModal, (e) => closeModalUponOutsideClick(e, deletePointModalContent, deletePointModal), "click");
+  addClickListener(deletePointModal, deselectSelectedPoint, "close");
+  addClickListener(deletePointModalExitButton, () => showModal(false, deletePointModal), "click");
+  addClickListener(deletePointModalDeleteButton, () => deleteSavedPoint(selectedPoint), "click");
+
+  // Delete Route Modal
+  addClickListener(deleteRouteModal, (e) => closeModalUponOutsideClick(e, deleteRouteModalContent, deleteRouteModal), "click");
+  addClickListener(deleteRouteModalExitButton, () => showModal(false, deleteRouteModal), "click");
 
   // Login Modal
   addClickListener(loginModalExitButton, () => showModal(false, loginModal), 'click');

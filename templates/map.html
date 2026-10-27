@@ -433,6 +433,25 @@
             </div>
         </dialog>
 
+        <!-- ##### DELETE ROUTE MODAL ##### -->
+        <dialog id="delete-route-confirmation-dialog" class="modal-overlay" aria-labelledby="delete-route-modal-header">
+            <div class="modal-wrapper">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 id="delete-route-modal-header">Delete Route</h2>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to delete this route:</p>
+                        <p><span id="delete-route-dialog-name-display"></span>?</p>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" id="route-delete-exit-button" class="modal-btn modal-btn-secondary">Exit</button>
+                        <button id="route-delete-delete-button" class="modal-btn modal-btn-danger">Delete Route</button>
+                    </div>
+                </div>
+            </div>
+        </dialog>
+
         <!-- ##### LOAD LAST ROUTE MODAL ##### -->
         <dialog id="load-last-route-dialog" class="modal-overlay">
             <div class="modal-wrapper">
