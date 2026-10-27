@@ -127,6 +127,8 @@ async function onLoadClick(event: MouseEvent) {
  * Handles the sequence of events that occur following the clicking of the delete route button
  */
 async function onDeleteClick(event: MouseEvent) {
+  event.preventDefault();
+
   const routeCard = (event.target as HTMLElement).closest<HTMLElement>(".route-card")
   const route = getRouteFromCard(routeCard);
   if (!route) return;
@@ -134,11 +136,9 @@ async function onDeleteClick(event: MouseEvent) {
   populateDeleteRouteModal(route.routeName);
 
   const check = await waitForDeleteRouteConfirmation();
+  cleanDeleteRouteModal(); // Clears the route name text on the modal once the user has confirmed
 
-  if (!check) {
-    cleanDeleteRouteModal();
-    return;
-  }
+  if (!check) return;
 
   try {
     const response = await deleteRoute(route.routeName);
@@ -156,11 +156,7 @@ async function onDeleteClick(event: MouseEvent) {
     }
   } catch (error) {
     showToast(error.cause || "Sorry, there was an error downloading your route, please try again later.")
-  } finally {
-    cleanDeleteRouteModal();
   }
-
-  event.preventDefault();
 }
 
 /**
