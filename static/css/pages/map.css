@@ -437,12 +437,6 @@
   display: none;
 }
 
-/* DELETE POINT MODAL */
-#point-name-display {
-  font-weight: 700;
-  color: var(--point-name-color);
-}
-
 /* RESPONSIVE STYLES */
 
 .mobile-nav-container {

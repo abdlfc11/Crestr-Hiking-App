@@ -57,7 +57,7 @@
   color: var(--ink);
 }
 
-/* MODAL BUTTON */ 
+/* MODAL BUTTON */
 
 /* modal button container */
 .modal-actions {
@@ -81,13 +81,13 @@
   outline: none;
 }
 
-/* specific modal button styles 
+/* specific modal button styles
    this is a secondary button style
    meant for regular low-risk actions
    such as exiting */
 .modal-btn-secondary {
   background-color: var(--secondary-btn-bg);
-  
+
   color: #FFFFFF;
 }
 
@@ -119,4 +119,11 @@
 .modal-btn-normal:hover {
     background-color: var(--blue-dark);
     transform: translateY(-1.5px);
+}
+
+/* Delete Point / Route Modal */
+#point-name-display, #delete-route-dialog-name-display {
+  font-weight: 700;
+  margin: .5rem;
+  color: var(--point-name-color);
 }
