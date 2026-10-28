@@ -2005,118 +2005,7 @@ function initInteractivePointLayer(map: Map) {
   map.addLayer(interactivePointLayer);
 }
 
-export function initUi() {
-  const map = getMap();
-
-  if (map) {
-    initCursorManager(map, getCurrentMode, getClickMode);
-  }
-
-  if (!window.appConfig.initialCurrentPath) {
-    if (saveContainer) {
-        saveContainer.style.display = 'none';
-    }
-  }
-
-  applyTheme(getTheme());
-
-  initSaveRoute();
-
-  initInteractivePointLayer(map);
-  loadAndDisplaySavedPoints();
-
-  // initial tour (automatic routing and saving the first route)
-  handleInitialTour();
-
-  // shows modal to load previous route if prompted to login after attempted save route
-  handleInitialLoadCachedRoute()
-
-  // These event listeners are for settings and preferences.
-  setOnDistanceUnitChange(() => handleDistanceUnitToggle());
-
-  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
-    applyTheme(getTheme());
-  });
-
-  // These event listeners are for navigation panels.
-  addClickListener(openSavedRoutesDashButton, openSavedRoutesDash, "click");
-  addClickListener(closeSavedRoutesDashButton, closeSavedRoutesDash, "click");
-
-  addClickListener(settingOpenButton, openSettings, "click");
-  addClickListener(settingCloseButton, closeSettings, "click");
-
-  addClickListener(importRouteOpenButton, openImportRoute, "click");
-  addClickListener(importRouteCloseButton, closeImportRoute, "click");
-  addClickListener(importRouteCancelButton, cancelRouteImport, "click");
-
-  addClickListener(loginNavBarButton, () => window.location.href = "/login-page", 'click')
-  addClickListener(logoutNavBarButton, logout, 'click')
-
-  addClickListener(reportIssueOpenButton, () => showReportIssueModal(true), "click");
-
-  // MOBILE
-
-  // These event listeners are for the mobile nav
-  addClickListener(mobileNavButton, () => mobileNavDropdownContent.classList.toggle('show'), "click");
-  addClickListener(mobileNavDonate, () => showModal(true, donateModal), "click");
-  addClickListener(mobileNavReportBug, () => showModal(true, reportIssueModal), "click");
-  addClickListener(mobileNavSettings, openSettings, "click");
-  addClickListener(mobileNavImportRoutes, openImportRoute, "click");
-  addClickListener(mobileNavSavedRoutes, openSavedRoutesDash, "click");
-
-  // These event listeners are for mobile routing actions
-  addClickListener(mobileActionsButton, () => {
-    const isOpen = mobileActions.classList.toggle("show");
-    mobileActionsButton.setAttribute("aria-expanded", String(isOpen));
-    mobileActionsButton.setAttribute("aria-label", isOpen ? "Hide route actions" : "Show route actions");
-  }, "click")
-
-  addClickListener(mobileClearAction, clearManualRoute, "click")
-  addClickListener(mobileUndoAction, undoManualRoutePoint, "click")
-  addClickListener(mobileRedoAction, redoManualRoutePoint, "click");
-  addClickListener(mobileAttributionButton, () => {
-    const isOpen = mobileAttributions.classList.toggle("show");
-    mobileAttributionButton.setAttribute("aria-expanded", String(isOpen));
-    mobileAttributionButton.setAttribute("aria-label", isOpen ? "Hide map attributions" : "Show map attributions");
-  }, "click");
-
-  // These event listeners are for route import.
-  importRouteFileInput.addEventListener("change", (e) => {
-    const file = (e.target as HTMLInputElement).files?.[0];
-    validateFileInput(file);
-  });
-
-
-  addClickListener(importRouteSubmitButton, handleRouteImport, "click");
-  routeInputTypes.forEach(radio => {
-    radio.addEventListener('change', handleRouteImportType);
-  });
-
-  // These event listeners are for the routing panel
-  addClickListener(searchForAreaButton, searchArea, "click");
-
-  addClickListener(setStartCoordButton, setStartCoord, "click");
-  addClickListener(setEndCoordButton, setEndCoord, "click");
-
-  addClickListener(startCoordEntry, () => handleCoordEntryChange(startCoordEntry, "start"), 'change')
-  addClickListener(endCoordEntry, () => handleCoordEntryChange(endCoordEntry, "end"), 'change')
-
-  addClickListener(clearRouteButton, clearManualRoute, "click");
-  addClickListener(homeButton, homeButtonFunction, "click");
-
-  addClickListener(undoManualRouteButton, undoManualRoutePoint, "click");
-  addClickListener(redoManualRouteButton, redoManualRoutePoint, "click");
-  addClickListener(noRouteCardButton, closeSavedRoutesDash, "click");
-
-  addClickListener(generatePathButton, () => void handleManualRouteGeneration(), "click");
-
-  // These event listeners are for route saving.
-  addClickListener(saveRouteToggleButton, toggleSaveRouteContainer, "click");
-
-  // These event listeners are for keyboard shortcuts.
-  addClickListener(document, handleKeyboardShortcuts, "keydown");
-
-  // MODALS
+function initModals() {
 
   // Delete Point Modal
   addClickListener(deletePointModal, (e) => closeModalUponOutsideClick(e, deletePointModalContent, deletePointModal), "click");
@@ -2158,34 +2047,153 @@ export function initUi() {
   addClickListener(loadLastRouteModal, (e) => closeModalUponOutsideClick(e, loadLastRouteModalContent, loadLastRouteModal), "click");
 
   // Keyboard Shortcuts Modal
-  addClickListener(shortcutsModalOpenButton, () => showModal(true, shortcutsModal), "click");
   addClickListener(shortcutsModalCloseButton, () => showModal(false, shortcutsModal), "click");
   addClickListener(shortcutsModal, (e) => closeModalUponOutsideClick(e, shortcutsModalContent, shortcutsModal), "click");
 
   // Share Route Modal
   addClickListener(shareRouteModalExitButton, () => showModal(false, shareRouteModal), "click");
   addClickListener(shareRouteModal, (e) => closeModalUponOutsideClick(e, shareRouteModalContent, shareRouteModal), "click");
+  addClickListener(document, handleKeyboardShortcuts, "keydown");
+}
+
+function initNavRail() {
+
+  // These event listeners are for navigation panels.
+  addClickListener(openSavedRoutesDashButton, openSavedRoutesDash, "click");
+  addClickListener(closeSavedRoutesDashButton, closeSavedRoutesDash, "click");
+
+  addClickListener(settingOpenButton, openSettings, "click");
+  addClickListener(settingCloseButton, closeSettings, "click");
+
+  addClickListener(importRouteOpenButton, openImportRoute, "click");
+  addClickListener(importRouteCloseButton, closeImportRoute, "click");
+  addClickListener(importRouteCancelButton, cancelRouteImport, "click");
+
+  addClickListener(loginNavBarButton, () => window.location.href = "/login-page", 'click')
+  addClickListener(logoutNavBarButton, logout, 'click')
+
+  addClickListener(reportIssueOpenButton, () => showReportIssueModal(true), "click");
+  addClickListener(shortcutsModalOpenButton, () => showModal(true, shortcutsModal), "click");
+}
+
+function initMobile() {
+
+  // These event listeners are for the mobile nav
+  addClickListener(mobileNavButton, () => mobileNavDropdownContent.classList.toggle('show'), "click");
+  addClickListener(mobileNavDonate, () => showModal(true, donateModal), "click");
+  addClickListener(mobileNavReportBug, () => showModal(true, reportIssueModal), "click");
+  addClickListener(mobileNavSettings, openSettings, "click");
+  addClickListener(mobileNavImportRoutes, openImportRoute, "click");
+  addClickListener(mobileNavSavedRoutes, openSavedRoutesDash, "click");
+
+  // These event listeners are for mobile routing actions
+  addClickListener(mobileActionsButton, () => {
+    const isOpen = mobileActions.classList.toggle("show");
+    mobileActionsButton.setAttribute("aria-expanded", String(isOpen));
+    mobileActionsButton.setAttribute("aria-label", isOpen ? "Hide route actions" : "Show route actions");
+  }, "click")
+
+  addClickListener(mobileClearAction, clearManualRoute, "click")
+  addClickListener(mobileUndoAction, undoManualRoutePoint, "click")
+  addClickListener(mobileRedoAction, redoManualRoutePoint, "click");
+  addClickListener(mobileAttributionButton, () => {
+    const isOpen = mobileAttributions.classList.toggle("show");
+    mobileAttributionButton.setAttribute("aria-expanded", String(isOpen));
+    mobileAttributionButton.setAttribute("aria-label", isOpen ? "Hide map attributions" : "Show map attributions");
+  }, "click");
+}
+
+function initImportRoutePanel() {
+
+  importRouteFileInput.addEventListener("change", (e) => {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    validateFileInput(file);
+  });
+
+
+  addClickListener(importRouteSubmitButton, handleRouteImport, "click");
+  routeInputTypes.forEach(radio => {
+    radio.addEventListener('change', handleRouteImportType);
+  });
+}
+
+function initRouting() {
+
+  addClickListener(searchForAreaButton, searchArea, "click");
+
+  addClickListener(setStartCoordButton, setStartCoord, "click");
+  addClickListener(setEndCoordButton, setEndCoord, "click");
+
+  addClickListener(startCoordEntry, () => handleCoordEntryChange(startCoordEntry, "start"), 'change')
+  addClickListener(endCoordEntry, () => handleCoordEntryChange(endCoordEntry, "end"), 'change')
+
+  addClickListener(clearRouteButton, clearManualRoute, "click");
+  addClickListener(homeButton, homeButtonFunction, "click");
+
+  addClickListener(undoManualRouteButton, undoManualRoutePoint, "click");
+  addClickListener(redoManualRouteButton, redoManualRoutePoint, "click");
+  addClickListener(noRouteCardButton, closeSavedRoutesDash, "click");
+
+  addClickListener(generatePathButton, () => void handleManualRouteGeneration(), "click");
+
+  // Route saving
+  addClickListener(saveRouteToggleButton, toggleSaveRouteContainer, "click");
 
   onMapClick(manualRouteClickHandler);
+}
 
-  // These event listeners are for updating the map cursor.
-  mapElement?.addEventListener("mouseup", () => {
-    updateCursor();
-  });
+function initCursor() {
+  mapElement?.addEventListener("mouseup", () => updateCursor());
+}
 
-  mapElement?.addEventListener("mousedown", () => {
-    if (getCurrentMode() === "manual") {
-      // Crosshair all the time due to creation of routes.
-      setCursor("crosshair");
-      return;
-    }
+function initSavedPoints(map: Map) {
+  initInteractivePointLayer(map);
+  loadAndDisplaySavedPoints();
+}
 
-    setCursor("grabbing");
-  });
-
-  // Detecting if loading shared route
+function initSharedRoute() {
   const routeId = new URLSearchParams(window.location.search).get("route_id");
-  if (routeId) displaySharedRoute(routeId)
+  if (routeId) displaySharedRoute(routeId);
+}
+
+export function initUi() {
+  const map = getMap();
+
+  if (map) {
+    initCursorManager(map, getCurrentMode, getClickMode);
+  }
+
+  if (!window.appConfig.initialCurrentPath) {
+    if (saveContainer) {
+        saveContainer.style.display = 'none';
+    }
+  }
+
+  applyTheme(getTheme());
+
+  initSaveRoute();
+  initModals();
+  initNavRail();
+  initMobile();
+  initImportRoutePanel();
+  initRouting();
+  initCursor();
+  initSavedPoints(map);
+
+  // initial tour (automatic routing and saving the first route)
+  handleInitialTour();
+
+  // shows modal to load previous route if prompted to login after attempted save route
+  handleInitialLoadCachedRoute()
+
+  // These event listeners are for settings and preferences.
+  setOnDistanceUnitChange(() => handleDistanceUnitToggle());
+
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+    applyTheme(getTheme());
+  });
+
+  initSharedRoute();
 }
 
 
