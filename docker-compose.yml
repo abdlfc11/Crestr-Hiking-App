@@ -129,6 +129,7 @@ services:
   # BROUTER SEGMENT INITIALISER
   brouter-segments:
     image: curlimages/curl:8.10.1
+    user: "1000:1000"
     volumes:
       - ./data/brouter/segments4:/segments4
     entrypoint: ["/bin/sh", "-c"]
