@@ -1,10 +1,10 @@
-/* 
+/*
   DESIGN TOKENS
 
   Single source of truth for colors, radii, shadows and fonts.
 
-  Previously this was split (and partly duplicated) between report-issue.css and error.css 
-  
+  Previously this was split (and partly duplicated) between report-issue.css and error.css
+
   Everything else in the codebase hardcoded these same values as raw hex, that's the main thing this file fixes
   Change a value here and it updates everywhere.
 */
@@ -40,8 +40,9 @@
   --list-item-bg: rgba(206, 203, 203, 0.85);
   --list-item-bg-hover: rgba(169, 166, 166, 0.85);
 
-  --panel-glass-bg: rgb(255 255 255 / 0.65); /* the glassmorphism routing panel background */
-  --panel-glass-bg-hover: rgba(223, 221, 221, 0.65);
+  --panel-glass-bg: rgb(255 255 255 / 0.65);
+  --panel-input-bg: #FFFFFF;
+  --panel-input-border-bg: #E2E8F0;
 
   /* Text */
   --ink: #1f2937;
@@ -62,7 +63,7 @@
   --btn-bg-hover: #454545;
   --secondary-btn-bg: #595959;
   --secondary-btn-bg-hover: #4b4a4a;
-  --danger-btn-bg-transparent: rgba(227, 49, 49, 0.2); 
+  --danger-btn-bg-transparent: rgba(227, 49, 49, 0.2);
   --btn-disabled-bg: #93b4f2;
   --btn-disabled-text: #ffffff;
 
@@ -80,10 +81,10 @@
   --radius-pill: 9999px;
 
   /* Spacing */
-  --space-3xs: 0.125rem; 
-  --space-2xs: 0.25rem; 
-  --space-xs:  0.5rem;  
-  --space-sm:  0.75rem; 
+  --space-3xs: 0.125rem;
+  --space-2xs: 0.25rem;
+  --space-xs:  0.5rem;
+  --space-sm:  0.75rem;
   --space-md:  1rem;
   --space-lg:  1.5rem;
   --space-xl:  2rem;
@@ -118,9 +119,9 @@
 
 /* DARK MODE */
 html.dark {
-  --bg: #212224;
+  --bg: #1E2229;
   --surface-bg: rgba(35, 36, 38, 0.8);
-  --surface-subtle: rgb(55 65 81 / 0.75);
+  --surface-subtle: #2A303A;
   --field-bg: #1c1c1e;
   --secondary-field-bg: #2c3038;
   --glass-bg: rgba(17, 24, 39, 0.85);
@@ -131,7 +132,8 @@ html.dark {
   --list-item-bg-hover: rgba(79, 77, 77, 0.85);
 
   --panel-glass-bg: rgb(31 41 55 / 0.75);
-  --panel-glass-bg-hover: rgba(18, 25, 34, 0.75);
+  --panel-input-bg: #2C333E;
+  --panel-input-border-bg: #3A4150;
 
   --ink: #f8fafc;
   --secondary-ink: #ffffff;
@@ -152,7 +154,7 @@ html.dark {
 
   --btn-bg: #374151;
   --btn-bg-hover: #4b5563;
-  --danger-btn-bg-transparent: rgba(158, 43, 43, 0.3); 
+  --danger-btn-bg-transparent: rgba(158, 43, 43, 0.3);
   --secondary-btn-bg: #3d3c3c;
   --secondary-btn-bg-hover: #313131;
   --btn-disabled-bg: #1e293b;

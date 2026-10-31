@@ -12,7 +12,10 @@ import {
 } from "./routeApi.js";
 
 import {
-  closeSavedRoutesDash
+  cleanDeleteRouteModal,
+  closeSavedRoutesDash,
+  populateDeleteRouteModal,
+  waitForDeleteRouteConfirmation
 } from "../ui/ui.js"
 
 import {
@@ -95,7 +98,7 @@ export function getRouteFromCard(routeCardElement: HTMLElement | null): {routeNa
 }
 
 /**
- * Handles the sequence of events that occur following the clicking of the load route button 
+ * Handles the sequence of events that occur following the clicking of the load route button
  */
 async function onLoadClick(event: MouseEvent) {
   const routeCard = (event.target as HTMLElement).closest<HTMLElement>('.route-card');
@@ -121,17 +124,21 @@ async function onLoadClick(event: MouseEvent) {
 }
 
 /**
- * Handles the sequence of events that occur following the clicking of the delete route button 
+ * Handles the sequence of events that occur following the clicking of the delete route button
  */
 async function onDeleteClick(event: MouseEvent) {
+  event.preventDefault();
+
   const routeCard = (event.target as HTMLElement).closest<HTMLElement>(".route-card")
   const route = getRouteFromCard(routeCard);
   if (!route) return;
 
-  const check = confirm(`Are you sure you want to delete the route: ${route.routeName}?`);
-  if (!check) {
-    return;
-  }
+  populateDeleteRouteModal(route.routeName);
+
+  const check = await waitForDeleteRouteConfirmation();
+  cleanDeleteRouteModal(); // Clears the route name text on the modal once the user has confirmed
+
+  if (!check) return;
 
   try {
     const response = await deleteRoute(route.routeName);
@@ -142,7 +149,7 @@ async function onDeleteClick(event: MouseEvent) {
 
       if (remainingCards.length === 0) {
         allRoutesContainer.insertAdjacentHTML('beforeend', createNoRouteCard());
-        const createRouteButton = document.getElementById('no-route-create-button'); 
+        const createRouteButton = document.getElementById('no-route-create-button');
         addClickListener(createRouteButton, closeSavedRoutesDash, "click")
       }
 
@@ -150,12 +157,10 @@ async function onDeleteClick(event: MouseEvent) {
   } catch (error) {
     showToast(error.cause || "Sorry, there was an error downloading your route, please try again later.")
   }
-
-  event.preventDefault();
 }
 
 /**
- * Handles the sequence of events that occur following the clicking of the download route button 
+ * Handles the sequence of events that occur following the clicking of the download route button
  */
 async function onDownloadClick(
   event: MouseEvent,
@@ -175,10 +180,10 @@ async function onDownloadClick(
     DOMElement.classList.remove('loading');
     return;
   }
-  
+
   try {
 
-    const blob = await downloadRoute(route.routeName, format, DOMElement); 
+    const blob = await downloadRoute(route.routeName, format, DOMElement);
 
     const filename = `${route.routeName}.${format}`
 
@@ -195,10 +200,10 @@ async function onDownloadClick(
     a.click(); // simulates click starting the download
 
     // good practice to remove the link + download url
-    document.body.removeChild(a); 
+    document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-  } 
+  }
   catch(error) {
 
     showToast(error.cause || "Sorry, there was an error downloading your route, please try again later.")
@@ -222,9 +227,9 @@ async function onShareRouteClick(
 
   try {
 
-    const urlId = nanoid(); 
+    const urlId = nanoid();
 
-    const routeData = await getRouteData(route.routeName); 
+    const routeData = await getRouteData(route.routeName);
 
     console.log(routeData);
 
@@ -241,20 +246,20 @@ async function onShareRouteClick(
 
     const url = new URL("/map", window.location.origin);
     url.searchParams.set("route_id", addSharedRouteResponse.code)
-    
+
     await QRCode.toCanvas(shareRouteModalCanvas, url.toString());
     showModal(true, shareRouteModal);
 
     await navigator.clipboard.writeText(url.toString());
-    
+
     showToast("URL copied to clipboard", "success", shareRouteModal)
   } catch (error) {
     showToast(error.cause || "Sorry, there was an error sharing your route, please try again later.");
   }
-  
+
 }
 
-/** 
+/**
 * Handles adding the event listeners for each button on the route card
 */
 function bindRouteCardButtons() {
@@ -268,7 +273,7 @@ function bindRouteCardButtons() {
     const loadButton = target.closest<HTMLButtonElement>('.route-card-actions-load-route-button');
     const gpxButton = target.closest<HTMLButtonElement>('.route-btn-download-gpx');
     const geojsonButton = target.closest<HTMLButtonElement>('.route-btn-download-geojson');
-    const shareRouteButton = target.closest<HTMLButtonElement>('.share-route-button'); 
+    const shareRouteButton = target.closest<HTMLButtonElement>('.share-route-button');
 
     if (optionsButton) {
       e.preventDefault();
@@ -327,7 +332,7 @@ function bindNavigation() {
 }
 
 /**
- * Responsible for initialising the event listeners by calling both functions associated with adding event listeners 
+ * Responsible for initialising the event listeners by calling both functions associated with adding event listeners
  */
 export function initSavedRoutesDashboard() {
   bindNavigation();

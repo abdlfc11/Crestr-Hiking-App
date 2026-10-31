@@ -1,5 +1,5 @@
 {$SITE_DOMAIN} {
-    reverse_proxy web-fastapi:5000
+    reverse_proxy web-fastapi:{$EXPOSED_PORT}
 }
 
 analytics.crestr.co.uk {

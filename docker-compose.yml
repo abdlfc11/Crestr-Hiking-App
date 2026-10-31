@@ -4,7 +4,7 @@
 
 services:
 
-  # POSTGRES DATABASE 
+  # POSTGRES DATABASE
   db:
     image: postgres:16-alpine
     env_file:
@@ -15,24 +15,23 @@ services:
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"] 
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
       timeout: 5s
       retries: 10
     volumes:
       - postgres_data:/var/lib/postgresql/data
-  
+
   # FASTAPI APP
   web-fastapi:
     build: .
     command: gunicorn -c src/gunicorn.config.py fastapi_app:app # Prod
-    ### command: uvicorn fastapi_app:app --reload --host 0.0.0.0 --port 5001 # DEVELOPERS: use this command when debugging 
+    ### command: uvicorn fastapi_app:app --reload --host 0.0.0.0 --port 5001 # DEVELOPERS: use this command when debugging
     volumes:
       - ./src:/app/src
       - ./templates:/app/templates
       - ./static:/app/static
       - ./migrations:/app/migrations
-      - graph_cache:/app/graph_generation/cache
     environment:
       - PYTHONDONTWRITEBYTECODE=1
       - PYTHONUNBUFFERED=1
@@ -50,8 +49,10 @@ services:
     depends_on:
       db:
         condition: service_healthy
-  
-  # UMAMI ANALYTICS 
+      brouter:
+        condition: service_started
+
+  # UMAMI ANALYTICS
   umami-db:
     image: postgres:16-alpine
     restart: unless-stopped
@@ -87,8 +88,8 @@ services:
     #   interval: 30s
     #   timeout: 10s
     #   retries: 3
-  
-  # PGADMIN 
+
+  # PGADMIN
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: crestr-pgadmin
@@ -105,8 +106,8 @@ services:
       db:
         condition: service_healthy
     restart: unless-stopped
-  
-  # CADDY SERVICe
+
+  # CADDY SERVICE
   caddy:
     image: caddy:2-alpine
     restart: unless-stopped
@@ -114,8 +115,10 @@ services:
       - "80:80"
       - "443:443"
     env_file:
-      - path: caddy.env
+      - path: caddy.example.env
         required: true
+      - path: caddy.env
+        required: false
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
@@ -123,10 +126,44 @@ services:
     depends_on:
       - web-fastapi
 
+  # BROUTER SEGMENT INITIALISER
+  brouter-segments:
+    image: curlimages/curl:8.10.1
+    volumes:
+      - ./data/brouter/segments4:/segments4
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -eu
+        mkdir -p /segments4
+        for seg in E0_N50 E0_N55 E0_N60 W5_N50 W5_N55 W5_N60 W10_N45 W10_N50 W10_N55 W15_N50; do
+          if [ ! -s "/segments4/$$seg.rd5" ]; then
+            echo "Downloading $$seg.rd5..."
+            curl --fail --location --retry 3 --output "/segments4/$$seg.rd5" \
+              "https://brouter.de/brouter/segments4/$$seg.rd5"
+          else
+            echo "$$seg.rd5 already exists."
+          fi
+        done
+
+  # BROUTER ROUTING ENGINE
+  brouter:
+    image: ghcr.io/abrensch/brouter:master
+    platform: linux/amd64
+    container_name: crestr-brouter
+    restart: unless-stopped
+    depends_on:
+      brouter-segments:
+        condition: service_completed_successfully
+    volumes:
+      - ./data/brouter/segments4:/segments4
+      - ./data/brouter/profiles/hiking-profile.brf:/profiles2/hiking-profile.brf:ro
+    ports:
+      - "17777:17777"
+
 volumes:
   postgres_data:
   pgadmin_data:
   umami_postgres_data:
   caddy_data:
   caddy_config:
-  graph_cache:

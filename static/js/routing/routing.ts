@@ -1,7 +1,6 @@
 import {
+  isPointInPolygon,
   manualRouteState,
-  cumbriaBoundary,
-  isPointInPolygon
 } from "../routes/routeState.js";
 
 import {
@@ -52,7 +51,7 @@ export async function getPathSegment(start: number[], end: number[]): Promise<Ro
   if (data.success) {
     return data;
   }
-  // no logging needed as the backend already logs errors if data.success if False 
+  // no logging needed as the backend already logs errors if data.success if False
   throw new Error( data.message || "ERROR : getPathSegment()", {cause : ERROR_MESSAGES.ROUTING.PATH_CREATION_FAILED});
 }
 
@@ -111,9 +110,9 @@ export async function addManualPoint(x: number, y: number, type: "normal" | "sta
 
   // this is a more computationally expensive but much more accurate way of finding out if a point is in Cumbria
   const lonLatCoords = toLonLat(currentClick);
-  const isInCumbria = isPointInPolygon(lonLatCoords, cumbriaBoundary);
-  if (!isInCumbria) {
-    throw new Error("User clicked outside Cumbria", {cause: ERROR_MESSAGES.ROUTING.OUTSIDE_CUMBRIA});
+  const isInUK = isPointInPolygon(lonLatCoords);
+  if (!isInUK) {
+    throw new Error("addManualPoint() : User clicked outside UK", {cause: ERROR_MESSAGES.ROUTING.INCORRECT_LOCATION});
   }
 
   if (clearRedo) manualRouteState.redoStack = [];
@@ -189,9 +188,9 @@ export async function addManualPoint(x: number, y: number, type: "normal" | "sta
  */
 export async function replaceManualRouteEnd(currentClick: number[]): Promise<ManualRouteResult> {
 
-  try { 
+  try {
     const { userClicks, segmentCache } = manualRouteState;
-    
+
     if (userClicks.length < 2) {
       return addManualPoint(currentClick[0], currentClick[1], "normal", { clearRedo: false });
     }
@@ -228,7 +227,7 @@ export async function replaceIntermediaryPoint(index: number, newCoordinates: nu
   try {
     const { userClicks, segmentCache } = manualRouteState;
 
-    // Rejects invalid calls  
+    // Rejects invalid calls
     if (userClicks.length < 3 || index <= 0 || index >= userClicks.length - 1) {
       throw new Error("Invalid intermediary waypoint index");
     }
@@ -237,17 +236,17 @@ export async function replaceIntermediaryPoint(index: number, newCoordinates: nu
     const previousPoint = userClicks[index - 1];
     const nextPoint = userClicks[index + 1];
 
-    // Computes new segments 
+    // Computes new segments
     const [previousSegment, nextSegment] = await Promise.all([
       resolveSegment(previousPoint, newCoordinates, segmentCache),
       resolveSegment(newCoordinates, nextPoint, segmentCache)
     ]);
 
-    // Replaces the old coordinate with the new one 
+    // Replaces the old coordinate with the new one
     const newUserClicks = [...userClicks];
     newUserClicks[index] = newCoordinates;
-    
-    // Deletes stale segments + Adds new segments 
+
+    // Deletes stale segments + Adds new segments
     const newSegmentCache = { ...segmentCache };
 
     delete newSegmentCache[segmentKey(previousPoint, oldPoint)];
@@ -263,7 +262,7 @@ export async function replaceIntermediaryPoint(index: number, newCoordinates: nu
     manualRouteState.redoStack = [];
 
     await persistManualSegmentCache();
-    await updateManualRoute(); 
+    await updateManualRoute();
 
     return {
       success: true
@@ -284,7 +283,7 @@ async function changeRouteStart(currentClick: number[]): Promise<ManualRouteResu
 
     const oldStart = userClicks[0];
 
-    // Moves starting point only if it is the only click 
+    // Moves starting point only if it is the only click
     if (userClicks.length === 1) {
       userClicks[0] = currentClick;
       manualRouteState.pathCoords = [currentClick];
@@ -296,11 +295,11 @@ async function changeRouteStart(currentClick: number[]): Promise<ManualRouteResu
     }
 
 
-    // Calculates new segment 
+    // Calculates new segment
     const secondPoint = userClicks[1];
     const newFirstSegment = await resolveSegment(currentClick, secondPoint, segmentCache);
 
-    // Deletes old cached segment and adds the new one 
+    // Deletes old cached segment and adds the new one
     const proposedCache = { ...segmentCache };
     delete proposedCache[segmentKey(oldStart, secondPoint)];
     proposedCache[segmentKey(currentClick, secondPoint)] = newFirstSegment;
@@ -308,7 +307,7 @@ async function changeRouteStart(currentClick: number[]): Promise<ManualRouteResu
     const proposedClicks = [currentClick, ...userClicks.slice(1)];
 
 
-    // Updates manualRouteState 
+    // Updates manualRouteState
     manualRouteState.userClicks = proposedClicks;
     manualRouteState.segmentCache = proposedCache;
     manualRouteState.pathCoords = rebuildPathCoords(proposedClicks, proposedCache);
@@ -320,7 +319,7 @@ async function changeRouteStart(currentClick: number[]): Promise<ManualRouteResu
     return {
       "success": true
     };
-  } 
+  }
   catch(error) {
     throw new Error(`ERROR (changeRouteStart()) : ${error}`, {cause : ERROR_MESSAGES.ROUTING.GENERIC_ROUTE_ACTION})
   }

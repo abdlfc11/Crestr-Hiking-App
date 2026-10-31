@@ -1,5 +1,5 @@
 import { getSavedPointStyle } from "./style.js";
-import { getMap } from "../init/map.js";
+import { getMap, waitForMap } from "../init/map.js";
 import { showLoginModal} from "../ui/ui.js";
 import { showToast, showModal } from "../utils/ui-utils.js";
 import { logError } from "../utils/logError-utils.js";
@@ -29,11 +29,11 @@ export function getSavedPointsLayer() {
 
 function clearOldSavedPointsLayer() {
     if (savedPointsLayer) {
-        
+
         const map = getMap();
 
         map.removeLayer(savedPointsLayer);
-    } 
+    }
 }
 
 function convertPointsToFeatures(data: { points: SavedPoint[] }): Feature<Point>[] {
@@ -56,9 +56,9 @@ function createSavedPointsLayer(features: Feature<Point>[]): VectorLayer<VectorS
     });
 };
 
-function addLayerToMap(layer: VectorLayer<VectorSource>) {
+async function addLayerToMap(layer: VectorLayer<VectorSource>) {
 
-    const map = getMap()
+    const map = await waitForMap()
 
     map.addLayer(layer);
     savedPointsLayer = layer;
@@ -66,13 +66,13 @@ function addLayerToMap(layer: VectorLayer<VectorSource>) {
 }
 
 async function getSavedPoints(): Promise<GetSavedPointsResponse> {
-    
+
     const url = window.appConfig.apiGetSavedPointsUrl;
 
     const response = await fetch(url);
 
     const data = await response.json();
-    
+
     if (!response.ok) {
       throw new Error(data.message || "Failed to fetch points");
     }
@@ -101,7 +101,7 @@ export function loadAndDisplaySavedPoints() {
 }
 
 /**
- * Responsible for saving a point for the given coordinate 
+ * Responsible for saving a point for the given coordinate
  */
 export async function saveNewPoint(coordinate: number[], name: string): Promise<void> {
 
@@ -121,7 +121,7 @@ export async function saveNewPoint(coordinate: number[], name: string): Promise<
 
   const response = await fetch(url, {
       method: "POST",
-      headers: { 
+      headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
@@ -130,7 +130,7 @@ export async function saveNewPoint(coordinate: number[], name: string): Promise<
         lat: lonLat[1],
       }),
     })
-    
+
     const data = await response.json().catch(() => ({})); // .catch used to resolve errors safely, they are then caught later
 
     if (response.status === 401) {
@@ -149,13 +149,13 @@ export async function saveNewPoint(coordinate: number[], name: string): Promise<
 
 export async function deleteSavedPoint(selectedPoint: Feature | null): Promise<void> {
 
-  try { 
+  try {
     if (!selectedPoint) {
       throw new Error("No point is currently selected for deletion.");
     }
 
     const pointName = selectedPoint.get("name");
-    
+
     const response = await fetch(window.appConfig.apiDeletePointUrl, {
       method: "POST",
       headers: {
@@ -163,7 +163,7 @@ export async function deleteSavedPoint(selectedPoint: Feature | null): Promise<v
       },
       body: JSON.stringify({ point_name: pointName }),
     });
-    
+
     const data = await response.json();
 
     if (response.status === 401) {

@@ -22,7 +22,8 @@ dist/
 *.local
 
 # environment variables
-*.env
+.env
+caddy.env
 
 # IDEs and Editors 
 .DS_Store
@@ -52,6 +53,9 @@ htmlcov/
 *.pbf
 *.gpkg
 *.pkl
+
+# BRouter .rd5 files 
+*.rd5
 
 # graph testing files
 testing_stuff.py

@@ -1,4 +1,4 @@
-// IMPORTS 
+// IMPORTS
 
 import "ol/ol.css?inline"
 
@@ -8,7 +8,7 @@ import { getRouteStrokeStyle } from "../utils/style-utils.js";
 import Map from "ol/Map.js";
 import View from "ol/View.js";
 import { defaults as defaultControls } from "ol/control.js";
-import { fromLonLat } from "ol/proj.js";
+import { fromLonLat, toLonLat } from "ol/proj.js";
 
 // OpenLayers Layers
 import Tile from "ol/layer/Tile.js";
@@ -24,12 +24,37 @@ import Stroke from "ol/style/Stroke.js";
 
 
 export let map: Map | null = null;
+
+export let resolveMapReady: ((map: Map) => void) | null = null;
+
+const mapReady = new Promise<Map>((resolve) => {
+  resolveMapReady = resolve;
+})
+
+const defaultZoom = 6
+
 export let tileLayer: Tile<XYZ> | null = null;
 export let routeLayer: VectorLayer<VectorSource> | null = null;
 export let manualRouteLayer: VectorLayer<VectorSource> | null = null;
 
+interface mapViewObject {
+  lon: number
+  lat: number
+  zoom: number
+}
+
+let mapView: mapViewObject | null = null;
+
 export function getMap() {
   return map;
+}
+
+export function waitForMap(): Promise<Map> {
+  if (map) {
+    return Promise.resolve(map);
+  } else {
+    return mapReady
+  }
 }
 
 export function setRouteLayer(layer: VectorLayer<VectorSource> | null) {
@@ -74,29 +99,29 @@ export function setTileLayer(layer: Tile<XYZ> | null) {
   tileLayer = layer;
 }
 
-export function createMap() {
-  const initialCentreLatLon = Array.isArray(window.appConfig?.mapInitialCentre)
-    ? window.appConfig.mapInitialCentre
-    : [-3.198308, 54.465458];
-  const initialCentre = fromLonLat(initialCentreLatLon);
-  const initialZoom = window.appConfig?.mapInitialZoom ?? 10.5;
+export function createMap(coords: number[], zoom?: number | null) {
+
+  const mapZoom = zoom || window.appConfig?.mapInitialZoom || defaultZoom;
 
   map = new Map({
-    layers: [tileLayer],
+    layers: tileLayer ? [tileLayer] : [],
     target: "map",
     controls: defaultControls({
       attributionOptions: {
-        collapsible: false
-      }
+        collapsible: false,
+      },
     }),
     view: new View({
       projection: "EPSG:3857",
       maxZoom: 17,
       minZoom: 0,
-      center: initialCentre,
-      zoom: initialZoom,
+      center: fromLonLat(coords),
+      zoom: mapZoom,
     }),
   });
+
+  resolveMapReady?.(map);
+  resolveMapReady = null;
 }
 
 export function onMapClick(handler: (...args: any[]) => void) {
@@ -164,10 +189,52 @@ export function getPathColour() {
 
 let mapInitialised = false;
 
-export function initMap() {
-    if (mapInitialised) return;
-    mapInitialised = true;
-    createTileLayer();
-    createMap();
-    createRouteLayer();
+export async function initMap(): Promise<Map> {
+  if (mapInitialised) return waitForMap();
+  mapInitialised = true;
+
+  // Populating mapView
+  try {
+    const mapViewData: mapViewObject = JSON.parse(localStorage.getItem("mapView"));
+    if (isFinite(mapViewData.lon) && isFinite(mapViewData.lat) && isFinite(mapViewData.zoom)) {
+      mapView = {
+        "lon": mapViewData.lon,
+        "lat": mapViewData.lat,
+        "zoom": mapViewData.zoom
+      }
+    }
+  } catch (error) {
+    console.error("initMap() : Invalid mapView data recieved")
+  };
+
+  const fallbackCoords: [number, number] = Array.isArray(window.appConfig.mapInitialCentre)
+    ? window.appConfig.mapInitialCentre
+    : [-3.198308, 54.465458];
+
+  const coords = mapView ? [mapView.lon, mapView.lat] : fallbackCoords
+  const zoom = mapView ? mapView.zoom : null
+
+  createTileLayer();
+  createMap(coords, zoom);
+  createRouteLayer();
+
+  map.addEventListener("moveend", () => {
+    const view = map.getView();
+
+    const coordinates = toLonLat(view.getCenter());
+    const lon = coordinates[0];
+    const lat = coordinates[1];
+
+    const zoom = view.getZoom();
+
+    mapView = {
+      "lon": lon,
+      "lat": lat,
+      "zoom": zoom
+    }
+
+    localStorage.setItem("mapView", JSON.stringify(mapView));
+  })
+
+  return map;
 }

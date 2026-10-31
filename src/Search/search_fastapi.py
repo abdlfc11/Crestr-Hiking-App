@@ -1,4 +1,4 @@
-#region IMPORTS 
+#region IMPORTS
 
 # Core Library Imports
 import traceback
@@ -6,12 +6,12 @@ import traceback
 
 # Third Party Library Imports
 import requests
-from fastapi import APIRouter, Depends, HTTPException 
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi_limiter.depends import RateLimiter
 from pyrate_limiter import Duration, Limiter, Rate
 
 # Local Module Imports
-from src.extensions import service, log_action, rate_limit_exceeded_callback
+from src.extensions import log_action, rate_limit_exceeded_callback
 from src.Search.search_schemas import SearchModel
 from src.config import Config
 
@@ -35,19 +35,19 @@ def search_area(
     data: SearchModel
 ):
 
-    try: 
+    try:
         search_input = data.search_input
         query_parameters = {
             'key': Config.LOCATIONIQ_API_KEY,
             'q': search_input,
             'format': 'json',
-            'countrycodes': 'gb'
+            'countrycodes': 'gb,ie' # UK + Ireland
         }
 
         response = requests.get(
            "https://eu1.locationiq.com/v1/search",
             params=query_parameters,
-            timeout=(3.05, 10), # 3.05s is connection timeout and 10s is read timeout 
+            timeout=(3.05, 10), # 3.05s is connection timeout and 10s is read timeout
         )
         results = response.json()
 

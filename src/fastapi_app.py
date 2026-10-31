@@ -1,4 +1,4 @@
-#region IMPORTS 
+#region IMPORTS
 
 # Core Library Imports
 import os
@@ -7,7 +7,7 @@ from datetime import datetime
 from pathlib import Path
 
 # Third Party Library Imports
-from fastapi import FastAPI, Request, Depends, HTTPException 
+from fastapi import FastAPI, Request, Depends, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -16,11 +16,11 @@ import traceback
 from sqlmodel import Session, select
 
 # Local Module Imports
-from src.extensions import service, get_current_user, log_action
+from src.extensions import get_current_user, log_action
 from src.constants import DEFAULT_CENTRE, DEFAULT_ZOOM
 from src.models import User, Route, Settings, Point
 from src.config import Config
-from src.db import get_session, engine # get_session used for fastapi routes and engine used for short-lived Session instances in JINJA templates 
+from src.db import get_session, engine # get_session used for fastapi routes and engine used for short-lived Session instances in JINJA templates
 
 from src.Points.points_fastapi import router as points_router
 from src.Report_Issue.report_issue_fastapi import router as report_issue_router
@@ -34,7 +34,7 @@ from src.Search.search_fastapi import router as search_router
 
 #region INITIALISATION
 
-# Absolute paths to make the correct path for static and template files no matter current environment 
+# Absolute paths to make the correct path for static and template files no matter current environment
 BASE_DIR = Path(__file__).resolve().parent.parent   # project root
 STATIC_DIR = BASE_DIR / "static"
 TEMPLATES_DIR = BASE_DIR / "templates"
@@ -107,7 +107,7 @@ def vite_css(src: str) -> list:
         return [f"dist/{css}" for css in entry["css"]]
     return []
 
-# External Local API routers 
+# External Local API routers
 app.include_router(points_router)
 app.include_router(report_issue_router)
 app.include_router(auth_router)
@@ -125,7 +125,7 @@ templates.env.globals["vite_css"] = vite_css
 
 #endregion
 
-#region JINJA TEMPLATES 
+#region JINJA TEMPLATES
 
 def format_distance(
     distance_km,
@@ -145,10 +145,10 @@ def format_distance(
 def format_elevation(elevation_gain):
     if not isinstance(elevation_gain, int) or isinstance(elevation_gain, float):
         elevation_gain = int(float(elevation_gain))
-    
+
     if elevation_gain == 0:
         return "No Data"
-    else: 
+    else:
         return f"+{elevation_gain} m" if elevation_gain > 0 else f"{elevation_gain} m"
 
 def format_eta(seconds):
@@ -184,9 +184,6 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException):
         status_code=exc.status_code,
         content=exc.detail if isinstance(exc.detail, (dict, list)) else {"detail": exc.detail},
     )
-# Graph initialisation
-if os.getenv("LOAD_GRAPH_ON_IMPORT", "1").lower() not in ("0", "false", "no"):
-    service.load_graph()
 
 # View endpoints
 @app.get("/")
@@ -229,14 +226,14 @@ def map_view(
     if not user:
         available_routes = []
         saved_points = []
-        
+
         return templates.TemplateResponse(
             request=request,
             name='map.html',
             context = {
                 'request': request,
                 "map_centre": DEFAULT_CENTRE,
-                "map_zoom": 10.5,
+                "map_zoom": DEFAULT_ZOOM,
                 "available_routes": available_routes,
                 "saved_points": saved_points,
                 "logged_in": "false",
@@ -244,8 +241,8 @@ def map_view(
                 "user": None
             }
         )
-    
-    try: 
+
+    try:
         available_routes = db.exec(
             select(Route)
             .where(Route.user_id == user.id)
@@ -256,14 +253,14 @@ def map_view(
             .where(Point.user_id == user.id)
             .order_by(Point.created_at.desc())
         ).all()
-        
+
         return templates.TemplateResponse(
             request=request,
             name='map.html',
             context = {
                 'request': request,
                 "map_centre": DEFAULT_CENTRE,
-                "map_zoom": 10.5,
+                "map_zoom": DEFAULT_ZOOM,
                 "available_routes": available_routes,
                 "saved_points": saved_points,
                 "logged_in": "true",
