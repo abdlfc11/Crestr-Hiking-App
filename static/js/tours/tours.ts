@@ -217,30 +217,39 @@ export function createSavingRoutesTour(onTourEnd?: () => void | Promise<void>, i
  * Creates and returns the tour for the settings panel
  */
 export function createSettingsTour(): Driver {
-    return driver({
-        popoverClass: 'app-tour-theme',
-        showProgress: true,
-        steps: [
-            {
-                popover: {
-                    title: 'App Preferences',
-                    description: 'Adjust your distance units and app appearance here. We’re in Beta, so drop us a line via feedback if there are other options you want to see!'
-                }
-            },
-            {
-                element: '#delete-account-container',
-                popover: {
-                    title: 'Account Control',
-                    description: 'If you ever need to close your account, you can manage that right here.'
-                }
-            },
-            {
-                element: '#settings-logout-button',
-                popover: {
-                    title: 'Log Out',
-                    description: 'Securely sign out of your session whenever you’re done.'
-                }
+
+  let tourSteps
+
+  if (!window.appConfig.loggedIn) {
+    tourSteps = [
+        {
+            popover: {
+                title: 'App Preferences',
+                description: 'Adjust your distance units and app appearance here. We’re in Beta, so drop us a line via feedback if there are other options you want to see!'
             }
-        ]
-    });
+      }
+    ]
+  } else {
+    tourSteps = [
+        {
+            popover: {
+                title: 'App Preferences',
+                description: 'Adjust your distance units and app appearance here. We’re in Beta, so drop us a line via feedback if there are other options you want to see!'
+            }
+        },
+        {
+            element: '#delete-account-container',
+            popover: {
+                title: 'Account Control',
+                description: 'If you ever need to close your account, you can manage that right here.'
+            }
+        }
+    ]
+  }
+
+  return driver({
+      popoverClass: 'app-tour-theme',
+      showProgress: true,
+      steps: tourSteps
+  });
 }
