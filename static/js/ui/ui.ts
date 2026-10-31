@@ -121,8 +121,6 @@ export const defaultCentre = Array.isArray(window.appConfig?.mapInitialCentre)
   ? window.appConfig.mapInitialCentre
   : [-3.198308, 54.465458];
 
-export const isMobileOrTablet = window.screen.width <= 1024;
-
 const setStartCoordButton = document.getElementById("set-start-coord-button");
 const setEndCoordButton = document.getElementById("set-end-coord-button");
 
