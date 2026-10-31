@@ -12,7 +12,7 @@ import type MapBrowserEvent from "ol/MapBrowserEvent.js";
 import type Style from "ol/style/Style.js";
 
 // constants
-import { MAP_VIEW_PADDING } from "../constants.js";
+import { MAP_VIEW_PADDING, isMobileOrTablet } from "../constants.js";
 
 // LocalForage
 import localforage from "localforage";
@@ -103,6 +103,7 @@ import { displayImportedRouteCard, processImportedRouteFile } from "../importRou
 import {
   createAutomaticRoutingTour,
   createImportRoutePanelTour,
+  createMobileRoutingTour,
   createSavedRouteDashboardTour,
   createSavingRoutesTour,
   createSettingsTour
@@ -119,8 +120,6 @@ import { ERROR_MESSAGES } from "../utils/error-constants.js";
 export const defaultCentre = Array.isArray(window.appConfig?.mapInitialCentre)
   ? window.appConfig.mapInitialCentre
   : [-3.198308, 54.465458];
-
-export const isMobileOrTablet = window.screen.width <= 1024;
 
 const setStartCoordButton = document.getElementById("set-start-coord-button");
 const setEndCoordButton = document.getElementById("set-end-coord-button");
@@ -276,6 +275,7 @@ const URLInputType = document.getElementById('url-route-input-type') as HTMLInpu
 
 // driver.js tours
 let automaticRoutingTourDriver;
+let mobileRoutingTour;
 let savingRoutesTourDriver;
 
 
@@ -1553,7 +1553,18 @@ export function updateSaveRouteContainer() {
 //#region DRIVER.JS
 
 async function handleSaveRouteTour() {
+
+  const mapView = getMap().getView();
+
+  // creating a route
   await handleManualRouteGeneration('54.454722, -3.267793', '54.454195, -3.211540');
+  getManualRouteLayer().getSource().changed() // to update feature before map moves to it
+
+  // moving map to route
+  await mapView.fit(manualRouteFeature.getGeometry().getExtent(), {
+    padding: MAP_VIEW_PADDING,
+    duration: 1000
+  })
 
   setTimeout(() => {
     savingRoutesTourDriver = createSavingRoutesTour(homeButtonFunction);
@@ -1567,12 +1578,27 @@ async function handleSaveRouteTour() {
 export function handleInitialTour() {
 
   if (!localStorage.getItem('seenInitialTour')) {
-    automaticRoutingTourDriver = createAutomaticRoutingTour(handleSaveRouteTour);
 
-    automaticRoutingTourDriver.drive();
+    if (isMobileOrTablet) {
 
-    localStorage.setItem('seenInitialTour', "True")
-    return;
+      mobileNavDropdownContent.classList.add("show");
+      mobileActions.classList.add("show");
+      mobileActionsButton.setAttribute("aria-expanded", "true");
+      mobileActionsButton.setAttribute("aria-label", "Hide route actions");
+
+      mobileRoutingTour = createMobileRoutingTour(handleSaveRouteTour);
+      mobileRoutingTour.drive();
+
+      mobileNavDropdownContent.classList.remove("show");
+      mobileActions.classList.remove("show");
+      mobileActionsButton.setAttribute("aria-expanded", "false");
+      mobileActionsButton.setAttribute("aria-label", "Show route actions");
+    } else {
+      automaticRoutingTourDriver = createAutomaticRoutingTour(handleSaveRouteTour);
+      automaticRoutingTourDriver.drive();
+
+      localStorage.setItem('seenInitialTour', "True")
+    }
   }
   return;
 }
