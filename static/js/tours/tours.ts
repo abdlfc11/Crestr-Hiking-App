@@ -1,5 +1,6 @@
 import { driver, type Driver } from "driver.js";
 import "driver.js/dist/driver.css";
+import { isMobileOrTablet } from "../constants";
 
 /**
  * Creates and returns the tour for the import route panel
@@ -48,7 +49,7 @@ export function createImportRoutePanelTour(): Driver {
 }
 
 /**
- * Creates and returns the tour for the saved routes dashboard 
+ * Creates and returns the tour for the saved routes dashboard
  */
 export function createSavedRouteDashboardTour(): Driver {
     return driver({
@@ -126,70 +127,129 @@ export function createAutomaticRoutingTour(onTourEnd?: () => void | Promise<void
     });
 }
 
-/**
- * Creates and returns the tour for saving a route 
- */
-export function createSavingRoutesTour(onTourEnd?: () => void | Promise<void>): Driver {
-    return driver({
-        popoverClass: 'app-tour-theme',
-        showProgress: true,
-        onDestroyed: () => {
-            if (typeof onTourEnd === 'function') onTourEnd();
+export function createMobileRoutingTour(onTourEnd?: () => void | Promise<void>): Driver {
+  return driver({
+    popoverClass: 'app-tour-theme',
+    showProgress: true,
+    onDestroyed: () => {
+      if (typeof onTourEnd === 'function') onTourEnd();
+    },
+    steps: [
+        {
+          popover: {
+              title: 'Welcome to Crestr',
+              description: 'This tour will show you how to build a route and navigate Crestr.'
+          }
         },
-        steps: [
-            {
-            element: '#save-route-button-container',
-            popover: {
-                title: 'Saving Your Route',
-                description: 'Click here to open a panel to save this route.'
-            }
-            },
-            {
-            element: '#route-stats',
-            popover: {
-                title: 'Route Statistics',
-                description: "Here you can view key details of your route such as it's distance, elevation change and time taken to complete."
-            }
-            },
-            {
-            element: '#toggle-elevation-chart',
-            popover: {
-                title: 'Elevation Profile',
-                description: 'Pressing this button will open a panel showing you an elevation profile of your route.'
-            }
-            }
-        ]
-    });
+        {
+          element: '#mobile-nav-button',
+          popover: {
+              title: 'Navigation',
+              description: 'Press this button to open the menu, where you can settings, import routes and access your saved routes.'
+          }
+        },
+        {
+          element: '#mobile-actions-button',
+          popover: {
+              title: 'Routing Actions',
+              description: 'Press this button to show routing tools, such as undoing, redoing and removing a route'
+          }
+        }
+    ]
+  })
+}
+
+/**
+ * Creates and returns the tour for saving a route
+ */
+export function createSavingRoutesTour(onTourEnd?: () => void | Promise<void>, isMobile: boolean = isMobileOrTablet): Driver {
+
+  let tourSteps
+
+  if (isMobile) {
+    tourSteps = [
+        {
+          element: '#mobile-save-route-button',
+          popover: {
+              title: 'Saving Your Route',
+              description: 'Click here to open a panel to save this route.'
+          }
+        }
+    ]
+  } else {
+    tourSteps = [
+        {
+          element: '#save-route-button-container',
+          popover: {
+              title: 'Saving Your Route',
+              description: 'Click here to open a panel to save this route.'
+          }
+        },
+        {
+          element: '#route-stats',
+          popover: {
+              title: 'Route Statistics',
+              description: "Here you can view key details of your route such as it's distance, elevation change and time taken to complete."
+          }
+        },
+        {
+          element: '#toggle-elevation-chart',
+          popover: {
+              title: 'Elevation Profile',
+              description: 'Pressing this button will open a panel showing you an elevation profile of your route.'
+          }
+        }
+    ]
+  }
+
+  return driver({
+    popoverClass: 'app-tour-theme',
+    showProgress: true,
+    onDestroyed: () => {
+      if (typeof onTourEnd === 'function') onTourEnd();
+    },
+    steps: tourSteps
+  })
+
 }
 
 /**
  * Creates and returns the tour for the settings panel
  */
 export function createSettingsTour(): Driver {
-    return driver({
-        popoverClass: 'app-tour-theme',
-        showProgress: true,
-        steps: [
-            {
-                popover: {
-                    title: 'App Preferences',
-                    description: 'Adjust your distance units and app appearance here. We’re in Beta, so drop us a line via feedback if there are other options you want to see!'
-                }
-            },
-            {
-                element: '#delete-account-container',
-                popover: {
-                    title: 'Account Control',
-                    description: 'If you ever need to close your account, you can manage that right here.'
-                }
-            },
-            {
-                element: '#settings-logout-button',
-                popover: {
-                    title: 'Log Out',
-                    description: 'Securely sign out of your session whenever you’re done.'
-                }
+
+  let tourSteps
+
+  if (!window.appConfig.loggedIn) {
+    tourSteps = [
+        {
+            popover: {
+                title: 'App Preferences',
+                description: 'Adjust your distance units and app appearance here. We’re in Beta, so drop us a line via feedback if there are other options you want to see!'
             }
-        ]
-    });
+      }
+    ]
+  } else {
+    tourSteps = [
+        {
+            popover: {
+                title: 'App Preferences',
+                description: 'Adjust your distance units and app appearance here. We’re in Beta, so drop us a line via feedback if there are other options you want to see!'
+            }
+        },
+        {
+            element: '#delete-account-container',
+            popover: {
+                title: 'Account Control',
+                description: 'If you ever need to close your account, you can manage that right here.'
+            }
+        }
+    ]
+  }
+
+  return driver({
+      popoverClass: 'app-tour-theme',
+      showProgress: true,
+      steps: tourSteps
+  });
 }
