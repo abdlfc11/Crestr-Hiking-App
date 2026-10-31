@@ -9,7 +9,8 @@ import {
 import {
   homeButtonFunction,
   updateSaveRouteContainer,
-  showLoginModal
+  showLoginModal,
+  isMobileOrTablet
 } from "../ui/ui.js";
 
 import {
