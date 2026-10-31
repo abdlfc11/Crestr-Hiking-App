@@ -1593,6 +1593,8 @@ export function handleInitialTour() {
       mobileActions.classList.remove("show");
       mobileActionsButton.setAttribute("aria-expanded", "false");
       mobileActionsButton.setAttribute("aria-label", "Show route actions");
+
+      localStorage.setItem('seenInitialTour', "True");
     } else {
       automaticRoutingTourDriver = createAutomaticRoutingTour(handleSaveRouteTour);
       automaticRoutingTourDriver.drive();
