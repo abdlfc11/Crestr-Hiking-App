@@ -1,7 +1,7 @@
 import {
-  getCurrentPathData, 
-  getLastKnownDistanceKm, 
-  getLoadedRouteCoordinates, 
+  getCurrentPathData,
+  getLastKnownDistanceKm,
+  getLoadedRouteCoordinates,
   manualRouteState,
   normaliseCoordLength
  } from "./routeState.js";
@@ -9,8 +9,7 @@ import {
 import {
   homeButtonFunction,
   updateSaveRouteContainer,
-  showLoginModal,
-  isMobileOrTablet
+  showLoginModal
 } from "../ui/ui.js";
 
 import {
@@ -31,6 +30,7 @@ import { toLonLat } from "ol/proj.js";
 import localforage from "localforage";
 import { logError } from "../utils/logError-utils.js";
 import { initIcons } from "../init/icons.js";
+import { isMobileOrTablet } from "../constants.js";
 
 let saveRouteForm: HTMLFormElement | null = null;
 
@@ -54,7 +54,7 @@ export function initSaveRoute() {
 async function handleSaveRoute(e: Event) {
   e.preventDefault();
 
-  let elevDisplayValue; 
+  let elevDisplayValue;
   let routeName = "";
   let eta = "";
   let elevationChange = "";
@@ -97,7 +97,7 @@ async function handleSaveRoute(e: Event) {
     return false;
   }
 
-  try { 
+  try {
 
     const url = window.appConfig.apiSaveRouteUrl;
 
@@ -123,11 +123,11 @@ async function handleSaveRoute(e: Event) {
     if (routeNameEntry) routeNameEntry.value = "";
     if (saveRouteModalNameInput) saveRouteModalNameInput.value = "";
 
-    // Removing noRouteCard if present 
+    // Removing noRouteCard if present
     const noRouteCard = document.getElementById('no-routes-wrapper-container');
     if (noRouteCard) removeDOMElement(noRouteCard);
 
-    // constructing / formatting data to be used in route card 
+    // constructing / formatting data to be used in route card
     const today = new Date();
     const formattedToday = new Intl.DateTimeFormat('en-GB', {
       "day": "2-digit",
@@ -149,7 +149,7 @@ async function handleSaveRoute(e: Event) {
     }
 
     if (saveRouteModal.open) saveRouteModal.close()
-      
+
     // Resetting UI state
     homeButtonFunction();
     updateSaveRouteContainer();
@@ -166,7 +166,7 @@ async function handleSaveRoute(e: Event) {
  */
 function getPathCoordinates(): number[][] {
   let pathCoordinates = [];
-  
+
   if (manualRouteState.pathCoords.length > 0) {
     const webMercatorCoords = manualRouteState.pathCoords;
 
