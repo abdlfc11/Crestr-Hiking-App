@@ -177,7 +177,7 @@ export function createSavingRoutesTour(onTourEnd?: () => void | Promise<void>, i
         }
     ]
   } else {
-    [
+    tourSteps = [
         {
           element: '#save-route-button-container',
           popover: {
