@@ -201,18 +201,6 @@
             </div>
         </div>
 
-        <div id="mobile-save-route-container">
-            <button
-                id="mobile-save-route-button"
-                class="mobile-button"
-                type="button"
-                aria-label="Open modal to save a route"
-
-            >
-                <i data-lucide="bookmark"></i>
-            </button>
-        </div>
-
         <div class="mobile-nav-container">
             <button id="mobile-nav-button" class="mobile-button" aria-label="Open navigation dropdown">
                 <i data-lucide="menu"></i>
@@ -276,67 +264,10 @@
                 class="mobile-button"
                 type="button"
                 aria-label="Open modal to save a route"
-                
+
             >
                 <i data-lucide="bookmark"></i>
             </button>
-        </div>
-
-        <div class="mobile-nav-container">
-            <button id="mobile-nav-button" class="mobile-button" aria-label="Open navigation dropdown">
-                <i data-lucide="menu"></i>
-            </button>
-            
-            <div id="mobile-nav-dropdown-content" class="context-menu">
-                <button id="mobile-nav-saved-routes" class="context-menu-option" aria-label="Open saved routes panel">Saved Routes</button>
-                <button id="mobile-nav-import-route" class="context-menu-option" aria-label="Open import route panel">Import Routes</button>
-                <button id="mobile-nav-settings" class="context-menu-option" aria-label="Open settings panel">Settings</button>
-                <button id="mobile-nav-report-bug" class="context-menu-option" aria-label="Open report issue modal">Report Bug</button>
-                <button id="mobile-nav-donate" class="context-menu-option" aria-label="Open donate modal">Donate</button>
-                {% if user is none %} 
-                <button id="mobile-nav-login" class="context-menu-option" aria-label="Press to login">Login</button>
-                {% else %}
-                <button id="mobile-nav-logout" class="context-menu-option" aria-label="Press to logout">Log out</button>
-                {% endif %}
-            </div>
-        </div>
-
-        <div class="mobile-actions-container">
-            <button
-                id="mobile-actions-button"
-                class="mobile-button"
-                aria-controls="mobile-actions"
-                aria-expanded="false"
-                aria-label="Show route actions"
-            >
-                <i data-lucide="route"></i>
-            </button>
-
-            <div id="mobile-actions" class="mobile-actions">
-                <button 
-                    id="mobile-undo-button"
-                    class="mobile-button mobile-routing-button"
-                    aria-label="undo route point"
-                >
-                    <i data-lucide="undo-2"></i>
-                </button>
-
-                <button
-                    id="mobile-redo-button" 
-                    class="mobile-button mobile-routing-button"
-                    aria-label="redo route point"
-                >
-                    <i data-lucide="redo-2"></i>
-                </button>
-
-                <button
-                    id="mobile-clear-button"
-                    class="mobile-button mobile-routing-button"
-                    aria-label="clear route"
-                >
-                    <i data-lucide="eraser"></i>
-                </button>
-            </div>
         </div>
 
         <!-- ##### DONATE MODAL ##### -->
