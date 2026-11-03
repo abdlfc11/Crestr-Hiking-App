@@ -340,7 +340,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: var(--panel-glass-bg);
+  background: var(--bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-radius: 0 0 var(--panel-radius) var(--panel-radius);
@@ -369,7 +369,7 @@
   overflow: hidden;
   height: 0;
   margin-right: 0.5rem;
-  background: var(--panel-glass-bg);
+  background: var(--bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-radius: 0 0 var(--panel-radius) var(--panel-radius);
@@ -378,14 +378,6 @@
   width: 13rem;
   max-width: 100%;
   transition: all 0.15s ease-in-out;
-}
-
-#save-route-toggle-button:hover {
-  background: var(--panel-glass-bg-hover);
-}
-
-#save-route-toggle-button:hover + #save-route {
-  background: var(--panel-glass-bg-hover);
 }
 
 #save-route-form {
@@ -585,7 +577,7 @@
     right: 2.5rem;
     width: 12rem;
   }
-  
+
   #save-route {
     width: 12rem;
   }
