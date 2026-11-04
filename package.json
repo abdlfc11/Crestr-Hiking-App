@@ -28,7 +28,7 @@
     "localforage": "^1.10.0",
     "lucide": "^1.30.0",
     "nanoid": "^6.0.2",
-    "ol": "^10.10.0",
+    "ol": "^10.11.0",
     "qrcode": "^1.5.4"
   },
   "devDependencies": {
