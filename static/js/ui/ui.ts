@@ -7,6 +7,7 @@ import VectorSource from "ol/source/Vector.js";
 import VectorLayer from "ol/layer/Vector.js";
 import Feature from "ol/Feature.js";
 import { Translate } from "ol/interaction.js"
+import PointerInteraction from "ol/interaction/Pointer.js";
 import type Map from "ol/Map.js";
 import type MapBrowserEvent from "ol/MapBrowserEvent.js";
 import type Style from "ol/style/Style.js";
@@ -22,7 +23,8 @@ import localforage from "localforage";
 import { formatLatLon } from "../utils/routing-utils.js";
 
 import {
-  createManualPointStyle
+  createManualPointStyle,
+  createRouteHoverPointStyle
 } from "../utils/style-utils.js";
 
 import {
@@ -44,7 +46,12 @@ import {
 
 import { moveMapToPosition } from "../utils/map-utils.js";
 
-import { addManualPoint, replaceIntermediaryPoint } from "../routing/index.js";
+import {
+  addManualPoint,
+  replaceIntermediaryPoint,
+  insertIntermediaryPoint,
+  getManualRouteSegmentIndex
+} from "../routing/index.js";
 
 import {
   getMap,
@@ -285,9 +292,15 @@ const allowedFileTypes = ['.gpx', '.kml', '.geojson', '.fit'];
 type ClickMode = "setStart" | "setEnd" | null;
 type PointType = "start" | "end" | "start-end" | "route-waypoint";
 
+// routing
+
 let clickMode: ClickMode = null;
 let selectedPoint: Feature<Point> | null = null;
 let manualRouteFeature: Feature<LineString> | null = null;
+let routeLineWasDragged = false;
+let routeLineIsDragging = false;
+let routeLineDragInteraction: PointerInteraction | null = null;
+let routeHoverFeature: Feature<Point> | null = null;
 
 // Start and End points
 
@@ -888,6 +901,11 @@ function handleRouteImportType() {
 //#region MAP CLICK HANDLERS
 
 async function manualRouteClickHandler(event: MapBrowserEvent<PointerEvent>) {
+
+  if (routeLineWasDragged) {
+    routeLineWasDragged = false;
+    return;
+  }
 
   if (handleSelectSavedPoint(event)) return;
   resetCoordInputState(false)
@@ -1705,6 +1723,148 @@ export function createPoint(coordinates: number[], style: Style, type: PointType
   return point;
 }
 
+function closestPathSegmentIndex(line: LineString, coordinate: number[]): number | null {
+  const coordinates = line.getCoordinates();
+  let closestIndex: number | null = null;
+  let closestDistance = Infinity;
+
+  for (let index = 0; index < coordinates.length - 1; index += 1) {
+    const [startX, startY] = coordinates[index];
+    const [endX, endY] = coordinates[index + 1];
+    const deltaX = endX - startX;
+    const deltaY = endY - startY;
+    const lengthSquared = deltaX * deltaX + deltaY * deltaY;
+    const projection = lengthSquared === 0
+      ? 0
+      : Math.max(0, Math.min(1, ((coordinate[0] - startX) * deltaX + (coordinate[1] - startY) * deltaY) / lengthSquared));
+    const projectedX = startX + projection * deltaX;
+    const projectedY = startY + projection * deltaY;
+    const distance = (coordinate[0] - projectedX) ** 2 + (coordinate[1] - projectedY) ** 2;
+
+    if (distance < closestDistance) {
+      closestDistance = distance;
+      closestIndex = index;
+    }
+  }
+
+  return closestIndex;
+}
+
+function closestPointOnPath(line: LineString, coordinate: number[]): number[] | null {
+  const coordinates = line.getCoordinates();
+  let closestPoint: number[] | null = null;
+  let closestDistance = Infinity;
+
+  for (let index = 0; index < coordinates.length - 1; index += 1) {
+    const [startX, startY] = coordinates[index];
+    const [endX, endY] = coordinates[index + 1];
+    const deltaX = endX - startX;
+    const deltaY = endY - startY;
+    const lengthSquared = deltaX * deltaX + deltaY * deltaY;
+    const projection = lengthSquared === 0
+      ? 0
+      : Math.max(0, Math.min(1, ((coordinate[0] - startX) * deltaX + (coordinate[1] - startY) * deltaY) / lengthSquared));
+    const point = [startX + projection * deltaX, startY + projection * deltaY];
+    const distance = (coordinate[0] - point[0]) ** 2 + (coordinate[1] - point[1]) ** 2;
+
+    if (distance < closestDistance) {
+      closestDistance = distance;
+      closestPoint = point;
+    }
+  }
+
+  return closestPoint;
+}
+
+function clearRouteHoverFeature() {
+  if (!routeHoverFeature) return;
+
+  getManualRouteLayer()?.getSource()?.removeFeature(routeHoverFeature);
+  routeHoverFeature = null;
+}
+
+function updateRouteHoverFeature(event: MapBrowserEvent<PointerEvent>) {
+  if (routeLineIsDragging || routeLineWasDragged || !manualRouteFeature || manualRouteState.userClicks.length < 2) {
+    clearRouteHoverFeature();
+    return;
+  }
+
+  const hoveredRoute = event.map.forEachFeatureAtPixel(
+    event.pixel,
+    (feature) => feature === manualRouteFeature ? feature : undefined
+  );
+  if (!hoveredRoute) {
+    clearRouteHoverFeature();
+    return;
+  }
+
+  const coordinate = closestPointOnPath(manualRouteFeature.getGeometry(), event.coordinate);
+  if (!coordinate) return;
+
+  if (!routeHoverFeature) {
+    routeHoverFeature = new Feature({
+      geometry: new Point(coordinate),
+      type: "route-hover"
+    });
+    routeHoverFeature.setStyle(createRouteHoverPointStyle());
+    getManualRouteLayer()?.getSource()?.addFeature(routeHoverFeature);
+  } else {
+    routeHoverFeature.getGeometry()?.setCoordinates(coordinate);
+  }
+}
+
+function initRouteLineInteraction(map: Map) {
+  map.on("pointermove", updateRouteHoverFeature);
+  map.getViewport().addEventListener("mouseleave", clearRouteHoverFeature);
+
+  routeLineDragInteraction = new PointerInteraction({
+    handleDownEvent: (event) => {
+      if (!manualRouteFeature || manualRouteState.userClicks.length < 2) return false;
+
+      const feature = map.forEachFeatureAtPixel(
+        event.pixel,
+        (candidate) => candidate === manualRouteFeature ? candidate : undefined
+      );
+      if (feature === manualRouteFeature) routeLineIsDragging = true;
+      return feature === manualRouteFeature;
+    },
+    handleDragEvent: () => {
+      routeLineWasDragged = true;
+      setCursor("grabbing");
+    },
+    handleUpEvent: (event) => {
+      routeLineIsDragging = false;
+      if (!manualRouteFeature) return false;
+
+      const line = manualRouteFeature.getGeometry();
+      const pathSegmentIndex = closestPathSegmentIndex(line, event.coordinate);
+      const routeSegmentIndex = pathSegmentIndex === null
+        ? null
+        : getManualRouteSegmentIndex(pathSegmentIndex);
+
+      if (routeSegmentIndex !== null) {
+        clearRouteHoverFeature();
+        void insertIntermediaryPoint(routeSegmentIndex + 1, event.coordinate)
+          .then(() => {
+            syncCoordinateInputs();
+            updateCursor();
+          })
+          .catch((error) => {
+            showToast(error.cause || ERROR_MESSAGES.ROUTING.PATH_CREATION_FAILED, "error");
+            updateCursor();
+          });
+      } else {
+        clearRouteHoverFeature();
+        updateCursor();
+      }
+
+      return false;
+    }
+  });
+
+  map.addInteraction(routeLineDragInteraction);
+}
+
 /**
  * Adds a translate interaction to start / end OpenLayers points
  */
@@ -2146,6 +2306,7 @@ function initImportRoutePanel() {
 }
 
 function initRouting() {
+  const map = getMap();
 
   addClickListener(searchForAreaButton, searchArea, "click");
 
@@ -2168,6 +2329,7 @@ function initRouting() {
   addClickListener(saveRouteToggleButton, toggleSaveRouteContainer, "click");
 
   onMapClick(manualRouteClickHandler);
+  if (map) initRouteLineInteraction(map);
 }
 
 function initCursor() {

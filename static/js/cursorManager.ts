@@ -90,8 +90,7 @@ function applyCursor(pixel: Pixel | null) {
 
   let cursor = desiredCursor;
 
-  // Only consider pointer when we are auto routing --> 'grab' cursor instead of 'pointer' cursor 
-  if (desiredCursor === 'grab' && pixel && mapRef) {
+  if (!getClickModeFn?.() && pixel && mapRef) {
 
     // gets the feature under the cursor (if any)
     const feature = mapRef.forEachFeatureAtPixel(
@@ -104,11 +103,7 @@ function applyCursor(pixel: Pixel | null) {
       const type = feature.get('type');
 
       const hoveredOverStartOrEndPoint = geometryType === 'Point' && (type === 'start' || type === 'end')
-      const hoveredOverLineString = geometryType === 'LineString'
-
-      // this shows the pointer on everything EXCEPT Point features named "start" or "end" AND Linestrings 
-      // this ensures that only saved points have the 'pointer' cursor, LineStrings will be removed from this when further route editing is implemented 
-      if ( !hoveredOverStartOrEndPoint && !hoveredOverLineString ) {
+      if (!hoveredOverStartOrEndPoint) {
         cursor = 'pointer';
       }
     }
