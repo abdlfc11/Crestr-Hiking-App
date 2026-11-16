@@ -99,13 +99,7 @@ function applyCursor(pixel: Pixel | null) {
     );
 
     if (feature) {
-      const geometryType = feature.getGeometry().getType();
-      const type = feature.get('type');
-
-      const hoveredOverStartOrEndPoint = geometryType === 'Point' && (type === 'start' || type === 'end')
-      if (!hoveredOverStartOrEndPoint) {
-        cursor = 'pointer';
-      }
+      cursor = "grab"
     }
   }
 

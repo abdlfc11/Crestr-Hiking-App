@@ -438,12 +438,10 @@ export async function handleReportIssueSubmission(title: string, description: st
 
       if (!response.ok) {
           throw new Error("There was an unexpected error whilst submitting the issue report.")
-          return;
       }
 
       if (!data.success) {
           throw new Error("There was an unexpected error whilst submitting the issue report.");
-          return;
       }
 
       showToast("Thank you, the issue was reported successfully. ", "success")
@@ -589,23 +587,6 @@ function setEndCoord() {
   setCoordInputActiveState(startCoordEntry, false);
   setCoordInputActiveState(endCoordEntry, true);
   endCoordEntry.placeholder = "Click a point on the map";
-  updateCursor();
-}
-
-/**
- *
- * @param {HTMLInputElement} entry
- * @param {number[]} coordinate In Web Mercator projection
- */
-function setCoordEntry(entry: HTMLInputElement, coordinate: number[]) {
-  const lonLat = toLonLat(coordinate);
-
-  entry.value = formatLatLon(lonLat, 6);
-  entry.placeholder = "Coordinates";
-  entry.classList.remove("input-error");
-  entry.classList.remove('is-active')
-
-  clickMode = null;
   updateCursor();
 }
 
@@ -1468,7 +1449,7 @@ function updateManualRouteStats(
 
 export async function undoManualRoutePoint() {
 
-  const { userClicks, segmentCache } = manualRouteState;
+  const { userClicks } = manualRouteState;
 
   // guard clause to prevent redundant running of code if userClicks is none / has no coords
   if (!userClicks || userClicks.length === 0) {
@@ -1784,7 +1765,13 @@ function clearRouteHoverFeature() {
 }
 
 function updateRouteHoverFeature(event: MapBrowserEvent<PointerEvent>) {
-  if (routeLineIsDragging || routeLineWasDragged || !manualRouteFeature || manualRouteState.userClicks.length < 2) {
+
+  let coordinate
+
+  if (
+    !manualRouteFeature ||
+    manualRouteState.userClicks.length < 2
+  ) {
     clearRouteHoverFeature();
     return;
   }
@@ -1795,10 +1782,10 @@ function updateRouteHoverFeature(event: MapBrowserEvent<PointerEvent>) {
   );
   if (!hoveredRoute) {
     clearRouteHoverFeature();
-    return;
+    if (routeLineIsDragging) coordinate = event.coordinate;
+  } else {
+    coordinate = closestPointOnPath(manualRouteFeature.getGeometry(), event.coordinate)
   }
-
-  const coordinate = closestPointOnPath(manualRouteFeature.getGeometry(), event.coordinate);
   if (!coordinate) return;
 
   if (!routeHoverFeature) {
@@ -1811,58 +1798,6 @@ function updateRouteHoverFeature(event: MapBrowserEvent<PointerEvent>) {
   } else {
     routeHoverFeature.getGeometry()?.setCoordinates(coordinate);
   }
-}
-
-function initRouteLineInteraction(map: Map) {
-  map.on("pointermove", updateRouteHoverFeature);
-  map.getViewport().addEventListener("mouseleave", clearRouteHoverFeature);
-
-  routeLineDragInteraction = new PointerInteraction({
-    handleDownEvent: (event) => {
-      if (!manualRouteFeature || manualRouteState.userClicks.length < 2) return false;
-
-      const feature = map.forEachFeatureAtPixel(
-        event.pixel,
-        (candidate) => candidate === manualRouteFeature ? candidate : undefined
-      );
-      if (feature === manualRouteFeature) routeLineIsDragging = true;
-      return feature === manualRouteFeature;
-    },
-    handleDragEvent: () => {
-      routeLineWasDragged = true;
-      setCursor("grabbing");
-    },
-    handleUpEvent: (event) => {
-      routeLineIsDragging = false;
-      if (!manualRouteFeature) return false;
-
-      const line = manualRouteFeature.getGeometry();
-      const pathSegmentIndex = closestPathSegmentIndex(line, event.coordinate);
-      const routeSegmentIndex = pathSegmentIndex === null
-        ? null
-        : getManualRouteSegmentIndex(pathSegmentIndex);
-
-      if (routeSegmentIndex !== null) {
-        clearRouteHoverFeature();
-        void insertIntermediaryPoint(routeSegmentIndex + 1, event.coordinate)
-          .then(() => {
-            syncCoordinateInputs();
-            updateCursor();
-          })
-          .catch((error) => {
-            showToast(error.cause || ERROR_MESSAGES.ROUTING.PATH_CREATION_FAILED, "error");
-            updateCursor();
-          });
-      } else {
-        clearRouteHoverFeature();
-        updateCursor();
-      }
-
-      return false;
-    }
-  });
-
-  map.addInteraction(routeLineDragInteraction);
 }
 
 /**
@@ -1884,6 +1819,9 @@ export function setUpPointInteraction(layers: Array<VectorLayer<VectorSource>>) 
   });
 
   map.addInteraction(interactivePointLayerInteraction);
+
+  interactivePointLayerInteraction.on("translatestart", () => setCursor("grabbing"));
+  interactivePointLayerInteraction.on("translating", () => setCursor("grabbing"));
 
   interactivePointLayerInteraction.on('translateend', async (event) => {
     const movedFeature = event.features.item(0);
@@ -2191,6 +2129,53 @@ function initInteractivePointLayer(map: Map) {
   });
 
   map.addLayer(interactivePointLayer);
+}
+
+function initRouteLineInteraction(map: Map) {
+  map.on("pointermove", updateRouteHoverFeature);
+  map.getViewport().addEventListener("mouseleave", clearRouteHoverFeature);
+
+  routeLineDragInteraction = new PointerInteraction({
+    handleDownEvent: (event: MapBrowserEvent<PointerEvent>) => {
+      if (!manualRouteFeature || manualRouteState.userClicks.length < 2) return false;
+
+      const feature = map.forEachFeatureAtPixel(
+        event.pixel,
+        (candidate) => candidate === manualRouteFeature ? candidate : undefined
+      );
+      if (feature === manualRouteFeature) routeLineIsDragging = true;
+      return feature === manualRouteFeature;
+    },
+    handleDragEvent: (event: MapBrowserEvent<PointerEvent>) => {
+      routeLineWasDragged = true;
+      updateRouteHoverFeature(event);
+      setCursor("grabbing");
+    },
+    handleUpEvent: (event: MapBrowserEvent<PointerEvent>) => {
+      routeLineIsDragging = false;
+      if (!manualRouteFeature) return false;
+
+      const line = manualRouteFeature.getGeometry();
+      const pathSegmentIndex = closestPathSegmentIndex(line, event.coordinate);
+      const routeSegmentIndex = pathSegmentIndex === null
+        ? null
+        : getManualRouteSegmentIndex(pathSegmentIndex);
+
+      if (routeSegmentIndex !== null) {
+        try {
+          insertIntermediaryPoint(routeSegmentIndex + 1, event.coordinate);
+          syncCoordinateInputs();
+        } catch (error) { showToast(error.cause || ERROR_MESSAGES.ROUTING.PATH_CREATION_FAILED) };
+      };
+
+      updateCursor();
+      clearRouteHoverFeature();
+
+      return false;
+    }
+  });
+
+  map.addInteraction(routeLineDragInteraction);
 }
 
 function initModals() {
