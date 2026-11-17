@@ -297,10 +297,7 @@ type PointType = "start" | "end" | "start-end" | "route-waypoint";
 let clickMode: ClickMode = null;
 let selectedPoint: Feature<Point> | null = null;
 let manualRouteFeature: Feature<LineString> | null = null;
-let routeLineWasDragged = false;
-let routeLineIsDragging = false;
-let routeLineDragInteraction: PointerInteraction | null = null;
-let routeHoverFeature: Feature<Point> | null = null;
+
 
 // Start and End points
 
@@ -308,6 +305,10 @@ let interactivePointLayerInteraction: Translate | null = null; // holds the Open
 let interactivePointLayer: VectorLayer<VectorSource> | null = null; // stores the vector layer which holds the point features
 
 // Waypoint insertion interaction
+
+let routeLineIsDragging = false;
+let routeLineDragInteraction: PointerInteraction | null = null;
+let routeHoverFeature: Feature<Point> | null = null;
 
 let lastMousePosition: number[] | null = null;
 let mousePositionThreshold: number = 5; // in pixels
@@ -888,11 +889,6 @@ function handleRouteImportType() {
 //#region MAP CLICK HANDLERS
 
 async function manualRouteClickHandler(event: MapBrowserEvent<PointerEvent>) {
-
-  if (routeLineWasDragged) {
-    routeLineWasDragged = false;
-    return;
-  }
 
   if (handleSelectSavedPoint(event)) return;
   resetCoordInputState(false)
@@ -2159,7 +2155,6 @@ function initRouteLineInteraction(map: Map) {
       return feature === manualRouteFeature;
     },
     handleDragEvent: (event: MapBrowserEvent<PointerEvent>) => {
-      routeLineWasDragged = true;
       updateRouteHoverFeature(event);
       setCursor("grabbing");
     },
