@@ -1,15 +1,15 @@
 /**
- * NOTES:  
- * 
- * OVERVIEW : 
+ * NOTES:
+ *
+ * OVERVIEW :
  * Central, future-proof place to manage the map cursor.
- * 
+ *
  * WHY :
  * OpenLayers internally sets `cursor: pointer` on .ol-viewport whenever the pointer
- * is over a feature (saved points, route line, etc.). 
+ * is over a feature (saved points, route line, etc.).
  * We want full control (crosshair in manual / clickMode, grab in normal auto mode)
  * even when hovering features.
- * 
+ *
  * RESPONSIBILITIES:
  * - writes to the OL viewport element (map.getViewport())
  * - Re-applies the desired cursor on every OL pointermove (after OL's own logic runs)
@@ -90,8 +90,7 @@ function applyCursor(pixel: Pixel | null) {
 
   let cursor = desiredCursor;
 
-  // Only consider pointer when we are auto routing --> 'grab' cursor instead of 'pointer' cursor 
-  if (desiredCursor === 'grab' && pixel && mapRef) {
+  if (!getClickModeFn?.() && pixel && mapRef) {
 
     // gets the feature under the cursor (if any)
     const feature = mapRef.forEachFeatureAtPixel(
@@ -100,17 +99,9 @@ function applyCursor(pixel: Pixel | null) {
     );
 
     if (feature) {
-      const geometryType = feature.getGeometry().getType();
-      const type = feature.get('type');
-
-      const hoveredOverStartOrEndPoint = geometryType === 'Point' && (type === 'start' || type === 'end')
-      const hoveredOverLineString = geometryType === 'LineString'
-
-      // this shows the pointer on everything EXCEPT Point features named "start" or "end" AND Linestrings 
-      // this ensures that only saved points have the 'pointer' cursor, LineStrings will be removed from this when further route editing is implemented 
-      if ( !hoveredOverStartOrEndPoint && !hoveredOverLineString ) {
-        cursor = 'pointer';
-      }
+      const type = feature.get("type")
+      if (type === "savedPoint") cursor = "pointer";
+      else cursor = "grab";
     }
   }
 

@@ -7,6 +7,7 @@ import VectorSource from "ol/source/Vector.js";
 import VectorLayer from "ol/layer/Vector.js";
 import Feature from "ol/Feature.js";
 import { Translate } from "ol/interaction.js"
+import PointerInteraction from "ol/interaction/Pointer.js";
 import type Map from "ol/Map.js";
 import type MapBrowserEvent from "ol/MapBrowserEvent.js";
 import type Style from "ol/style/Style.js";
@@ -22,7 +23,8 @@ import localforage from "localforage";
 import { formatLatLon } from "../utils/routing-utils.js";
 
 import {
-  createManualPointStyle
+  createManualPointStyle,
+  createRouteHoverPointStyle
 } from "../utils/style-utils.js";
 
 import {
@@ -44,7 +46,12 @@ import {
 
 import { moveMapToPosition } from "../utils/map-utils.js";
 
-import { addManualPoint, replaceIntermediaryPoint } from "../routing/index.js";
+import {
+  addManualPoint,
+  replaceIntermediaryPoint,
+  insertIntermediaryPoint,
+  getManualRouteSegmentIndex
+} from "../routing/index.js";
 
 import {
   getMap,
@@ -285,14 +292,28 @@ const allowedFileTypes = ['.gpx', '.kml', '.geojson', '.fit'];
 type ClickMode = "setStart" | "setEnd" | null;
 type PointType = "start" | "end" | "start-end" | "route-waypoint";
 
+// routing
+
 let clickMode: ClickMode = null;
 let selectedPoint: Feature<Point> | null = null;
 let manualRouteFeature: Feature<LineString> | null = null;
+
 
 // Start and End points
 
 let interactivePointLayerInteraction: Translate | null = null; // holds the OpenLayer interaction for the start and end points
 let interactivePointLayer: VectorLayer<VectorSource> | null = null; // stores the vector layer which holds the point features
+
+// Waypoint insertion interaction
+
+let routeLineIsDragging = false;
+let routeLineDragInteraction: PointerInteraction | null = null;
+let routeHoverFeature: Feature<Point> | null = null;
+
+let lastMousePosition: number[] | null = null;
+let lastMouseID: number | null = null;
+let mousePositionThreshold: number = 5; // in pixels
+let closestSegmentIndex: number | null = null;
 
 //#endregion
 
@@ -425,12 +446,10 @@ export async function handleReportIssueSubmission(title: string, description: st
 
       if (!response.ok) {
           throw new Error("There was an unexpected error whilst submitting the issue report.")
-          return;
       }
 
       if (!data.success) {
           throw new Error("There was an unexpected error whilst submitting the issue report.");
-          return;
       }
 
       showToast("Thank you, the issue was reported successfully. ", "success")
@@ -576,23 +595,6 @@ function setEndCoord() {
   setCoordInputActiveState(startCoordEntry, false);
   setCoordInputActiveState(endCoordEntry, true);
   endCoordEntry.placeholder = "Click a point on the map";
-  updateCursor();
-}
-
-/**
- *
- * @param {HTMLInputElement} entry
- * @param {number[]} coordinate In Web Mercator projection
- */
-function setCoordEntry(entry: HTMLInputElement, coordinate: number[]) {
-  const lonLat = toLonLat(coordinate);
-
-  entry.value = formatLatLon(lonLat, 6);
-  entry.placeholder = "Coordinates";
-  entry.classList.remove("input-error");
-  entry.classList.remove('is-active')
-
-  clickMode = null;
   updateCursor();
 }
 
@@ -1450,7 +1452,7 @@ function updateManualRouteStats(
 
 export async function undoManualRoutePoint() {
 
-  const { userClicks, segmentCache } = manualRouteState;
+  const { userClicks } = manualRouteState;
 
   // guard clause to prevent redundant running of code if userClicks is none / has no coords
   if (!userClicks || userClicks.length === 0) {
@@ -1705,6 +1707,102 @@ export function createPoint(coordinates: number[], style: Style, type: PointType
   return point;
 }
 
+function closestPathSegmentIndex(line: LineString, coordinate: number[]): number | null {
+  const coordinates = line.getCoordinates();
+  let closestIndex: number | null = null;
+  let closestDistance = Infinity;
+
+  for (let index = 0; index < coordinates.length - 1; index += 1) {
+    const [startX, startY] = coordinates[index];
+    const [endX, endY] = coordinates[index + 1];
+    const deltaX = endX - startX;
+    const deltaY = endY - startY;
+    const lengthSquared = deltaX * deltaX + deltaY * deltaY;
+    const projection = lengthSquared === 0
+      ? 0
+      : Math.max(0, Math.min(1, ((coordinate[0] - startX) * deltaX + (coordinate[1] - startY) * deltaY) / lengthSquared));
+    const projectedX = startX + projection * deltaX;
+    const projectedY = startY + projection * deltaY;
+    const distance = (coordinate[0] - projectedX) ** 2 + (coordinate[1] - projectedY) ** 2;
+
+    if (distance < closestDistance) {
+      closestDistance = distance;
+      closestIndex = index;
+    }
+  }
+
+  return closestIndex;
+}
+
+function closestPointOnPath(line: LineString, coordinate: number[]): number[] | null {
+  const coordinates = line.getCoordinates();
+  let closestPoint: number[] | null = null;
+  let closestDistance = Infinity;
+
+  for (let index = 0; index < coordinates.length - 1; index += 1) {
+    const [startX, startY] = coordinates[index];
+    const [endX, endY] = coordinates[index + 1];
+    const deltaX = endX - startX;
+    const deltaY = endY - startY;
+    const lengthSquared = deltaX * deltaX + deltaY * deltaY;
+    const projection = lengthSquared === 0
+      ? 0
+      : Math.max(0, Math.min(1, ((coordinate[0] - startX) * deltaX + (coordinate[1] - startY) * deltaY) / lengthSquared));
+    const point = [startX + projection * deltaX, startY + projection * deltaY];
+    const distance = (coordinate[0] - point[0]) ** 2 + (coordinate[1] - point[1]) ** 2;
+
+    if (distance < closestDistance) {
+      closestDistance = distance;
+      closestPoint = point;
+    }
+  }
+
+  return closestPoint;
+}
+
+function clearRouteHoverFeature() {
+  if (!routeHoverFeature) return;
+
+  getManualRouteLayer()?.getSource()?.removeFeature(routeHoverFeature);
+  routeHoverFeature = null;
+}
+
+function updateRouteHoverFeature(event: MapBrowserEvent<PointerEvent>) {
+
+  let coordinate
+
+  if (
+    !manualRouteFeature ||
+    manualRouteState.userClicks.length < 2
+  ) {
+    clearRouteHoverFeature();
+    return;
+  }
+
+  const hoveredRoute = event.map.forEachFeatureAtPixel(
+    event.pixel,
+    (feature) => feature === manualRouteFeature ? feature : undefined
+  );
+  if (!hoveredRoute) {
+    clearRouteHoverFeature();
+    if (routeLineIsDragging) coordinate = event.coordinate;
+  } else {
+    coordinate = closestPointOnPath(manualRouteFeature.getGeometry(), event.coordinate)
+  }
+  if (!coordinate) return;
+
+  if (!routeHoverFeature) {
+    routeHoverFeature = new Feature({
+      geometry: new Point(coordinate),
+      type: "route-hover"
+    });
+    routeHoverFeature.setStyle(createRouteHoverPointStyle());
+    getManualRouteLayer()?.getSource()?.addFeature(routeHoverFeature);
+  } else {
+    routeHoverFeature.getGeometry()?.setCoordinates(coordinate);
+  }
+}
+
 /**
  * Adds a translate interaction to start / end OpenLayers points
  */
@@ -1724,6 +1822,9 @@ export function setUpPointInteraction(layers: Array<VectorLayer<VectorSource>>) 
   });
 
   map.addInteraction(interactivePointLayerInteraction);
+
+  interactivePointLayerInteraction.on("translatestart", () => setCursor("grabbing"));
+  interactivePointLayerInteraction.on("translating", () => setCursor("grabbing"));
 
   interactivePointLayerInteraction.on('translateend', async (event) => {
     const movedFeature = event.features.item(0);
@@ -2033,6 +2134,78 @@ function initInteractivePointLayer(map: Map) {
   map.addLayer(interactivePointLayer);
 }
 
+function initRouteLineInteraction(map: Map) {
+  map.getViewport().addEventListener("mouseleave", clearRouteHoverFeature);
+
+  routeLineDragInteraction = new PointerInteraction({
+    handleMoveEvent: (event: MapBrowserEvent<PointerEvent>) => {
+      updateRouteHoverFeature(event);
+    },
+    handleDownEvent: (event: MapBrowserEvent<PointerEvent>) => {
+      if (!manualRouteFeature || manualRouteState.userClicks.length < 2) return false;
+      lastMousePosition = event.pixel;
+      lastMouseID = event.originalEvent.pointerId;
+
+      const feature = map.forEachFeatureAtPixel(
+        event.pixel,
+        (candidate) => candidate === manualRouteFeature ? candidate : undefined
+      );
+      if (feature === manualRouteFeature) {
+        routeLineIsDragging = true;
+        closestSegmentIndex = closestPathSegmentIndex(manualRouteFeature.getGeometry(), event.coordinate);
+      };
+      return feature === manualRouteFeature;
+    },
+    handleDragEvent: (event: MapBrowserEvent<PointerEvent>) => {
+      updateRouteHoverFeature(event);
+      setCursor("grabbing");
+    },
+    handleUpEvent: (event: MapBrowserEvent<PointerEvent>) => {
+      routeLineIsDragging = false;
+      if (!manualRouteFeature) return false;
+
+      // Check if user moved mouse signficantly
+      if (lastMouseID !== event.originalEvent.pointerId) return true; // Protects against different pointers e.g different finger
+
+      if (lastMousePosition) {
+        const lastX = lastMousePosition[0];
+        const lastY = lastMousePosition[1];
+
+        lastMousePosition = null;
+
+        const currentX = event.pixel[0];
+        const currentY = event.pixel[1];
+
+        if (
+          Math.abs(lastX - currentX) < mousePositionThreshold &&
+          Math.abs(lastY - currentY) < mousePositionThreshold
+        ) {
+          clearRouteHoverFeature();
+          return false;
+        };
+      };
+
+      const routeSegmentIndex = closestSegmentIndex === null
+        ? null
+        : getManualRouteSegmentIndex(closestSegmentIndex);
+
+      if (routeSegmentIndex !== null) {
+
+        void insertIntermediaryPoint(routeSegmentIndex + 1, event.coordinate)
+          .then(() => syncCoordinateInputs())
+          .catch((error) => showToast(error.cause || ERROR_MESSAGES.ROUTING.PATH_CREATION_FAILED));
+      };
+
+      updateCursor();
+      clearRouteHoverFeature();
+
+      return false;
+    }
+  });
+
+  map.addInteraction(routeLineDragInteraction);
+}
+
 function initModals() {
 
   // Delete Point Modal
@@ -2146,6 +2319,7 @@ function initImportRoutePanel() {
 }
 
 function initRouting() {
+  const map = getMap();
 
   addClickListener(searchForAreaButton, searchArea, "click");
 
@@ -2168,6 +2342,7 @@ function initRouting() {
   addClickListener(saveRouteToggleButton, toggleSaveRouteContainer, "click");
 
   onMapClick(manualRouteClickHandler);
+  if (map) initRouteLineInteraction(map);
 }
 
 function initCursor() {
