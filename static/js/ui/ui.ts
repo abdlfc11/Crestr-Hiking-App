@@ -307,6 +307,11 @@ let routeHoverFeature: Feature<Point> | null = null;
 let interactivePointLayerInteraction: Translate | null = null; // holds the OpenLayer interaction for the start and end points
 let interactivePointLayer: VectorLayer<VectorSource> | null = null; // stores the vector layer which holds the point features
 
+// Waypoint insertion interaction
+
+let lastMousePosition: number[] | null = null;
+let mousePositionThreshold: number = 5; // in pixels
+
 //#endregion
 
 //#region LOGIN MODAL
@@ -2132,12 +2137,15 @@ function initInteractivePointLayer(map: Map) {
 }
 
 function initRouteLineInteraction(map: Map) {
-  map.on("pointermove", updateRouteHoverFeature);
   map.getViewport().addEventListener("mouseleave", clearRouteHoverFeature);
 
   routeLineDragInteraction = new PointerInteraction({
+    handleMoveEvent: (event: MapBrowserEvent<PointerEvent>) => {
+      updateRouteHoverFeature(event);
+    },
     handleDownEvent: (event: MapBrowserEvent<PointerEvent>) => {
       if (!manualRouteFeature || manualRouteState.userClicks.length < 2) return false;
+      lastMousePosition = event.pixel;
 
       const feature = map.forEachFeatureAtPixel(
         event.pixel,
@@ -2154,6 +2162,25 @@ function initRouteLineInteraction(map: Map) {
     handleUpEvent: (event: MapBrowserEvent<PointerEvent>) => {
       routeLineIsDragging = false;
       if (!manualRouteFeature) return false;
+
+      // Check if user moved mouse signficantly
+      if (lastMousePosition) {
+        const lastX = lastMousePosition[0];
+        const lastY = lastMousePosition[1];
+
+        lastMousePosition = null;
+
+        const currentX = event.pixel[0];
+        const currentY = event.pixel[1];
+
+        if (
+          Math.abs(lastX - currentX) < mousePositionThreshold &&
+          Math.abs(lastY - currentY) < mousePositionThreshold
+        ) {
+          clearRouteHoverFeature();
+          return false;
+        };
+      };
 
       const line = manualRouteFeature.getGeometry();
       const pathSegmentIndex = closestPathSegmentIndex(line, event.coordinate);
