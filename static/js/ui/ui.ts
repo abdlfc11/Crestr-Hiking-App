@@ -2193,7 +2193,7 @@ function initRouteLineInteraction(map: Map) {
 
         void insertIntermediaryPoint(routeSegmentIndex + 1, event.coordinate)
           .then(() => syncCoordinateInputs())
-          .catch((error) => showToast(error.cause || ERROR_MESSAGES.ROUTING.PATH_CREATION_FAILED));
+          .catch((error: Error) => showToast(error.cause as string|| ERROR_MESSAGES.ROUTING.PATH_CREATION_FAILED));
       };
 
       updateCursor();
