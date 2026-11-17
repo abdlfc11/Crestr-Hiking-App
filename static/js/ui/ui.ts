@@ -311,6 +311,7 @@ let interactivePointLayer: VectorLayer<VectorSource> | null = null; // stores th
 
 let lastMousePosition: number[] | null = null;
 let mousePositionThreshold: number = 5; // in pixels
+let closestSegmentIndex: number | null = null;
 
 //#endregion
 
@@ -2151,7 +2152,10 @@ function initRouteLineInteraction(map: Map) {
         event.pixel,
         (candidate) => candidate === manualRouteFeature ? candidate : undefined
       );
-      if (feature === manualRouteFeature) routeLineIsDragging = true;
+      if (feature === manualRouteFeature) {
+        routeLineIsDragging = true;
+        closestSegmentIndex = closestPathSegmentIndex(manualRouteFeature.getGeometry(), event.coordinate);
+      };
       return feature === manualRouteFeature;
     },
     handleDragEvent: (event: MapBrowserEvent<PointerEvent>) => {
@@ -2182,11 +2186,9 @@ function initRouteLineInteraction(map: Map) {
         };
       };
 
-      const line = manualRouteFeature.getGeometry();
-      const pathSegmentIndex = closestPathSegmentIndex(line, event.coordinate);
-      const routeSegmentIndex = pathSegmentIndex === null
+      const routeSegmentIndex = closestSegmentIndex === null
         ? null
-        : getManualRouteSegmentIndex(pathSegmentIndex);
+        : getManualRouteSegmentIndex(closestSegmentIndex);
 
       if (routeSegmentIndex !== null) {
         try {
