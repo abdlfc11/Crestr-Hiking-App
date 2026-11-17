@@ -1,7 +1,7 @@
 /**
  * settings.ts
  * Handles settings panel UI wiring for the map view (distance unit toggle + theme radio pills).
- * Open/close of the panel itself is managed by ui.ts (style.width).
+ * Open/close of the panel itself is managed by panels.ts (style.width).
  * Persists choice to both localStorage (via settingsState) and the Flask backend.
  *
  * Uses vanilla TypeScript. No framework.
@@ -19,7 +19,7 @@ import {
 
 import { logout, deleteAccount } from "./auth/auth.js";
 
-import { applyTheme } from "./ui/ui.js";
+import { applyTheme } from "./ui/ui-routing.js";
 
 import { hasActiveRouteStatsPanel } from "./routes/routeState.js";
 
@@ -30,7 +30,7 @@ let onDistanceUnitChange: (() => void) | null = null;
 
 /**
  * Register callback invoked after distance unit is toggled.
- * Used by ui.ts to refresh manual route stats, etc.
+ * Used by initialisation.ts to refresh manual route stats, etc.
  */
 export function setOnDistanceUnitChange(handler: () => void) {
   onDistanceUnitChange = handler;

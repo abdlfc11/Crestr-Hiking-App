@@ -6,11 +6,9 @@ import {
   normaliseCoordLength
  } from "./routeState.js";
 
-import {
-  homeButtonFunction,
-  updateSaveRouteContainer,
-  showLoginModal
-} from "../ui/ui.js";
+import { homeButtonFunction } from "../ui/ui-routing.js";
+import { updateSaveRouteContainer } from "../ui/ui-panels.js";
+import { showLoginModal } from "../ui/ui-modals.js";
 
 import {
   addClickListener,
