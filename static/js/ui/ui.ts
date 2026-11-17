@@ -2191,10 +2191,10 @@ function initRouteLineInteraction(map: Map) {
         : getManualRouteSegmentIndex(closestSegmentIndex);
 
       if (routeSegmentIndex !== null) {
-        try {
-          insertIntermediaryPoint(routeSegmentIndex + 1, event.coordinate);
-          syncCoordinateInputs();
-        } catch (error) { showToast(error.cause || ERROR_MESSAGES.ROUTING.PATH_CREATION_FAILED) };
+
+        void insertIntermediaryPoint(routeSegmentIndex + 1, event.coordinate)
+          .then(() => syncCoordinateInputs())
+          .catch((error) => showToast(error.cause || ERROR_MESSAGES.ROUTING.PATH_CREATION_FAILED));
       };
 
       updateCursor();
