@@ -311,6 +311,7 @@ let routeLineDragInteraction: PointerInteraction | null = null;
 let routeHoverFeature: Feature<Point> | null = null;
 
 let lastMousePosition: number[] | null = null;
+let lastMouseID: number | null = null;
 let mousePositionThreshold: number = 5; // in pixels
 let closestSegmentIndex: number | null = null;
 
@@ -2143,6 +2144,7 @@ function initRouteLineInteraction(map: Map) {
     handleDownEvent: (event: MapBrowserEvent<PointerEvent>) => {
       if (!manualRouteFeature || manualRouteState.userClicks.length < 2) return false;
       lastMousePosition = event.pixel;
+      lastMouseID = event.originalEvent.pointerId;
 
       const feature = map.forEachFeatureAtPixel(
         event.pixel,
@@ -2163,6 +2165,8 @@ function initRouteLineInteraction(map: Map) {
       if (!manualRouteFeature) return false;
 
       // Check if user moved mouse signficantly
+      if (lastMouseID !== event.originalEvent.pointerId) return true; // Protects against different pointers e.g different finger
+
       if (lastMousePosition) {
         const lastX = lastMousePosition[0];
         const lastY = lastMousePosition[1];
