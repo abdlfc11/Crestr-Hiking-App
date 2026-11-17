@@ -37,15 +37,18 @@ function clearOldSavedPointsLayer() {
 }
 
 function convertPointsToFeatures(data: { points: SavedPoint[] }): Feature<Point>[] {
-    return data.points.map((point) => {
+  return data.points.map((point) => {
 
-        // converts to Web Mercator (API sends coords in [Lon, Lat] format)
-        const mercatorCoords = fromLonLat(point.coordinates);
-        return new Feature({
-            geometry: new Point(mercatorCoords),
-            name: point.name
-        });
+    // converts to Web Mercator (API sends coords in [Lon, Lat] format)
+    const mercatorCoords = fromLonLat(point.coordinates);
+
+    const pointFeature = new Feature({
+        geometry: new Point(mercatorCoords),
+        name: point.name,
     });
+    pointFeature.set("type", "savedPoint");
+    return pointFeature
+  });
 };
 
 function createSavedPointsLayer(features: Feature<Point>[]): VectorLayer<VectorSource> {
