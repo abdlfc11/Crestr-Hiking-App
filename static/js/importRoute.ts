@@ -1,7 +1,8 @@
 
 import {
   addClickListener,
-    createRouteRow
+    createRouteRow,
+    showToast
 } from "./utils/ui-utils.js";
 
 import {
@@ -12,6 +13,7 @@ import {
 
 import { initIcons } from "./init/icons.js";
 import { handleRouteImport, handleRouteImportType, validateFileInput } from "./ui/ui-panels.js";
+import { ERROR_MESSAGES } from "./utils/error-constants.js";
 
 const allRoutesContainer = document.getElementById("all-routes-container");
 
@@ -91,7 +93,11 @@ export function initImportRoutePanel() {
 
   importRouteFileInput.addEventListener("change", (e) => {
     const file = (e.target as HTMLInputElement).files?.[0];
-    validateFileInput(file);
+    try {
+      validateFileInput(file);
+    } catch (error) {
+      showToast(error.cause || ERROR_MESSAGES.generic);
+    }
   });
 
 
