@@ -313,13 +313,21 @@ export async function insertIntermediaryPoint(index: number, newCoordinates: num
     ];
     const newSegmentCache = { ...segmentCache };
 
-    delete newSegmentCache[segmentKey(previousPoint, nextPoint)];
+    const oldKey = segmentKey(previousPoint, nextPoint);
+    const isOldKeyInUse = newUserClicks.some((point, i) => {
+      return i < newUserClicks.length - 1 && segmentKey(point, newUserClicks[i + 1]) === oldKey
+    });
+
+    if (!isOldKeyInUse) delete newSegmentCache[oldKey];
+
     newSegmentCache[segmentKey(previousPoint, newCoordinates)] = previousSegment;
     newSegmentCache[segmentKey(newCoordinates, nextPoint)] = nextSegment;
 
+    const newPathCoords = rebuildPathCoords(newUserClicks, newSegmentCache);
+
     manualRouteState.userClicks = newUserClicks;
     manualRouteState.segmentCache = newSegmentCache;
-    manualRouteState.pathCoords = rebuildPathCoords(newUserClicks, newSegmentCache);
+    manualRouteState.pathCoords = newPathCoords;
     manualRouteState.redoStack = [];
 
     await persistManualSegmentCache();
