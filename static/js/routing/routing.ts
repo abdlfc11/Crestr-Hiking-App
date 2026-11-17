@@ -5,7 +5,7 @@ import {
 
 import {
   updateManualRoute
-} from '../ui/ui.js'
+} from '../ui/ui-routing.js'
 
 import { fromLonLat, toLonLat } from "ol/proj.js";
 import { getDistance } from "ol/sphere.js";

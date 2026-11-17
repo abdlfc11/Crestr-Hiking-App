@@ -19,6 +19,8 @@
 import type Map from "ol/Map.js";
 import type { Pixel } from "ol/pixel.js";
 
+const mapElement = document.getElementById("map");
+
 type ModeGetter = () => "manual" | "auto";
 type ClickModeGetter = () => string | null;
 
@@ -106,4 +108,8 @@ function applyCursor(pixel: Pixel | null) {
   }
 
   viewport.style.cursor = cursor;
+}
+
+export function initCursor() {
+  mapElement?.addEventListener("mouseup", () => updateCursor());
 }

@@ -13,10 +13,10 @@ import {
 
 import {
   cleanDeleteRouteModal,
-  closeSavedRoutesDash,
   populateDeleteRouteModal,
   waitForDeleteRouteConfirmation
-} from "../ui/ui.js"
+} from "../ui/ui-modals.js"
+import { closeSavedRoutesDash } from "../ui/ui-panels.js";
 
 import {
   displayLoadedRouteOnMap

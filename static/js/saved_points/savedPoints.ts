@@ -1,6 +1,6 @@
 import { getSavedPointStyle } from "./style.js";
 import { getMap, waitForMap } from "../init/map.js";
-import { showLoginModal} from "../ui/ui.js";
+import { showLoginModal} from "../ui/ui-modals.js";
 import { showToast, showModal } from "../utils/ui-utils.js";
 import { logError } from "../utils/logError-utils.js";
 import { fromLonLat, toLonLat } from "ol/proj.js";
