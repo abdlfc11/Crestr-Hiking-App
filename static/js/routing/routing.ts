@@ -5,7 +5,7 @@ import {
 
 import {
   updateManualRoute
-} from '../ui/ui.js'
+} from '../ui/ui-routing.js'
 
 import { fromLonLat, toLonLat } from "ol/proj.js";
 import { getDistance } from "ol/sphere.js";
@@ -93,6 +93,24 @@ function rebuildPathCoords(userClicks: number[][], segmentCache: SegmentCache): 
     pathCoords.push(...segment.slice(1));
   }
   return pathCoords;
+}
+
+export function getManualRouteSegmentIndex(pathSegmentIndex: number): number | null {
+  if (pathSegmentIndex < 0) return null;
+
+  let pathSegmentOffset = 0;
+  for (let index = 0; index < manualRouteState.userClicks.length - 1; index += 1) {
+    const start = manualRouteState.userClicks[index];
+    const end = manualRouteState.userClicks[index + 1];
+    const segment = manualRouteState.segmentCache[segmentKey(start, end)];
+    if (!segment) return null;
+
+    const segmentLineCount = segment.length - 1;
+    if (pathSegmentIndex < pathSegmentOffset + segmentLineCount) return index;
+    pathSegmentOffset += segmentLineCount;
+  }
+
+  return null;
 }
 
 async function persistManualSegmentCache() {
@@ -270,6 +288,57 @@ export async function replaceIntermediaryPoint(index: number, newCoordinates: nu
   }
   catch (error) {
     throw new Error(`ERROR (replaceIntermediaryPoint()) : ${error}`, {cause : ERROR_MESSAGES.ROUTING.GENERIC_ROUTE_ACTION})
+  }
+}
+
+export async function insertIntermediaryPoint(index: number, newCoordinates: number[]): Promise<ManualRouteResult> {
+  try {
+    const { userClicks, segmentCache } = manualRouteState;
+
+    if (index <= 0 || index >= userClicks.length) {
+      throw new Error("Invalid route insertion index");
+    }
+
+    const previousPoint = userClicks[index - 1];
+    const nextPoint = userClicks[index];
+    const [previousSegment, nextSegment] = await Promise.all([
+      resolveSegment(previousPoint, newCoordinates, segmentCache),
+      resolveSegment(newCoordinates, nextPoint, segmentCache)
+    ]);
+
+    const newUserClicks = [
+      ...userClicks.slice(0, index),
+      newCoordinates,
+      ...userClicks.slice(index)
+    ];
+    const newSegmentCache = { ...segmentCache };
+
+    const oldKey = segmentKey(previousPoint, nextPoint);
+    const isOldKeyInUse = newUserClicks.some((point, i) => {
+      return i < newUserClicks.length - 1 && segmentKey(point, newUserClicks[i + 1]) === oldKey
+    });
+
+    if (!isOldKeyInUse) delete newSegmentCache[oldKey];
+
+    newSegmentCache[segmentKey(previousPoint, newCoordinates)] = previousSegment;
+    newSegmentCache[segmentKey(newCoordinates, nextPoint)] = nextSegment;
+
+    const newPathCoords = rebuildPathCoords(newUserClicks, newSegmentCache);
+
+    manualRouteState.userClicks = newUserClicks;
+    manualRouteState.segmentCache = newSegmentCache;
+    manualRouteState.pathCoords = newPathCoords;
+    manualRouteState.redoStack = [];
+
+    await persistManualSegmentCache();
+    await updateManualRoute();
+
+    return {
+      success: true
+    };
+  }
+  catch (error) {
+    throw new Error(`ERROR (insertIntermediaryPoint()) : ${error}`, {cause : ERROR_MESSAGES.ROUTING.GENERIC_ROUTE_ACTION})
   }
 }
 

@@ -33,7 +33,6 @@
   --surface-bg: rgba(255, 255, 255, 0.92);
   --surface-subtle: #f1f5f9;
   --field-bg: #ffffff;
-  --glass-bg: rgba(249, 250, 251, 0.4);   /* the glassmorphism slide-panel background */
   --secondary-bg: #e2e8f0;
   --secondary-bg-hover: #cbd5e1;
   --tooltip-bg: rgba(206, 203, 203);
@@ -124,7 +123,6 @@ html.dark {
   --surface-subtle: #2A303A;
   --field-bg: #1c1c1e;
   --secondary-field-bg: #2c3038;
-  --glass-bg: rgba(17, 24, 39, 0.85);
   --secondary-bg: rgb(69, 68, 68);
   --secondary-bg-hover: rgb(87, 87, 87);
   --tooltip-bg: rgba(60, 60, 60, 0.85);

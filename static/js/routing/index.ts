@@ -1,5 +1,7 @@
 export {
     addManualPoint,
     replaceManualRouteEnd,
-    replaceIntermediaryPoint
+    replaceIntermediaryPoint,
+    insertIntermediaryPoint,
+    getManualRouteSegmentIndex
 } from './routing.js'

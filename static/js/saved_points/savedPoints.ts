@@ -1,6 +1,6 @@
 import { getSavedPointStyle } from "./style.js";
 import { getMap, waitForMap } from "../init/map.js";
-import { showLoginModal} from "../ui/ui.js";
+import { showLoginModal} from "../ui/ui-modals.js";
 import { showToast, showModal } from "../utils/ui-utils.js";
 import { logError } from "../utils/logError-utils.js";
 import { fromLonLat, toLonLat } from "ol/proj.js";
@@ -37,15 +37,18 @@ function clearOldSavedPointsLayer() {
 }
 
 function convertPointsToFeatures(data: { points: SavedPoint[] }): Feature<Point>[] {
-    return data.points.map((point) => {
+  return data.points.map((point) => {
 
-        // converts to Web Mercator (API sends coords in [Lon, Lat] format)
-        const mercatorCoords = fromLonLat(point.coordinates);
-        return new Feature({
-            geometry: new Point(mercatorCoords),
-            name: point.name
-        });
+    // converts to Web Mercator (API sends coords in [Lon, Lat] format)
+    const mercatorCoords = fromLonLat(point.coordinates);
+
+    const pointFeature = new Feature({
+        geometry: new Point(mercatorCoords),
+        name: point.name,
     });
+    pointFeature.set("type", "savedPoint");
+    return pointFeature
+  });
 };
 
 function createSavedPointsLayer(features: Feature<Point>[]): VectorLayer<VectorSource> {

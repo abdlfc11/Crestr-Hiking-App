@@ -1,6 +1,8 @@
 
 import {
-    createRouteRow
+  addClickListener,
+    createRouteRow,
+    showToast
 } from "./utils/ui-utils.js";
 
 import {
@@ -10,6 +12,8 @@ import {
 } from "./utils/format-utils.js";
 
 import { initIcons } from "./init/icons.js";
+import { handleRouteImport, handleRouteImportType, validateFileInput } from "./ui/ui-panels.js";
+import { ERROR_MESSAGES } from "./utils/error-constants.js";
 
 const allRoutesContainer = document.getElementById("all-routes-container");
 
@@ -69,7 +73,7 @@ export function displayImportedRouteCard(data: ImportedRouteResponse): void {
     const formattedETA = formatETA(routeInfo.eta_seconds);
     const formattedElevation = routeInfo.elevation_gain_metres === 0 ? "No Data" : formatElevation(routeInfo.elevation_gain_metres)
 
-    
+
 
     const routeCard = createRouteRow(routeName, formattedToday, distanceKm, formattedDistanceKm, formattedETA, formattedElevation);
 
@@ -77,4 +81,28 @@ export function displayImportedRouteCard(data: ImportedRouteResponse): void {
         allRoutesContainer.insertAdjacentHTML("beforeend", routeCard);
         initIcons();
     }
+}
+
+// Initialisation
+
+const importRouteFileInput = document.getElementById("import-route-file-input") as HTMLInputElement | null;
+const importRouteSubmitButton = document.getElementById("import-route-submit-button");
+const routeInputTypes = document.querySelectorAll<HTMLInputElement>("input[name=\"import-route-method\"]");
+
+export function initImportRoutePanel() {
+
+  importRouteFileInput.addEventListener("change", (e) => {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    try {
+      validateFileInput(file);
+    } catch (error) {
+      showToast(error.cause || ERROR_MESSAGES.generic);
+    }
+  });
+
+
+  addClickListener(importRouteSubmitButton, handleRouteImport, "click");
+  routeInputTypes.forEach(radio => {
+    radio.addEventListener('change', handleRouteImportType);
+  });
 }

@@ -1,10 +1,10 @@
 /**
  * This file is intended to hold all styling related functions
  * As of July 2026 this file hold the following functions:
- * 
+ *
  *      - createManualPointStyle(label, colour, radius=7.5, strokeBorderColor="#FFFFFF")
  *      - getRouteStrokeStyle()
- * 
+ *
  */
 
 import Fill from "ol/style/Fill"
@@ -15,7 +15,7 @@ import type { Options as StrokeOptions } from "ol/style/Stroke.js"
 
 
 /**
- * Returns the styling to be applied to intermediary points on a route
+ * Returns the styling to be applied to intermediary points on a route (i.e points that aren't start/end)
  */
 export function createManualPointStyle(): Style {
   return new Style({
@@ -34,7 +34,7 @@ export function createManualPointStyle(): Style {
 }
 
 /**
- * Returns the styling to be applied to dynamic points created on a route by the elevation chart 
+ * Returns the styling for temporary points created on a route when hovering over the elevation chart
  */
 export function createElevationPointStyle(): Style {
   return new Style({
@@ -53,7 +53,26 @@ export function createElevationPointStyle(): Style {
 }
 
 /**
- * Returns the styling of route LineStrings displayed on the map 
+ * For when a user hovers over a route feature
+ */
+export function createRouteHoverPointStyle(): Style {
+  return new Style({
+    image: new Circle({
+      radius: 7,
+      fill: new Fill({
+        color: "#2563eb"
+      }),
+      stroke: new Stroke({
+        color: "#FFFFFF",
+        width: 2
+      })
+    }),
+    zIndex: 1100
+  })
+}
+
+/**
+ * Returns the styling of route features displayed on the map
  */
 export function getRouteStrokeStyle(): StrokeOptions {
   return {
