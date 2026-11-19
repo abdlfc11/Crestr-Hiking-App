@@ -44,6 +44,7 @@ import {
 import { initImportRoutePanel } from "../importRoute.js";
 import { initMobile } from "./ui-mobile.js";
 import { handleInitialTour } from "./ui-tours.js";
+import { checkForUpdate } from "./ui-updates.js";
 
 
 // Nav Rail
@@ -132,6 +133,8 @@ export function initUi() {
   });
 
   initSharedRoute();
+  checkForUpdate();
+  localStorage.setItem("hasAccessedApp", "true");
 }
 
 
