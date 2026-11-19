@@ -134,7 +134,6 @@ export function initUi() {
 
   initSharedRoute();
   checkForUpdate();
-  localStorage.setItem("hasAccessedApp", "true");
 }
 
 

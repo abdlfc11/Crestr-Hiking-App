@@ -67,7 +67,7 @@ export async function checkForUpdate() {
     initUpdates(releaseData.changelogUrl, releaseData.latestRelease)
 
     // New users don't need to be notified of an update
-    const hasAccessedApp: HasAccessedApp = JSON.parse(localStorage.getItem("hasAccessedApp"));
+    const hasAccessedApp: HasAccessedApp = JSON.parse(localStorage.getItem("hasAccessedApp")) || JSON.parse(localStorage.getItem('seenInitialTour'));
     if (!hasAccessedApp) {
       updateUserInfo(releaseData.latestRelease);
       return;
@@ -76,8 +76,11 @@ export async function checkForUpdate() {
     // Fetching last update
     const lastSeenUpdate: LastSeenUpdate = localStorage.getItem("lastSeenUpdate");
 
-    // No need to update user info as it passed both 'seen checks'
-    if (lastSeenUpdate === releaseData.latestRelease) return
+    // Update user info needed to migrate legacy users to use the key
+    if (lastSeenUpdate === releaseData.latestRelease) {
+      updateUserInfo(releaseData.latestRelease);
+      return;
+    }
     populateUpdateModal(releaseData.latestRelease);
     await waitForUserAcknowledgment();
     updateUserInfo(releaseData.latestRelease)
