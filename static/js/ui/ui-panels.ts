@@ -62,10 +62,8 @@ export function openSavedRoutesDash() {
     const savedRouteDashTourDriver = createSavedRouteDashboardTour();
 
     savedRouteDashTourDriver.drive();
-
-    localStorage.setItem('seenSavedRouteDashTour', 'True')
-    return;
-  }
+  };
+  localStorage.setItem('seenSavedRouteDashTour', 'true');
   return;
 };
 
@@ -82,10 +80,8 @@ export function openSettings() {
     const settingsTourDriver = createSettingsTour();
 
     settingsTourDriver.drive();
-
-    localStorage.setItem('seenSettingsTour', 'True')
-    return;
-  }
+  };
+  localStorage.setItem('seenSettingsTour', 'true');
   return;
 };
 
@@ -109,10 +105,8 @@ export function openImportRoute() {
     const importRouteTourDriver = createImportRoutePanelTour();
 
     importRouteTourDriver.drive();
-
-    localStorage.setItem('seenImportRouteTour', 'True')
-    return;
-  }
+  };
+  localStorage.setItem('seenImportRouteTour', 'true');
   return;
 };
 

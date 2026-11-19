@@ -92,6 +92,11 @@ export const shareRouteModal = document.getElementById('share-route-dialog') as 
 export const shareRouteModalContent = shareRouteModal.querySelector('.modal-content');
 export const shareRouteModalExitButton = document.getElementById('share-route-dialog-exit-button');
 
+// Release / Update modal
+const updateModal = document.getElementById('update-dialog') as HTMLDialogElement;
+const updateModalContent = updateModal.querySelector('.modal-content');
+const updateModalCloseButton = document.getElementById('update-dialog-close');
+
 // HTML elements used in keyboard shortcuts
 const searchEntry = document.getElementById("search-entry") as HTMLInputElement | null;
 const savedRoutesDashContent = document.getElementById("saved-routes-dashboard");
@@ -397,6 +402,7 @@ export function initModals() {
   bindModal(donateModal, donateModalContent, donateModalCloseButton);
   bindModal(shortcutsModal, shortcutsModalContent, shortcutsModalCloseButton);
   bindModal(shareRouteModal, shareRouteModalContent, shareRouteModalExitButton);
+  bindModal(updateModal, updateModalContent, updateModalCloseButton)
   bindModal(reportIssueModal, null, reportIssueModalExit)
 
   bindModal(loadLastRouteModal, loadLastRouteModalContent, null);
