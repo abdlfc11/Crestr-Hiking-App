@@ -32,7 +32,7 @@ function populateUpdateModal(latestRelease: LatestRelease) {
 }
 
 function updateUserInfo(latestRelease: LatestRelease) {
-  if (!JSON.parse(localStorage.getItem("hasAccessedApp"))) {
+  if (localStorage.getItem("hasAccessedApp") !== 'true') {
     localStorage.setItem("hasAccessedApp", "true");
   };
 
@@ -67,7 +67,9 @@ export async function checkForUpdate() {
     initUpdates(releaseData.changelogUrl, releaseData.latestRelease)
 
     // New users don't need to be notified of an update
-    const hasAccessedApp: HasAccessedApp = JSON.parse(localStorage.getItem("hasAccessedApp")) || JSON.parse(localStorage.getItem('seenInitialTour'));
+    const hasAccessedApp: HasAccessedApp = localStorage.getItem('hasAccessedApp') === 'true' || localStorage.getItem('seenInitialTour') === 'true'
+    console.log(localStorage.getItem('seenInitialTour') === 'true');
+    console.log(`HAS ACCESSED : ${hasAccessedApp}`);
     if (!hasAccessedApp) {
       updateUserInfo(releaseData.latestRelease);
       return;
