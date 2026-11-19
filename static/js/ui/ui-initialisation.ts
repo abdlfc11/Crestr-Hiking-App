@@ -119,6 +119,9 @@ export function initUi() {
   initCursor();
   initSavedPoints(map);
 
+  // Detects previous access
+  const hasAccessedApp = localStorage.getItem("hasAccessedApp") === 'true' || localStorage.getItem("seenInitialTour") === 'true';
+
   // initial tour (automatic routing and saving the first route)
   handleInitialTour();
 
@@ -133,7 +136,7 @@ export function initUi() {
   });
 
   initSharedRoute();
-  checkForUpdate();
+  checkForUpdate(hasAccessedApp);
 }
 
 

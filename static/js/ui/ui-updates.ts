@@ -51,7 +51,7 @@ function initUpdates(changelogUrl: ChangelogUrl, latestRelease: LatestRelease) {
 
 // Main function
 
-export async function checkForUpdate() {
+export async function checkForUpdate(hasAccessedApp: HasAccessedApp) {
 
   try {
 
@@ -67,9 +67,6 @@ export async function checkForUpdate() {
     initUpdates(releaseData.changelogUrl, releaseData.latestRelease)
 
     // New users don't need to be notified of an update
-    const hasAccessedApp: HasAccessedApp = localStorage.getItem('hasAccessedApp') === 'true' || localStorage.getItem('seenInitialTour') === 'true'
-    console.log(localStorage.getItem('seenInitialTour') === 'true');
-    console.log(`HAS ACCESSED : ${hasAccessedApp}`);
     if (!hasAccessedApp) {
       updateUserInfo(releaseData.latestRelease);
       return;
