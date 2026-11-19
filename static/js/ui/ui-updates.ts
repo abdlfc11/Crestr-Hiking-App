@@ -43,9 +43,18 @@ function updateUserInfo(latestRelease: LatestRelease) {
 
 function initUpdates(changelogUrl: ChangelogUrl, latestRelease: LatestRelease) {
   addClickListener(updateModalInfoButton, () => {
-    showModal(false, updateModal);
-    updateUserInfo(latestRelease)
-    window.location.href = changelogUrl;
+    try {
+      showModal(false, updateModal);
+      updateUserInfo(latestRelease)
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.log(error.message)
+      } else {
+        console.log(`initUpdates() -> An unexpected error occurred : ${error}`)
+      }
+    } finally {
+      window.location.href = changelogUrl;
+    }
   }, "click");
 }
 
